@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
 import "../styles/Register.css";
-import loginImage from "../img/loginimage.png";
+import Plumas from "../img/Plumas.png";
 
 const RegisterUI = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -145,7 +145,7 @@ const RegisterUI = () => {
 
         <div className="register-right">
           <div className="register-right-inner">
-            <img src={loginImage} alt="Imagen decorativa" />
+            <img src={Plumas} alt="Imagen decorativa" />
           </div>
         </div>
       </div>
