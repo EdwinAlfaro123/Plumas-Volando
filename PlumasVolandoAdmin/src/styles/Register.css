@@ -107,7 +107,7 @@
   cursor: pointer;
 }
 
-.register-btn {
+.custom-btn {
   width: 165px;
   height: 40px;
   display: block;
@@ -126,7 +126,7 @@
   transition: 0.2s ease;
 }
 
-.register-btn:hover {
+.custom-btn:hover {
   background: #d3bc6b;
 }
 
@@ -181,7 +181,7 @@
 .neo-input,
 .neo-input input,
 .icon-button,
-.register-btn,
+.custom-btn,
 .register-footer,
 .register-footer span {
   font-family: "Montserrat", sans-serif;
@@ -232,9 +232,9 @@
     font-size: 0.9rem;
   }
 
-  .register-btn {
-    width: 100%;
-    height: 42px;
-    font-size: 0.95rem;
+ .custom-btn {
+  width: 100%;
+  height: 42px;
+  font-size: 0.95rem;
   }
 }
