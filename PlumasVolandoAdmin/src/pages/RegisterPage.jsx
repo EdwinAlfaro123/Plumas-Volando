@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
 import "../styles/Register.css";
-
+import { useNavigate } from "react-router-dom";
 import CustomButton from "../components/Buttons";
 import CustomInput from "../components/Input";
 import AuthLayout from "../components/AuthLayout";
 import CustomAlert from "../components/CustomAlert";
 
 const RegisterPage = () => {
+  const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -37,7 +39,6 @@ const RegisterPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validar campos vacíos
     if (
       !formData.nombre ||
       !formData.correo ||
@@ -54,7 +55,6 @@ const RegisterPage = () => {
       return;
     }
 
-    // Validar contraseñas
     if (formData.password !== formData.confirmPassword) {
       setAlert({
         isOpen: true,
@@ -65,7 +65,17 @@ const RegisterPage = () => {
       return;
     }
 
-    // Simular registro exitoso
+    const usuario = {
+      nombre: formData.nombre,
+      correo: formData.correo,
+      telefono: formData.telefono,
+      password: formData.password,
+    };
+
+    localStorage.setItem("usuarioRegistrado", JSON.stringify(usuario));
+
+    console.log("Datos de registro:", usuario);
+
     setAlert({
       isOpen: true,
       type: "success",
@@ -73,9 +83,6 @@ const RegisterPage = () => {
       message: "Tu cuenta fue creada correctamente",
     });
 
-    console.log("Datos de registro:", formData);
-
-    // Limpiar formulario
     setFormData({
       nombre: "",
       correo: "",
@@ -83,13 +90,16 @@ const RegisterPage = () => {
       password: "",
       confirmPassword: "",
     });
+
+    setTimeout(() => {
+      navigate("/login");
+    }, 1500);
   };
 
   return (
     <>
       <AuthLayout title="Bienvenido a la Granja" subtitle="Registro">
         <form className="register-form" onSubmit={handleSubmit}>
-          
           <CustomInput
             label="Nombre"
             name="nombre"
@@ -148,15 +158,9 @@ const RegisterPage = () => {
               <button
                 type="button"
                 className="icon-button"
-                onClick={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                {showConfirmPassword ? (
-                  <EyeOff size={16} />
-                ) : (
-                  <Eye size={16} />
-                )}
+                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             }
           />
@@ -164,9 +168,9 @@ const RegisterPage = () => {
           <CustomButton text="Registrarse" type="submit" />
 
           <p className="register-footer">
-            ¿Tienes cuenta? <span>Inicia sesión</span>
+            ¿Tienes cuenta?{" "}
+            <span onClick={() => navigate("/login")}>Inicia sesión</span>
           </p>
-
         </form>
       </AuthLayout>
 
