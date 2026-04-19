@@ -38,7 +38,7 @@ const RecoverCodePage = () => {
 
     const fullCode = code.join("");
 
-    if (fullCode.length < 6) {
+    if (fullCode.length < 6 || code.includes("")) {
       setAlert({
         isOpen: true,
         type: "error",
@@ -54,6 +54,10 @@ const RecoverCodePage = () => {
       title: "Código correcto",
       message: "Verificación completada correctamente",
     });
+
+    setTimeout(() => {
+      navigate("/newPass");
+    }, 1200);
   };
 
   const handleResend = () => {
@@ -107,9 +111,7 @@ const RecoverCodePage = () => {
                 </span>
               </p>
 
-              <button 
-                type="submit" className="recover-code-btn-primary"
-                onClick={() => navigate("/newPass")}>
+              <button type="submit" className="recover-code-btn-primary">
                 Ingresar
               </button>
 

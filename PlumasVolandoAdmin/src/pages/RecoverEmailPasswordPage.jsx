@@ -18,7 +18,10 @@ const RecoverPasswordPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!correo.trim()) {
+    const correoLimpio = correo.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!correoLimpio) {
       setAlert({
         isOpen: true,
         type: "error",
@@ -28,12 +31,50 @@ const RecoverPasswordPage = () => {
       return;
     }
 
+    if (!emailRegex.test(correoLimpio)) {
+      setAlert({
+        isOpen: true,
+        type: "error",
+        title: "Correo inválido",
+        message: "Ingresa un correo válido",
+      });
+      return;
+    }
+
+    const usuarioGuardado = JSON.parse(
+      localStorage.getItem("usuarioRegistrado")
+    );
+
+    if (!usuarioGuardado) {
+      setAlert({
+        isOpen: true,
+        type: "error",
+        title: "Sin registro",
+        message: "No hay usuarios registrados",
+      });
+      return;
+    }
+
+    if (correoLimpio !== usuarioGuardado.correo) {
+      setAlert({
+        isOpen: true,
+        type: "error",
+        title: "Correo no encontrado",
+        message: "Este correo no está registrado",
+      });
+      return;
+    }
+
     setAlert({
       isOpen: true,
       type: "success",
-      title: "Correo enviado",
+      title: "Código enviado",
       message: "Revisa tu correo para continuar",
     });
+
+    setTimeout(() => {
+      navigate("/emailCode");
+    }, 1200);
   };
 
   return (
@@ -62,10 +103,8 @@ const RecoverPasswordPage = () => {
                 <Mail size={14} className="recover-input-icon" />
               </div>
 
-              <button 
-                    type="submit" className="recover-btn-primary"
-                    onClick={() => navigate("/emailCode")}>
-                    Enviar
+              <button type="submit" className="recover-btn-primary">
+                Enviar
               </button>
 
               <button
