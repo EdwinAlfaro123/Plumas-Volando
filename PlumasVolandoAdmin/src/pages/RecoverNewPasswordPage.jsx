@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Lock, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "../styles/RecoverNewPassword.css";
 import CustomAlert from "../components/CustomAlert";
@@ -33,17 +33,20 @@ const RecoverNewPasswordPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!formData.password || !formData.confirmPassword) {
+    const passwordLimpia = formData.password.trim();
+    const confirmPasswordLimpia = formData.confirmPassword.trim();
+
+    if (!passwordLimpia || !confirmPasswordLimpia) {
       setAlert({
         isOpen: true,
         type: "error",
         title: "Campos incompletos",
-        message: "Por favor llena todos los campos",
+        message: "Por favor llena ambos campos",
       });
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    if (passwordLimpia !== confirmPasswordLimpia) {
       setAlert({
         isOpen: true,
         type: "error",
@@ -114,7 +117,9 @@ const RecoverNewPasswordPage = () => {
                 <button
                   type="button"
                   className="recover-new-toggle"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
                 >
                   {showConfirmPassword ? (
                     <EyeOff size={15} />
@@ -124,9 +129,7 @@ const RecoverNewPasswordPage = () => {
                 </button>
               </div>
 
-              <button 
-                type="submit" className="recover-new-btn-primary"
-                onClick={() => navigate("/login")}>
+              <button type="submit" className="recover-new-btn-primary">
                 Cambiar contraseña
               </button>
 
