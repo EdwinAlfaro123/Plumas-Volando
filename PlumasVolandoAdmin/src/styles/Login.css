@@ -189,6 +189,16 @@
   display: block;
 }
 
+.login-link {
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.login-link:hover {
+  text-decoration: underline;
+  color: #2f66d0;
+}
+
 /* ===== Responsive ===== */
 
 @media (max-width: 1200px) {

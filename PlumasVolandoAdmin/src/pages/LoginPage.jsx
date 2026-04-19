@@ -143,7 +143,11 @@ const LoginPage = () => {
                 Entrar
               </button>
 
-              <p className="login-forgot">Restablece tu contraseña</p>
+              <p className="login-forgot">
+                <span onClick={() => navigate("/recoverEmail")} className="login-link">
+                    Restablece tu contraseña
+                </span>
+              </p>
 
               <p className="login-register">
                 ¿No tienes cuenta?{" "}
