@@ -15,7 +15,6 @@ const LoginPage = () => {
     password: "",
   });
 
-  // 🔥 ALERTA PERSONALIZADA
   const [alert, setAlert] = useState({
     isOpen: false,
     type: "success",
@@ -70,9 +69,8 @@ const LoginPage = () => {
         message: `Hola ${savedUser.nombre}, sesión iniciada correctamente`,
       });
 
-      // opcional: redirigir después
       setTimeout(() => {
-        navigate("/"); // o dashboard cuando tengas
+        navigate("/dashboard");
       }, 1500);
     } else {
       setAlert({
@@ -89,8 +87,6 @@ const LoginPage = () => {
       <div className="login-wrapper">
         <div className="login-card">
           <div className="login-left">
-
-            {/* LOGO */}
             <div className="login-header">
               <div className="login-logo-box">
                 <img
@@ -101,7 +97,6 @@ const LoginPage = () => {
               </div>
             </div>
 
-            {/* FORM */}
             <form className="login-form" onSubmit={handleSubmit}>
               <h1 className="login-form-title">Iniciar Sesion</h1>
 
@@ -144,8 +139,11 @@ const LoginPage = () => {
               </button>
 
               <p className="login-forgot">
-                <span onClick={() => navigate("/recoverEmail")} className="login-link">
-                    Restablece tu contraseña
+                <span
+                  onClick={() => navigate("/recoverEmail")}
+                  className="login-link"
+                >
+                  Restablece tu contraseña
                 </span>
               </p>
 
@@ -158,7 +156,6 @@ const LoginPage = () => {
             </form>
           </div>
 
-          {/* PANEL DERECHO */}
           <div className="login-right">
             <img
               src={LoginImage}
@@ -169,7 +166,6 @@ const LoginPage = () => {
         </div>
       </div>
 
-      {/* 🔥 ALERTA */}
       <CustomAlert
         isOpen={alert.isOpen}
         type={alert.type}
