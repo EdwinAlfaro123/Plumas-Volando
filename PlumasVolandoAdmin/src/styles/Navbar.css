@@ -1,0 +1,39 @@
+.dashboard-navbar {
+  width: 100%;
+  height: 58px;
+  background: #dd944c;
+  border-radius: 18px 18px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+}
+
+.dashboard-navbar-spacer {
+  flex: 1;
+}
+
+.dashboard-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dashboard-navbar-icon {
+  border: none;
+  background: transparent;
+  color: #b22222;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff7ef;
+  font-size: 0.9rem;
+  font-weight: 700;
+}

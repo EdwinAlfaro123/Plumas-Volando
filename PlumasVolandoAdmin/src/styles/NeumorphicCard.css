@@ -1,0 +1,19 @@
+.neumorphic-card {
+  background: #f3f1ec;
+  border-radius: 18px;
+  box-shadow:
+    6px 6px 14px rgba(194, 184, 161, 0.28),
+    -6px -6px 14px rgba(255, 255, 255, 0.78);
+}
+
+.neumorphic-card-sm {
+  padding: 12px;
+}
+
+.neumorphic-card-md {
+  padding: 16px;
+}
+
+.neumorphic-card-lg {
+  padding: 22px;
+}
