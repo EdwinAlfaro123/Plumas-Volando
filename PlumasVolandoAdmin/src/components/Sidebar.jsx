@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
   User,
@@ -13,15 +14,18 @@ import "../styles/Sidebar.css";
 import Logo from "../img/PlumasVolandoLogo.png";
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const menuItems = [
-    { label: "Inicio", icon: <Home size={18} />, active: true },
-    { label: "Empleados", icon: <User size={18} /> },
-    { label: "Clientes", icon: <Users size={18} /> },
-    { label: "Gallinas", icon: <Egg size={18} /> },
-    { label: "Productos", icon: <Package size={18} /> },
-    { label: "Pedidos", icon: <Truck size={18} /> },
-    { label: "Facturas", icon: <ReceiptText size={18} /> },
-    { label: "Historial", icon: <History size={18} /> },
+    { label: "Inicio", icon: <Home size={18} />, path: "/dashboard" },
+    { label: "Empleados", icon: <User size={18} />, path: "/employees" },
+    { label: "Clientes", icon: <Users size={18} />, path: "/customers" },
+    { label: "Gallinas", icon: <Egg size={18} />, path: "/chickens" },
+    { label: "Productos", icon: <Package size={18} />, path: "/products" },
+    { label: "Pedidos", icon: <Truck size={18} />, path: "/orders" },
+    { label: "Facturas", icon: <ReceiptText size={18} />, path: "/bills" },
+    { label: "Historial", icon: <History size={18} />, path: "/records" },
   ];
 
   return (
@@ -31,16 +35,21 @@ const Sidebar = () => {
       </div>
 
       <nav className="sidebar-nav">
-        {menuItems.map((item, index) => (
-          <button
-            key={index}
-            type="button"
-            className={`sidebar-item ${item.active ? "active" : ""}`}
-          >
-            <span className="sidebar-icon">{item.icon}</span>
-            <span className="sidebar-text">{item.label}</span>
-          </button>
-        ))}
+        {menuItems.map((item, index) => {
+          const isActive = location.pathname === item.path;
+
+          return (
+            <button
+              key={index}
+              type="button"
+              className={`sidebar-item ${isActive ? "active" : ""}`}
+              onClick={() => navigate(item.path)}
+            >
+              <span className="sidebar-icon">{item.icon}</span>
+              <span className="sidebar-text">{item.label}</span>
+            </button>
+          );
+        })}
       </nav>
     </aside>
   );
