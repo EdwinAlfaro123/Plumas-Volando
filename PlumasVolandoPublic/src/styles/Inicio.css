@@ -307,17 +307,20 @@ button {
 
 .recipe-meta span {
   display: flex;
-  align-items: center;
+  align-items:end;
   gap: 5px;
 }
 
 .card-btn {
-  width: 100%;
+  display: flex;
+  align-items: center;
+  align-content: center;
+  width: 50%;
   height: 36px;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(90deg, #f5d15f, #eea835);
-  color: #6c4a11;
+  background:orange;
+  color: #ffffff;
   font-weight: 700;
   cursor: pointer;
 }
@@ -328,8 +331,8 @@ button {
   height: 38px;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(90deg, #f4d266, #efaf3e);
-  color: #704b11;
+  background:orange;
+  color: #ffffff;
   font-weight: 700;
   cursor: pointer;
   padding: 0 24px;
