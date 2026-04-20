@@ -1,0 +1,597 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --cream: #f8f3ea;
+  --soft-yellow: #ead28c;
+  --section-cream: #fbf6ee;
+  --gold: #d8ac4e;
+  --gold-2: #efb040;
+  --orange-soft: #f39b63;
+  --blue: #0e56c9;
+  --blue-dark: #0a469f;
+  --text-dark: #222222;
+  --text-soft: #5a5a5a;
+  --white: #ffffff;
+  --shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  --border-soft: rgba(0, 0, 0, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+  background: #efe7d7;
+  color: var(--text-dark);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+.recipe-page {
+  min-height: 100vh;
+  background: #efe7d7;
+}
+
+.recipe-phone-frame {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  background: var(--cream);
+  overflow: hidden;
+}
+
+/* HEADER */
+.topbar {
+  height: 72px;
+  background: #f3e0a9;
+  display: grid;
+  grid-template-columns: 220px 1fr auto;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid rgba(80, 60, 30, 0.15);
+  background: #fff;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.brand-small {
+  font-size: 0.63rem;
+  color: #6f5a33;
+  font-weight: 600;
+}
+
+.brand-text strong {
+  font-size: 0.82rem;
+  color: #3f3628;
+  font-weight: 800;
+}
+
+.nav-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #5a4a2d;
+  font-weight: 700;
+  transition: 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: var(--blue);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: #473e30;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.45);
+  color: var(--blue);
+}
+
+/* HERO */
+.hero {
+  width: 100%;
+  background: var(--soft-yellow);
+  line-height: 0;
+}
+
+.hero-banner-image {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* TESTIMONIOS */
+.testimonial-section {
+  background: #f7f2ea;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 28px;
+  align-items: center;
+  padding: 36px 34px 18px;
+  position: relative;
+}
+
+.testimonial-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.egg-photo {
+  width: 210px;
+  height: 90px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 50%, #ffd040 0 9%, #f0ba2a 10%, transparent 11%),
+    radial-gradient(circle at 50% 50%, #ffffff 0 23%, transparent 24%),
+    #f2efeb;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow);
+}
+
+.testimonial-content h3 {
+  margin: 0 0 14px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #181818;
+}
+
+.testimonial-content p {
+  margin: 0;
+  font-size: 0.93rem;
+  line-height: 1.7;
+  color: #444;
+  max-width: 620px;
+  text-align: left;
+}
+
+.testimonial-controls {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.circle-nav {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: #f0e2c6;
+  color: #6f5533;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.dots {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #c6b188;
+}
+
+.dot.active {
+  background: #202020;
+}
+
+/* ONDA */
+.wave-divider {
+  height: 72px;
+  background:
+    radial-gradient(circle at 10% 0, #efe4d0 0 50px, transparent 51px),
+    radial-gradient(circle at 30% 0, #efe4d0 0 50px, transparent 51px),
+    radial-gradient(circle at 50% 0, #efe4d0 0 50px, transparent 51px),
+    radial-gradient(circle at 70% 0, #efe4d0 0 50px, transparent 51px),
+    radial-gradient(circle at 90% 0, #efe4d0 0 50px, transparent 51px);
+  background-color: #fbf6ee;
+}
+
+/* RECETAS */
+.recipes-section {
+  background: #fbf6ee;
+  padding: 24px 34px 34px;
+  text-align: center;
+}
+
+.recipes-section h2 {
+  margin: 0 0 28px;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--blue);
+}
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.recipe-card {
+  background: #fff;
+  border: 2px solid #ebb45d;
+  border-radius: 14px;
+  overflow: hidden;
+  text-align: left;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+}
+
+.recipe-card img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  display: block;
+}
+
+.recipe-card-body {
+  padding: 14px;
+}
+
+.recipe-card h4 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  color: var(--blue);
+  font-weight: 800;
+}
+
+.recipe-card p {
+  margin: 0 0 12px;
+  color: #555;
+  font-size: 0.83rem;
+  line-height: 1.45;
+  min-height: 48px;
+}
+
+.recipe-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 0.8rem;
+  color: #6a6a6a;
+}
+
+.recipe-meta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.card-btn {
+  width: 100%;
+  height: 36px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f5d15f, #eea835);
+  color: #6c4a11;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-btn {
+  margin-top: 24px;
+  min-width: 130px;
+  height: 38px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f4d266, #efaf3e);
+  color: #704b11;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 24px;
+}
+
+/* BENEFICIOS */
+.benefits-section {
+  background: #d3a54b;
+  padding: 34px;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 28px;
+  align-items: center;
+}
+
+.benefits-title h2 {
+  margin: 0 0 18px;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: #fff1d4;
+}
+
+.benefits-photo {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+}
+
+.benefits-photo img {
+  width: 100%;
+  height: 390px;
+  object-fit: cover;
+  display: block;
+}
+
+.benefits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.benefit-item p {
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+  line-height: 1.7;
+}
+
+.benefit-item svg {
+  color: #fff3d8;
+  margin-top: 10px;
+  flex-shrink: 0;
+}
+
+/* FOOTER */
+.footer {
+  background: linear-gradient(180deg, #0f5bc8, #0b47a0);
+  color: #fff;
+  display: grid;
+  grid-template-columns: 180px 1fr 1fr;
+  gap: 24px;
+  padding: 28px 34px 16px;
+}
+
+.footer-brand-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-logo-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fff7e4;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.footer-col h3 {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.footer-col p {
+  margin: 0 0 10px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.footer-col p svg {
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.footer-bottom {
+  grid-column: 1 / -1;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.88);
+  flex-wrap: wrap;
+}
+
+/* RESPONSIVE */
+@media (max-width: 980px) {
+  .topbar {
+    grid-template-columns: 1fr;
+    height: auto;
+    gap: 14px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .brand {
+    justify-content: center;
+  }
+
+  .topbar-actions {
+    justify-content: center;
+  }
+
+  .testimonial-section,
+  .benefits-section,
+  .footer {
+    grid-template-columns: 1fr;
+  }
+
+  .testimonial-content p {
+    max-width: 100%;
+  }
+
+  .recipes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-brand-col {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .nav-links {
+    gap: 10px;
+  }
+
+  .nav-links a {
+    font-size: 0.62rem;
+  }
+
+  .testimonial-section,
+  .recipes-section,
+  .benefits-section,
+  .footer {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .recipes-section h2,
+  .benefits-title h2 {
+    font-size: 1.55rem;
+  }
+}
+
+/* TESTIMONIOS NUEVO */
+.testimonials-section {
+  padding: 50px 30px;
+  background: #f7f2ea;
+  text-align: center;
+}
+
+.testimonials-section h2 {
+  font-size: 2rem;
+  color: #0e56c9;
+  margin-bottom: 30px;
+  font-weight: 800;
+}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* CARD */
+.testimonial-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  text-align: left;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  transition: 0.2s ease;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-5px);
+}
+
+/* HEADER */
+.testimonial-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.testimonial-header img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.testimonial-header h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.testimonial-header span {
+  font-size: 0.75rem;
+  color: #777;
+}
+
+/* TEXTO */
+.testimonial-text {
+  font-size: 0.85rem;
+  color: #444;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+/* ESTRELLAS */
+.stars {
+  color: #f4b400;
+  font-size: 1rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+  }
+}
