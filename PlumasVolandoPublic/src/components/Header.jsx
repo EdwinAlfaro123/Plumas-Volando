@@ -1,10 +1,12 @@
 import React from "react";
+import { Link } from "react-router";
 import { Menu, Search, ShoppingCart, Mail } from "lucide-react";
 import logoPlumas from "../assets/logo-plumas.png";
 
 const Header = () => {
   return (
     <header className="topbar">
+      {/* LOGO */}
       <div className="brand">
         <img
           src={logoPlumas}
@@ -18,28 +20,30 @@ const Header = () => {
         </div>
       </div>
 
+      {/* NAV */}
       <nav className="nav-links">
-        <a href="#inicio">Inicio</a>
-        <a href="#nosotros">Nosotros</a>
-        <a href="#productos">Productos</a>
-        <a href="#recetas">Recetas</a>
-        <a href="#contacto">Contacto</a>
+        <Link to="/">Inicio</Link>
+        <Link to="/about">Nosotros</Link>
+        <Link to="/products">Productos</Link>
+        <Link to="/recipes">Recetas</Link>
+        <Link to="/contact">Contacto</Link>
       </nav>
 
+      {/* ICONOS */}
       <div className="topbar-actions">
-        <button className="icon-btn" aria-label="Menú">
+        <button className="icon-btn">
           <Menu size={16} />
         </button>
 
-        <button className="icon-btn" aria-label="Buscar">
+        <button className="icon-btn">
           <Search size={16} />
         </button>
-        
-        <button className="icon-btn" aria-label="Correo">
+
+        <button className="icon-btn">
           <Mail size={16} />
         </button>
 
-        <button className="icon-btn" aria-label="Carrito">
+        <button className="icon-btn">
           <ShoppingCart size={16} />
         </button>
       </div>

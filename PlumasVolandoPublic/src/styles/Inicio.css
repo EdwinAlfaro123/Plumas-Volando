@@ -55,13 +55,12 @@ button {
 
 /* HEADER */
 .topbar {
-  height: 72px;
+  height: 70px;
   background: #f3e0a9;
   display: grid;
   grid-template-columns: 220px 1fr auto;
   align-items: center;
   padding: 0 24px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .brand {
@@ -71,12 +70,10 @@ button {
 }
 
 .brand-logo-img {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  border: 1px solid rgba(80, 60, 30, 0.15);
-  background: #fff;
+  object-fit: cover;
 }
 
 .brand-text {
@@ -86,60 +83,56 @@ button {
 }
 
 .brand-small {
-  font-size: 0.63rem;
-  color: #6f5a33;
-  font-weight: 600;
+  font-size: 0.6rem;
+  color: #6a5a2d;
 }
 
 .brand-text strong {
-  font-size: 0.82rem;
-  color: #3f3628;
+  font-size: 0.8rem;
+  color: #3c3325;
   font-weight: 800;
 }
 
+/* NAV */
 .nav-links {
   display: flex;
   justify-content: center;
-  align-items: center;
   gap: 18px;
-  flex-wrap: wrap;
 }
 
 .nav-links a {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
   color: #5a4a2d;
   font-weight: 700;
-  transition: 0.2s ease;
+  transition: 0.2s;
 }
 
 .nav-links a:hover {
-  color: var(--blue);
+  color: #0d58c8;
 }
 
+/* ICONOS */
 .topbar-actions {
   display: flex;
-  align-items: center;
   gap: 8px;
 }
 
 .icon-btn {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border: none;
   background: transparent;
-  color: #473e30;
-  border-radius: 50%;
   display: grid;
   place-items: center;
+  border-radius: 50%;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: 0.2s;
 }
 
 .icon-btn:hover {
-  background: rgba(255, 255, 255, 0.45);
-  color: var(--blue);
+  background: rgba(255, 255, 255, 0.5);
+  color: #0d58c8;
 }
 
 /* HERO */
