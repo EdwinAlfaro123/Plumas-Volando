@@ -8,7 +8,7 @@ const AboutHero = () => {
       <div className="about-hero-content">
         <div className="about-hero-image">
           <img
-            src="https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=1200&q=80"
+            src="https://certifiedhumanelatino.org/wp-content/uploads/2022/04/pollos-de-engorde.png"
             alt="Granja avícola"
           />
         </div>
