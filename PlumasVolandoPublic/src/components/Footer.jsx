@@ -11,7 +11,6 @@ const Footer = () => {
           alt="Logo Plumas Volando"
           className="footer-logo-img"
         />
-        <p>Planta central</p>
       </div>
 
       <div className="footer-col">
@@ -29,10 +28,10 @@ const Footer = () => {
           <MapPin size={15} /> plumasvolando.sv
         </p>
         <p>
-          <Phone size={15} /> 503-0000-0000
+          <Phone size={15} /> 503-6065-1765
         </p>
         <p>
-          <Mail size={15} /> plumasvolando@gmail.com
+          <Mail size={15} /> 20210133@ricaldone.edu.sv
         </p>
       </div>
 
