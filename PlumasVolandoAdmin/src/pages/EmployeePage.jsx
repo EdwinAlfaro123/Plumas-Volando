@@ -64,8 +64,6 @@ const EMPLOYEES_DATA = [
   },
 ];
 
-const PAGE_SIZE_OPTIONS = [5, 10, 15, 20];
-
 const EmployeesPage = () => {
   const [employees, setEmployees] = useState(EMPLOYEES_DATA);
   const [searchTerm, setSearchTerm] = useState("");
@@ -144,15 +142,25 @@ const EmployeesPage = () => {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredEmployees.length / itemsPerPage)
+    itemsPerPage === "all"
+      ? 1
+      : Math.ceil(filteredEmployees.length / itemsPerPage)
   );
 
   const paginatedEmployees = useMemo(() => {
+    if (itemsPerPage === "all") {
+      return filteredEmployees;
+    }
+
     const start = (currentPage - 1) * itemsPerPage;
     return filteredEmployees.slice(start, start + itemsPerPage);
   }, [filteredEmployees, currentPage, itemsPerPage]);
 
   const visiblePages = useMemo(() => {
+    if (itemsPerPage === "all") {
+      return [1];
+    }
+
     const pages = [];
     const maxVisible = 5;
     let start = Math.max(1, currentPage - 2);
@@ -167,7 +175,7 @@ const EmployeesPage = () => {
     }
 
     return pages;
-  }, [currentPage, totalPages]);
+  }, [currentPage, totalPages, itemsPerPage]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -189,6 +197,7 @@ const EmployeesPage = () => {
 
   const handleItemsPerPageChange = (value) => {
     setItemsPerPage(value);
+    setCurrentPage(1);
     setIsPageSizeMenuOpen(false);
   };
 
@@ -401,7 +410,10 @@ const EmployeesPage = () => {
         <div className="employee-page-header">
           <div>
             <h1>Gestionar Empleados</h1>
-            <p>Administra la información de tus empleados de forma clara y ordenada.</p>
+            <p>
+              Administra la información de tus empleados de forma clara y
+              ordenada.
+            </p>
           </div>
         </div>
 
@@ -444,27 +456,31 @@ const EmployeesPage = () => {
             <div className="employee-page-size-dropdown" ref={pageSizeMenuRef}>
               <button
                 type="button"
-                className={`employee-filter-chip ${isPageSizeMenuOpen ? "open" : ""}`}
+                className={`employee-filter-chip ${
+                  isPageSizeMenuOpen ? "open" : ""
+                }`}
                 onClick={() => setIsPageSizeMenuOpen((prev) => !prev)}
-                title="Cantidad por página"
               >
-                <span>{itemsPerPage}</span>
-                <SlidersHorizontal size={17} />
+                <SlidersHorizontal size={16} />
               </button>
 
               {isPageSizeMenuOpen && (
                 <div className="employee-page-size-menu">
                   <p className="employee-page-size-title">Mostrar por página</p>
 
-                  {PAGE_SIZE_OPTIONS.map((option) => {
-                    const isActive = itemsPerPage === option;
+                  {[5, 10, "Todos"].map((option) => {
+                    const isAll = option === "Todos";
+                    const value = isAll ? "all" : option;
+                    const isActive = itemsPerPage === value;
 
                     return (
                       <button
                         key={option}
                         type="button"
-                        className={`employee-page-size-option ${isActive ? "active" : ""}`}
-                        onClick={() => handleItemsPerPageChange(option)}
+                        className={`employee-page-size-option ${
+                          isActive ? "active" : ""
+                        }`}
+                        onClick={() => handleItemsPerPageChange(value)}
                       >
                         <span>{option}</span>
                         {isActive && <Check size={16} />}
@@ -504,7 +520,9 @@ const EmployeesPage = () => {
                       <td>
                         <span
                           className={`employee-status-badge ${
-                            employee.estado === "Activo" ? "active" : "inactive"
+                            employee.estado === "Activo"
+                              ? "active"
+                              : "inactive"
                           }`}
                         >
                           {employee.estado}
@@ -548,14 +566,15 @@ const EmployeesPage = () => {
 
           <div className="employee-pagination">
             <div className="employee-pagination-info">
-              Mostrando {paginatedEmployees.length} de {filteredEmployees.length} registros
+              Mostrando {paginatedEmployees.length} de {filteredEmployees.length}{" "}
+              registros
             </div>
 
             <button
               type="button"
               className="employee-page-arrow"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
+              disabled={currentPage === 1 || itemsPerPage === "all"}
             >
               <ChevronLeft size={18} />
             </button>
@@ -565,8 +584,11 @@ const EmployeesPage = () => {
                 <button
                   key={page}
                   type="button"
-                  className={`employee-page-number ${currentPage === page ? "active" : ""}`}
+                  className={`employee-page-number ${
+                    currentPage === page ? "active" : ""
+                  }`}
                   onClick={() => setCurrentPage(page)}
+                  disabled={itemsPerPage === "all"}
                 >
                   {page}
                 </button>
@@ -579,7 +601,7 @@ const EmployeesPage = () => {
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
-              disabled={currentPage === totalPages}
+              disabled={currentPage === totalPages || itemsPerPage === "all"}
             >
               <ChevronRight size={18} />
             </button>
@@ -588,7 +610,10 @@ const EmployeesPage = () => {
 
         {isCreateModalOpen && (
           <div className="employee-modal-overlay" onClick={closeCreateModal}>
-            <div className="employee-modal employee-create-modal" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="employee-modal employee-create-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
               <button
                 type="button"
                 className="employee-modal-close"
@@ -602,7 +627,10 @@ const EmployeesPage = () => {
                 <h2>INGRESAR EMPLEADO</h2>
               </div>
 
-              <form className="employee-modal-form" onSubmit={handleCreateSubmit}>
+              <form
+                className="employee-modal-form"
+                onSubmit={handleCreateSubmit}
+              >
                 <div className="employee-modal-field employee-modal-field-full">
                   <label htmlFor="create-nombre">Nombre</label>
                   <input
@@ -648,7 +676,9 @@ const EmployeesPage = () => {
                 </div>
 
                 <div className="employee-modal-field employee-modal-field-full">
-                  <label htmlFor="create-fechaContrato">Fecha de contrato</label>
+                  <label htmlFor="create-fechaContrato">
+                    Fecha de contrato
+                  </label>
                   <input
                     id="create-fechaContrato"
                     name="fechaContrato"
