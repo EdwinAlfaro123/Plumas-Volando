@@ -6,6 +6,7 @@ import EmailCode from "./pages/RecoverEmailCodePage";
 import NewPass from "./pages/RecoverNewPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import CustomerPage from "./pages/CustomerPage";
+import BillPage from "./pages/BillPage";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/newPass" element={<NewPass />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/customers" element={<CustomerPage />} />
+        <Route path="/bills" element={<BillPage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
