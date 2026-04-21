@@ -1,18 +1,24 @@
 import React from "react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { Menu, Search, ShoppingCart, Mail } from "lucide-react";
 import logoPlumas from "../assets/logo-plumas.png";
 
 const Header = () => {
+  const location = useLocation();
+
+  const showCart =
+    location.pathname === "/products" || location.pathname === "/cart";
+
   return (
     <header className="topbar">
-      {/* LOGO */}
       <div className="brand">
-        <img
-          src={logoPlumas}
-          alt="Logo Plumas Volando"
-          className="brand-logo-img"
-        />
+        <Link to="/">
+          <img
+            src={logoPlumas}
+            alt="Logo Plumas Volando"
+            className="brand-logo-img"
+          />
+        </Link>
 
         <div className="brand-text">
           <span className="brand-small">Plumas</span>
@@ -20,7 +26,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* NAV */}
       <nav className="nav-links">
         <Link to="/">Inicio</Link>
         <Link to="/about">Nosotros</Link>
@@ -29,23 +34,24 @@ const Header = () => {
         <Link to="/contact">Contacto</Link>
       </nav>
 
-      {/* ICONOS */}
       <div className="topbar-actions">
-        <button className="icon-btn">
+        <button className="icon-btn" type="button" aria-label="Menú">
           <Menu size={16} />
         </button>
 
-        <button className="icon-btn">
+        <button className="icon-btn" type="button" aria-label="Buscar">
           <Search size={16} />
         </button>
 
-        <button className="icon-btn">
+        <button className="icon-btn" type="button" aria-label="Correo">
           <Mail size={16} />
         </button>
 
-        <button className="icon-btn">
-          <ShoppingCart size={16} />
-        </button>
+        {showCart && (
+          <Link to="/cart" className="icon-btn cart-link" aria-label="Carrito">
+            <ShoppingCart size={16} />
+          </Link>
+        )}
       </div>
     </header>
   );
