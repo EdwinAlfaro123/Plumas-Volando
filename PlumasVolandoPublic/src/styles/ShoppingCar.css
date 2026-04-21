@@ -16,7 +16,7 @@
 
 .cart-main h1 {
   margin: 0 0 14px;
-  color: #c5c0b8;
+  color: #0e56c9;
   font-size: 2rem;
   font-weight: 700;
 }
@@ -170,8 +170,8 @@
   height: 38px;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(90deg, #f6d15e, #efa432);
-  color: #6a4812;
+  background: #f0a334;
+  color: #ffffff;
   font-weight: 800;
   margin-top: 12px;
   cursor: pointer;
