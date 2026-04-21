@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search,
   CalendarDays,
@@ -8,12 +8,15 @@ import {
   Plus,
   ChevronLeft,
   ChevronRight,
+  Check,
+  X,
 } from "lucide-react";
 import DashboardLayout from "../components/DashboardLayout";
 import NeumorphicCard from "../components/NeumorphisCard";
+import CustomAlert from "../components/CustomAlert";
 import "../styles/Customer.css";
 
-const customersMock = [
+const initialCustomers = [
   {
     id: 1,
     nombre: "Daniel Alejandro",
@@ -96,7 +99,18 @@ const customersMock = [
   },
 ];
 
-const ITEMS_PER_PAGE = 5;
+const PAGE_SIZE_OPTIONS = [5, 10, "Todos"];
+
+const emptyForm = {
+  id: null,
+  nombre: "",
+  apellido: "",
+  fechaNacimiento: "",
+  telefono: "",
+  correo: "",
+  password: "",
+  dui: "",
+};
 
 const formatDate = (dateString) => {
   const [year, month, day] = dateString.split("-");
@@ -104,14 +118,63 @@ const formatDate = (dateString) => {
 };
 
 const CustomerPage = () => {
+  const [customers, setCustomers] = useState(initialCustomers);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [isPageSizeMenuOpen, setIsPageSizeMenuOpen] = useState(false);
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState(emptyForm);
+
+  const [alert, setAlert] = useState({
+    isOpen: false,
+    type: "success",
+    title: "",
+    message: "",
+    showCancel: false,
+    confirmText: "Aceptar",
+    cancelText: "Cancelar",
+    onConfirm: null,
+    onCancel: null,
+  });
+
+  const pageSizeMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        pageSizeMenuRef.current &&
+        !pageSizeMenuRef.current.contains(event.target)
+      ) {
+        setIsPageSizeMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isEditModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isEditModalOpen]);
 
   const filteredCustomers = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
 
-    return customersMock.filter((customer) => {
+    return customers.filter((customer) => {
       const matchesSearch =
         !search ||
         customer.nombre.toLowerCase().includes(search) ||
@@ -124,26 +187,40 @@ const CustomerPage = () => {
 
       return matchesSearch && matchesDate;
     });
-  }, [searchTerm, dateFilter]);
+  }, [customers, searchTerm, dateFilter]);
+
+  const effectiveItemsPerPage =
+    itemsPerPage === "Todos" ? filteredCustomers.length || 1 : itemsPerPage;
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredCustomers.length / ITEMS_PER_PAGE)
+    Math.ceil(filteredCustomers.length / effectiveItemsPerPage)
   );
 
   const paginatedCustomers = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    const end = start + ITEMS_PER_PAGE;
+    const start = (currentPage - 1) * effectiveItemsPerPage;
+    const end = start + effectiveItemsPerPage;
     return filteredCustomers.slice(start, end);
-  }, [filteredCustomers, currentPage]);
+  }, [filteredCustomers, currentPage, effectiveItemsPerPage]);
 
   const visiblePages = useMemo(() => {
-    const pages = [];
-    for (let i = 1; i <= totalPages; i += 1) {
-      pages.push(i);
-    }
-    return pages;
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
   }, [totalPages]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const closeAlert = () => {
+    setAlert((prev) => ({
+      ...prev,
+      isOpen: false,
+      onConfirm: null,
+      onCancel: null,
+    }));
+  };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -155,18 +232,116 @@ const CustomerPage = () => {
     setCurrentPage(1);
   };
 
-  const handleEdit = (customer) => {
-    alert(`Editar cliente: ${customer.nombre} ${customer.apellido}`);
+  const handleItemsPerPageChange = (value) => {
+    setItemsPerPage(value);
+    setCurrentPage(1);
+    setIsPageSizeMenuOpen(false);
+  };
+
+  const openEditModal = (customer) => {
+    setEditForm({ ...customer });
+    setIsEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditForm(emptyForm);
+  };
+
+  const handleEditFormChange = (e) => {
+    const { name, value } = e.target;
+
+    setEditForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleEditSubmit = (e) => {
+    e.preventDefault();
+
+    if (
+      !editForm.nombre.trim() ||
+      !editForm.apellido.trim() ||
+      !editForm.fechaNacimiento ||
+      !editForm.telefono.trim() ||
+      !editForm.correo.trim() ||
+      !editForm.password.trim() ||
+      !editForm.dui.trim()
+    ) {
+      setAlert({
+        isOpen: true,
+        type: "error",
+        title: "Campos incompletos",
+        message: "Completa todos los campos antes de guardar.",
+        showCancel: false,
+        confirmText: "Aceptar",
+        cancelText: "Cancelar",
+        onConfirm: closeAlert,
+        onCancel: null,
+      });
+      return;
+    }
+
+    setCustomers((prevCustomers) =>
+      prevCustomers.map((customer) =>
+        customer.id === editForm.id ? { ...editForm } : customer
+      )
+    );
+
+    closeEditModal();
+
+    setAlert({
+      isOpen: true,
+      type: "success",
+      title: "Cambios guardados",
+      message: "Los datos del cliente se editaron correctamente.",
+      showCancel: false,
+      confirmText: "Aceptar",
+      cancelText: "Cancelar",
+      onConfirm: closeAlert,
+      onCancel: null,
+    });
   };
 
   const handleDelete = (customer) => {
-    const confirmDelete = window.confirm(
-      `¿Deseas eliminar a ${customer.nombre} ${customer.apellido}?`
-    );
+    setAlert({
+      isOpen: true,
+      type: "warning",
+      title: "Eliminar cliente",
+      message: `¿Estás seguro de eliminar a ${customer.nombre} ${customer.apellido}?`,
+      showCancel: true,
+      confirmText: "Eliminar",
+      cancelText: "Cancelar",
+      onConfirm: () => {
+        setCustomers((prev) => prev.filter((item) => item.id !== customer.id));
 
-    if (confirmDelete) {
-      alert("Aquí luego conectas la lógica para eliminar.");
-    }
+        setAlert({
+          isOpen: true,
+          type: "success",
+          title: "Registro eliminado",
+          message: "El cliente se eliminó correctamente.",
+          showCancel: false,
+          confirmText: "Aceptar",
+          cancelText: "Cancelar",
+          onConfirm: closeAlert,
+          onCancel: null,
+        });
+      },
+      onCancel: () => {
+        setAlert({
+          isOpen: true,
+          type: "info",
+          title: "Operación cancelada",
+          message: "La eliminación del registro fue cancelada.",
+          showCancel: false,
+          confirmText: "Aceptar",
+          cancelText: "Cancelar",
+          onConfirm: closeAlert,
+          onCancel: null,
+        });
+      },
+    });
   };
 
   return (
@@ -212,9 +387,42 @@ const CustomerPage = () => {
               <p>clientes encontrados</p>
             </div>
 
-            <button type="button" className="customer-filter-chip">
-              <SlidersHorizontal size={17} />
-            </button>
+            <div className="customer-page-size-dropdown" ref={pageSizeMenuRef}>
+              <button
+                type="button"
+                className={`customer-filter-chip ${
+                  isPageSizeMenuOpen ? "open" : ""
+                }`}
+                onClick={() => setIsPageSizeMenuOpen((prev) => !prev)}
+                title="Cantidad por página"
+              >
+                <SlidersHorizontal size={17} />
+              </button>
+
+              {isPageSizeMenuOpen && (
+                <div className="customer-page-size-menu">
+                  <p className="customer-page-size-title">Mostrar por página</p>
+
+                  {PAGE_SIZE_OPTIONS.map((option) => {
+                    const isActive = itemsPerPage === option;
+
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        className={`customer-page-size-option ${
+                          isActive ? "active" : ""
+                        }`}
+                        onClick={() => handleItemsPerPageChange(option)}
+                      >
+                        <span>{option}</span>
+                        {isActive && <Check size={16} />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="customer-table-wrapper">
@@ -250,7 +458,7 @@ const CustomerPage = () => {
                           <button
                             type="button"
                             className="customer-icon-btn edit"
-                            onClick={() => handleEdit(customer)}
+                            onClick={() => openEditModal(customer)}
                             title="Editar"
                           >
                             <SquarePen size={18} />
@@ -282,6 +490,10 @@ const CustomerPage = () => {
           </div>
 
           <div className="customer-pagination">
+            <div className="customer-pagination-info">
+              Mostrando {paginatedCustomers.length} de {filteredCustomers.length} registros
+            </div>
+
             <button
               type="button"
               className="customer-page-arrow"
@@ -318,6 +530,134 @@ const CustomerPage = () => {
             </button>
           </div>
         </NeumorphicCard>
+
+        {isEditModalOpen && (
+          <div className="customer-modal-overlay" onClick={closeEditModal}>
+            <div
+              className="customer-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                className="customer-modal-close"
+                onClick={closeEditModal}
+                title="Cerrar"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="customer-modal-header">
+                <h2>EDITAR CLIENTE</h2>
+              </div>
+
+              <form className="customer-modal-form" onSubmit={handleEditSubmit}>
+                <div className="customer-modal-field">
+                  <label htmlFor="nombre">Nombre</label>
+                  <input
+                    id="nombre"
+                    name="nombre"
+                    type="text"
+                    value={editForm.nombre}
+                    onChange={handleEditFormChange}
+                  />
+                </div>
+
+                <div className="customer-modal-field">
+                  <label htmlFor="apellido">Apellido</label>
+                  <input
+                    id="apellido"
+                    name="apellido"
+                    type="text"
+                    value={editForm.apellido}
+                    onChange={handleEditFormChange}
+                  />
+                </div>
+
+                <div className="customer-modal-field">
+                  <label htmlFor="correo">Correo</label>
+                  <input
+                    id="correo"
+                    name="correo"
+                    type="email"
+                    value={editForm.correo}
+                    onChange={handleEditFormChange}
+                  />
+                </div>
+
+                <div className="customer-modal-field">
+                  <label htmlFor="telefono">Teléfono</label>
+                  <input
+                    id="telefono"
+                    name="telefono"
+                    type="text"
+                    value={editForm.telefono}
+                    onChange={handleEditFormChange}
+                  />
+                </div>
+
+                <div className="customer-modal-field">
+                  <label htmlFor="fechaNacimiento">Fecha de nacimiento</label>
+                  <input
+                    id="fechaNacimiento"
+                    name="fechaNacimiento"
+                    type="date"
+                    value={editForm.fechaNacimiento}
+                    onChange={handleEditFormChange}
+                  />
+                </div>
+
+                <div className="customer-modal-field">
+                  <label htmlFor="dui">DUI</label>
+                  <input
+                    id="dui"
+                    name="dui"
+                    type="text"
+                    value={editForm.dui}
+                    onChange={handleEditFormChange}
+                  />
+                </div>
+
+                <div className="customer-modal-field customer-modal-field-full">
+                  <label htmlFor="password">Contraseña</label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="text"
+                    value={editForm.password}
+                    onChange={handleEditFormChange}
+                  />
+                </div>
+
+                <div className="customer-modal-actions">
+                  <button type="submit" className="customer-modal-save">
+                    Guardar cambios
+                  </button>
+
+                  <button
+                    type="button"
+                    className="customer-modal-cancel"
+                    onClick={closeEditModal}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        <CustomAlert
+          isOpen={alert.isOpen}
+          type={alert.type}
+          title={alert.title}
+          message={alert.message}
+          confirmText={alert.confirmText}
+          cancelText={alert.cancelText}
+          showCancel={alert.showCancel}
+          onClose={closeAlert}
+          onConfirm={alert.onConfirm || closeAlert}
+          onCancel={alert.onCancel || closeAlert}
+        />
       </div>
     </DashboardLayout>
   );
