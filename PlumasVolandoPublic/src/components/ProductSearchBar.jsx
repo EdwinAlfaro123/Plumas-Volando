@@ -4,7 +4,7 @@ import { Search } from "lucide-react";
 const ProductSearchBar = ({ value, onChange }) => {
   return (
     <div className="products-searchbar">
-      <Search size={16} />
+      <Search size={13} />
       <input
         type="text"
         placeholder="Buscar producto..."

@@ -1,5 +1,9 @@
 const CART_KEY = "plumas_volando_cart";
 
+const dispatchCartUpdate = () => {
+  window.dispatchEvent(new Event("cart-updated"));
+};
+
 export const getCart = () => {
   const rawCart = localStorage.getItem(CART_KEY);
   return rawCart ? JSON.parse(rawCart) : [];
@@ -7,6 +11,7 @@ export const getCart = () => {
 
 export const saveCart = (cart) => {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  dispatchCartUpdate();
 };
 
 export const addToCart = (product) => {

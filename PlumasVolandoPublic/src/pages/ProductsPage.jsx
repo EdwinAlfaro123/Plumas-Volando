@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ProductFilters from "../components/ProductFilters";
@@ -12,6 +12,8 @@ const ProductsPage = () => {
   const [activeFilter, setActiveFilter] = useState("todos");
   const [search, setSearch] = useState("");
   const [message, setMessage] = useState("");
+  const [messageVisible, setMessageVisible] = useState(false);
+  const timeoutRef = useRef(null);
 
   const filteredProducts = useMemo(() => {
     return productsData.filter((product) => {
@@ -26,13 +28,26 @@ const ProductsPage = () => {
     });
   }, [activeFilter, search]);
 
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   const handleAddToCart = (product) => {
     addToCart(product);
-    setMessage(`"${product.name}" fue agregado al carrito`);
 
-    setTimeout(() => {
-      setMessage("");
-    }, 2000);
+    const duration = activeFilter === "insumos" ? 4500 : 2200;
+
+    setMessage(`"${product.name}" fue agregado al carrito`);
+    setMessageVisible(true);
+
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    timeoutRef.current = setTimeout(() => {
+      setMessageVisible(false);
+      setTimeout(() => setMessage(""), 250);
+    }, duration);
   };
 
   return (
@@ -42,6 +57,7 @@ const ProductsPage = () => {
 
         <main className="products-main">
           <h1>Nuestros Productos</h1>
+          <div className="products-title-line"></div>
 
           <ProductFilters
             filters={filterOptions}
@@ -49,9 +65,23 @@ const ProductsPage = () => {
             onChange={setActiveFilter}
           />
 
-          <ProductSearchBar value={search} onChange={setSearch} />
+          <div className="products-container">
+            <ProductSearchBar value={search} onChange={setSearch} />
 
-          {message && <div className="product-cart-message">{message}</div>}
+            {message && (
+              <div
+                className={`product-cart-message ${
+                  messageVisible ? "show" : "hide"
+                }`}
+              >
+                <div className="product-cart-message-icon">✓</div>
+                <div className="product-cart-message-text">
+                  <strong>Producto agregado</strong>
+                  <span>{message}</span>
+                </div>
+              </div>
+            )}
+          </div>
 
           <ProductGrid products={filteredProducts} onBuy={handleAddToCart} />
         </main>
