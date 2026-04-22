@@ -28,6 +28,10 @@
   background: var(--about-bg);
 }
 
+.nav-links a.active {
+  color: #ef9322;
+}
+
 /* MAIN */
 .about-main {
   padding: 20px 24px 0;
@@ -41,7 +45,7 @@
 .about-hero h1 {
   margin: 0 0 24px;
   text-align: center;
-  color: var(--about-blue);
+  color: #0f4f93;
   font-size: 2rem;
   font-weight: 800;
 }
