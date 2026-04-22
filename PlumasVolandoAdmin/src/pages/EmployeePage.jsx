@@ -1,10 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  CalendarDays,
+  Check,
   ChevronLeft,
   ChevronRight,
-  Check,
-  Search,
   SlidersHorizontal,
   SquarePen,
   Trash2,
@@ -12,7 +10,9 @@ import {
   X,
 } from "lucide-react";
 import DashboardLayout from "../components/DashboardLayout";
-import NeumorphicCard from "../components/NeumorphisCard";
+import SearchBar from "../components/SearchBar";
+import DateFilter from "../components/DateFilter";
+import Table from "../components/Table";
 import CustomAlert from "../components/CustomAlert";
 import "../styles/Employee.css";
 
@@ -72,11 +72,10 @@ const EmployeesPage = () => {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isPageSizeMenuOpen, setIsPageSizeMenuOpen] = useState(false);
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const [editForm, setEditForm] = useState({
-    id: "",
+  const [createForm, setCreateForm] = useState({
     nombre: "",
     apellido: "",
     correo: "",
@@ -85,7 +84,8 @@ const EmployeesPage = () => {
     estado: "",
   });
 
-  const [createForm, setCreateForm] = useState({
+  const [editForm, setEditForm] = useState({
+    id: "",
     nombre: "",
     apellido: "",
     correo: "",
@@ -118,8 +118,7 @@ const EmployeesPage = () => {
   };
 
   const normalizeText = (value) =>
-    value
-      .toString()
+    String(value)
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
@@ -134,7 +133,8 @@ const EmployeesPage = () => {
         normalizeText(employee.telefono).includes(normalizeText(searchTerm)) ||
         normalizeText(employee.estado).includes(normalizeText(searchTerm));
 
-      const matchesDate = !dateFilter || employee.fechaContrato <= dateFilter;
+      const matchesDate =
+        !dateFilter || employee.fechaContrato <= dateFilter;
 
       return matchesSearch && matchesDate;
     });
@@ -157,9 +157,7 @@ const EmployeesPage = () => {
   }, [filteredEmployees, currentPage, itemsPerPage]);
 
   const visiblePages = useMemo(() => {
-    if (itemsPerPage === "all") {
-      return [1];
-    }
+    if (itemsPerPage === "all") return [1];
 
     const pages = [];
     const maxVisible = 5;
@@ -201,6 +199,22 @@ const EmployeesPage = () => {
     setIsPageSizeMenuOpen(false);
   };
 
+  const openCreateModal = () => {
+    setCreateForm({
+      nombre: "",
+      apellido: "",
+      correo: "",
+      telefono: "",
+      fechaContrato: "",
+      estado: "",
+    });
+    setIsCreateModalOpen(true);
+  };
+
+  const closeCreateModal = () => {
+    setIsCreateModalOpen(false);
+  };
+
   const openEditModal = (employee) => {
     setEditForm({ ...employee });
     setIsEditModalOpen(true);
@@ -219,39 +233,7 @@ const EmployeesPage = () => {
     });
   };
 
-  const openCreateModal = () => {
-    setCreateForm({
-      nombre: "",
-      apellido: "",
-      correo: "",
-      telefono: "",
-      fechaContrato: "",
-      estado: "",
-    });
-    setIsCreateModalOpen(true);
-  };
-
-  const closeCreateModal = () => {
-    setIsCreateModalOpen(false);
-    setCreateForm({
-      nombre: "",
-      apellido: "",
-      correo: "",
-      telefono: "",
-      fechaContrato: "",
-      estado: "",
-    });
-  };
-
-  const handleEditFormChange = (e) => {
-    const { name, value } = e.target;
-    setEditForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleCreateFormChange = (e) => {
+  const handleCreateChange = (e) => {
     const { name, value } = e.target;
     setCreateForm((prev) => ({
       ...prev,
@@ -259,7 +241,15 @@ const EmployeesPage = () => {
     }));
   };
 
-  const validateEmployeeForm = (form) => {
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const validateForm = (form) => {
     if (
       !form.nombre ||
       !form.apellido ||
@@ -279,58 +269,16 @@ const EmployeesPage = () => {
     return "";
   };
 
-  const handleEditSubmit = (e) => {
-    e.preventDefault();
-
-    const errorMessage = validateEmployeeForm(editForm);
-
-    if (errorMessage) {
-      setAlert({
-        isOpen: true,
-        type: "error",
-        title: "Campos inválidos",
-        message: errorMessage,
-        showCancel: false,
-        confirmText: "Aceptar",
-        cancelText: "Cancelar",
-        onConfirm: closeAlert,
-        onCancel: null,
-      });
-      return;
-    }
-
-    setEmployees((prevEmployees) =>
-      prevEmployees.map((employee) =>
-        employee.id === editForm.id ? { ...editForm } : employee
-      )
-    );
-
-    closeEditModal();
-
-    setAlert({
-      isOpen: true,
-      type: "success",
-      title: "Cambios guardados",
-      message: "Los datos del empleado se editaron correctamente.",
-      showCancel: false,
-      confirmText: "Aceptar",
-      cancelText: "Cancelar",
-      onConfirm: closeAlert,
-      onCancel: null,
-    });
-  };
-
   const handleCreateSubmit = (e) => {
     e.preventDefault();
 
-    const errorMessage = validateEmployeeForm(createForm);
-
-    if (errorMessage) {
+    const error = validateForm(createForm);
+    if (error) {
       setAlert({
         isOpen: true,
         type: "error",
         title: "Campos inválidos",
-        message: errorMessage,
+        message: error,
         showCancel: false,
         confirmText: "Aceptar",
         cancelText: "Cancelar",
@@ -343,7 +291,7 @@ const EmployeesPage = () => {
     const newEmployee = {
       id:
         employees.length > 0
-          ? Math.max(...employees.map((employee) => employee.id)) + 1
+          ? Math.max(...employees.map((item) => item.id)) + 1
           : 1,
       ...createForm,
     };
@@ -364,6 +312,44 @@ const EmployeesPage = () => {
     });
   };
 
+  const handleEditSubmit = (e) => {
+    e.preventDefault();
+
+    const error = validateForm(editForm);
+    if (error) {
+      setAlert({
+        isOpen: true,
+        type: "error",
+        title: "Campos inválidos",
+        message: error,
+        showCancel: false,
+        confirmText: "Aceptar",
+        cancelText: "Cancelar",
+        onConfirm: closeAlert,
+        onCancel: null,
+      });
+      return;
+    }
+
+    setEmployees((prev) =>
+      prev.map((item) => (item.id === editForm.id ? { ...editForm } : item))
+    );
+
+    closeEditModal();
+
+    setAlert({
+      isOpen: true,
+      type: "success",
+      title: "Cambios guardados",
+      message: "Los datos del empleado se editaron correctamente.",
+      showCancel: false,
+      confirmText: "Aceptar",
+      cancelText: "Cancelar",
+      onConfirm: closeAlert,
+      onCancel: null,
+    });
+  };
+
   const handleDelete = (employee) => {
     setAlert({
       isOpen: true,
@@ -375,7 +361,6 @@ const EmployeesPage = () => {
       cancelText: "Cancelar",
       onConfirm: () => {
         setEmployees((prev) => prev.filter((item) => item.id !== employee.id));
-
         setAlert({
           isOpen: true,
           type: "success",
@@ -388,21 +373,54 @@ const EmployeesPage = () => {
           onCancel: null,
         });
       },
-      onCancel: () => {
-        setAlert({
-          isOpen: true,
-          type: "info",
-          title: "Operación cancelada",
-          message: "La eliminación del registro fue cancelada.",
-          showCancel: false,
-          confirmText: "Aceptar",
-          cancelText: "Cancelar",
-          onConfirm: closeAlert,
-          onCancel: null,
-        });
-      },
+      onCancel: closeAlert,
     });
   };
+
+  const tableColumns = [
+    { key: "id", label: "ID" },
+    { key: "nombre", label: "Nombre" },
+    { key: "apellido", label: "Apellido" },
+    { key: "correo", label: "Correo" },
+    { key: "telefono", label: "Teléfono" },
+    { key: "fechaContrato", label: "Fecha Contrato" },
+    { key: "estado", label: "Estado" },
+    { key: "acciones", label: "Acciones" },
+  ];
+
+  const tableData = paginatedEmployees.map((employee) => ({
+    ...employee,
+    estado: (
+      <span
+        className={`employee-status-badge ${
+          employee.estado === "Activo" ? "active" : "inactive"
+        }`}
+      >
+        {employee.estado}
+      </span>
+    ),
+    acciones: (
+      <div className="employee-actions">
+        <button
+          type="button"
+          className="employee-icon-btn edit"
+          onClick={() => openEditModal(employee)}
+          title="Editar"
+        >
+          <SquarePen size={18} />
+        </button>
+
+        <button
+          type="button"
+          className="employee-icon-btn delete"
+          onClick={() => handleDelete(employee)}
+          title="Eliminar"
+        >
+          <Trash2 size={18} />
+        </button>
+      </div>
+    ),
+  }));
 
   return (
     <DashboardLayout>
@@ -418,156 +436,88 @@ const EmployeesPage = () => {
         </div>
 
         <div className="employee-toolbar">
-          <div className="employee-search-wrap">
-            <Search size={18} />
-            <input
-              type="text"
-              placeholder="Búsqueda por nombre, apellido, correo, teléfono o estado"
+          <div className="employee-toolbar-search">
+            <SearchBar
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Búsqueda por nombre, apellido, correo, teléfono o estado"
             />
           </div>
 
-          <div className="employee-date-group">
-            <label htmlFor="fechaHasta">Hasta</label>
-            <div className="employee-date-wrap">
-              <CalendarDays size={18} />
-              <input
-                id="fechaHasta"
-                type="date"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-              />
-            </div>
+          <div className="employee-toolbar-date">
+            <DateFilter
+              label="Hasta"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+            />
           </div>
         </div>
 
-        <NeumorphicCard className="employee-table-card" padding="lg">
+        <div className="employee-table-card">
           <div className="employee-table-topbar">
-            <button
-              type="button"
-              className="employee-add-btn"
-              onClick={openCreateModal}
-            >
-              <UserPlus size={18} />
-              Agregar
-            </button>
-
-            <div className="employee-page-size-dropdown" ref={pageSizeMenuRef}>
+            <div className="employee-left-actions">
               <button
                 type="button"
-                className={`employee-filter-chip ${
-                  isPageSizeMenuOpen ? "open" : ""
-                }`}
-                onClick={() => setIsPageSizeMenuOpen((prev) => !prev)}
+                className="employee-add-btn"
+                onClick={openCreateModal}
               >
-                <SlidersHorizontal size={16} />
+                <UserPlus size={18} />
+                Agregar
               </button>
+            </div>
 
-              {isPageSizeMenuOpen && (
-                <div className="employee-page-size-menu">
-                  <p className="employee-page-size-title">Mostrar por página</p>
+            <div className="employee-right-actions">
+              <div className="employee-page-size-dropdown" ref={pageSizeMenuRef}>
+                <button
+                  type="button"
+                  className={`employee-filter-chip ${
+                    isPageSizeMenuOpen ? "open" : ""
+                  }`}
+                  onClick={() => setIsPageSizeMenuOpen((prev) => !prev)}
+                >
+                  <SlidersHorizontal size={16} />
+                </button>
 
-                  {[5, 10, "Todos"].map((option) => {
-                    const isAll = option === "Todos";
-                    const value = isAll ? "all" : option;
-                    const isActive = itemsPerPage === value;
+                {isPageSizeMenuOpen && (
+                  <div className="employee-page-size-menu">
+                    <p className="employee-page-size-title">Mostrar por página</p>
 
-                    return (
-                      <button
-                        key={option}
-                        type="button"
-                        className={`employee-page-size-option ${
-                          isActive ? "active" : ""
-                        }`}
-                        onClick={() => handleItemsPerPageChange(value)}
-                      >
-                        <span>{option}</span>
-                        {isActive && <Check size={16} />}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                    {[5, 10, "Todos"].map((option) => {
+                      const isAll = option === "Todos";
+                      const value = isAll ? "all" : option;
+                      const isActive = itemsPerPage === value;
+
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          className={`employee-page-size-option ${
+                            isActive ? "active" : ""
+                          }`}
+                          onClick={() => handleItemsPerPageChange(value)}
+                        >
+                          <span>{option}</span>
+                          {isActive && <Check size={16} />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           <div className="employee-table-wrapper">
-            <table className="employee-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Apellido</th>
-                  <th>Correo</th>
-                  <th>Teléfono</th>
-                  <th>Fecha Contrato</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {paginatedEmployees.length > 0 ? (
-                  paginatedEmployees.map((employee) => (
-                    <tr key={employee.id}>
-                      <td>{employee.id}</td>
-                      <td>{employee.nombre}</td>
-                      <td>{employee.apellido}</td>
-                      <td>{employee.correo}</td>
-                      <td>{employee.telefono}</td>
-                      <td>{employee.fechaContrato}</td>
-                      <td>
-                        <span
-                          className={`employee-status-badge ${
-                            employee.estado === "Activo"
-                              ? "active"
-                              : "inactive"
-                          }`}
-                        >
-                          {employee.estado}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="employee-actions">
-                          <button
-                            type="button"
-                            className="employee-icon-btn edit"
-                            onClick={() => openEditModal(employee)}
-                            title="Editar"
-                          >
-                            <SquarePen size={18} />
-                          </button>
-
-                          <button
-                            type="button"
-                            className="employee-icon-btn delete"
-                            onClick={() => handleDelete(employee)}
-                            title="Eliminar"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="8">
-                      <div className="employee-empty-state">
-                        No se encontraron empleados con esos filtros.
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            <Table
+              columns={tableColumns}
+              data={tableData}
+              emptyMessage="No se encontraron empleados con esos filtros."
+            />
           </div>
 
           <div className="employee-pagination">
             <div className="employee-pagination-info">
-              Mostrando {paginatedEmployees.length} de {filteredEmployees.length}{" "}
-              registros
+              Mostrando {paginatedEmployees.length} de {filteredEmployees.length} registros
             </div>
 
             <button
@@ -606,7 +556,7 @@ const EmployeesPage = () => {
               <ChevronRight size={18} />
             </button>
           </div>
-        </NeumorphicCard>
+        </div>
 
         {isCreateModalOpen && (
           <div className="employee-modal-overlay" onClick={closeCreateModal}>
@@ -627,74 +577,63 @@ const EmployeesPage = () => {
                 <h2>INGRESAR EMPLEADO</h2>
               </div>
 
-              <form
-                className="employee-modal-form"
-                onSubmit={handleCreateSubmit}
-              >
+              <form className="employee-modal-form" onSubmit={handleCreateSubmit}>
                 <div className="employee-modal-field employee-modal-field-full">
-                  <label htmlFor="create-nombre">Nombre</label>
+                  <label>Nombre</label>
                   <input
-                    id="create-nombre"
                     name="nombre"
                     type="text"
                     value={createForm.nombre}
-                    onChange={handleCreateFormChange}
+                    onChange={handleCreateChange}
                   />
                 </div>
 
                 <div className="employee-modal-field employee-modal-field-full">
-                  <label htmlFor="create-apellido">Apellido</label>
+                  <label>Apellido</label>
                   <input
-                    id="create-apellido"
                     name="apellido"
                     type="text"
                     value={createForm.apellido}
-                    onChange={handleCreateFormChange}
+                    onChange={handleCreateChange}
                   />
                 </div>
 
                 <div className="employee-modal-field employee-modal-field-full">
-                  <label htmlFor="create-correo">Correo</label>
+                  <label>Correo</label>
                   <input
-                    id="create-correo"
                     name="correo"
                     type="email"
                     value={createForm.correo}
-                    onChange={handleCreateFormChange}
+                    onChange={handleCreateChange}
                   />
                 </div>
 
                 <div className="employee-modal-field employee-modal-field-full">
-                  <label htmlFor="create-telefono">Teléfono</label>
+                  <label>Teléfono</label>
                   <input
-                    id="create-telefono"
                     name="telefono"
                     type="text"
                     value={createForm.telefono}
-                    onChange={handleCreateFormChange}
+                    onChange={handleCreateChange}
                   />
                 </div>
 
                 <div className="employee-modal-field employee-modal-field-full">
-                  <label htmlFor="create-fechaContrato">
-                    Fecha de contrato
-                  </label>
+                  <label>Fecha de contrato</label>
                   <input
-                    id="create-fechaContrato"
                     name="fechaContrato"
                     type="date"
                     value={createForm.fechaContrato}
-                    onChange={handleCreateFormChange}
+                    onChange={handleCreateChange}
                   />
                 </div>
 
                 <div className="employee-modal-field employee-modal-field-full">
-                  <label htmlFor="create-estado">Estado</label>
+                  <label>Estado</label>
                   <select
-                    id="create-estado"
                     name="estado"
                     value={createForm.estado}
-                    onChange={handleCreateFormChange}
+                    onChange={handleCreateChange}
                   >
                     <option value="">Selecciona un estado</option>
                     <option value="Activo">Activo</option>
@@ -744,67 +683,61 @@ const EmployeesPage = () => {
 
               <form className="employee-modal-form" onSubmit={handleEditSubmit}>
                 <div className="employee-modal-field">
-                  <label htmlFor="nombre">Nombre</label>
+                  <label>Nombre</label>
                   <input
-                    id="nombre"
                     name="nombre"
                     type="text"
                     value={editForm.nombre}
-                    onChange={handleEditFormChange}
+                    onChange={handleEditChange}
                   />
                 </div>
 
                 <div className="employee-modal-field">
-                  <label htmlFor="apellido">Apellido</label>
+                  <label>Apellido</label>
                   <input
-                    id="apellido"
                     name="apellido"
                     type="text"
                     value={editForm.apellido}
-                    onChange={handleEditFormChange}
+                    onChange={handleEditChange}
                   />
                 </div>
 
                 <div className="employee-modal-field">
-                  <label htmlFor="correo">Correo</label>
+                  <label>Correo</label>
                   <input
-                    id="correo"
                     name="correo"
                     type="email"
                     value={editForm.correo}
-                    onChange={handleEditFormChange}
+                    onChange={handleEditChange}
                   />
                 </div>
 
                 <div className="employee-modal-field">
-                  <label htmlFor="telefono">Teléfono</label>
+                  <label>Teléfono</label>
                   <input
-                    id="telefono"
                     name="telefono"
                     type="text"
                     value={editForm.telefono}
-                    onChange={handleEditFormChange}
+                    onChange={handleEditChange}
                   />
                 </div>
 
                 <div className="employee-modal-field">
-                  <label htmlFor="fechaContrato">Fecha de contrato</label>
+                  <label>Fecha de contrato</label>
                   <input
-                    id="fechaContrato"
                     name="fechaContrato"
                     type="date"
                     value={editForm.fechaContrato}
-                    onChange={handleEditFormChange}
+                    onChange={handleEditChange}
                   />
                 </div>
 
                 <div className="employee-modal-field">
-                  <label htmlFor="estado">Estado</label>
+                  <label>Estado</label>
                   <select
-                    id="estado"
                     name="estado"
                     value={editForm.estado}
-                    onChange={handleEditFormChange}
+                    onChange={handleEditChange}
                   >
                     <option value="">Selecciona un estado</option>
                     <option value="Activo">Activo</option>
