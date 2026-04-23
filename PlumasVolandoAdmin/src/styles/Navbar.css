@@ -36,4 +36,90 @@
   color: #fff7ef;
   font-size: 0.9rem;
   font-weight: 700;
+  cursor: pointer;
+}
+
+.dashboard-navbar-user:hover {
+  color: #e8d1a5;
+}
+
+.profile-modal {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #c5a788;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+  width: 500px;
+  z-index: 1000;
+  text-align: center;
+}
+
+.profile-modal h2 {
+  font-size: 20px;
+  font-weight: 800;
+  color: white;
+}
+
+.profile-modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.profile-modal-row {
+  display: flex;
+  gap: 10px;
+}
+
+.profile-modal-field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.profile-modal input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  background-color: #f9f9f9;
+}
+
+.profile-modal button {
+  padding: 10px;
+  border: none;
+  background-color: #e3c96f;
+  color: white;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.profile-modal button:hover {
+  background-color: #c3a57e;
+}
+
+.profile-modal button:nth-child(2) {
+  background-color: #d9534f;
+}
+
+.profile-modal button:nth-child(2):hover {
+  background-color: #bb4036;
+}
+
+.logout-btn {
+  background-color: #d9534f;
+  color: white;
+  font-weight: 700;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: #bb4036;
 }
