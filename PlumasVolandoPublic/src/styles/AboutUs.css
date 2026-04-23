@@ -238,11 +238,7 @@
   .about-features-grid {
     grid-template-columns: 1fr;
   }
-
-  .about-feature-card {
-    min-height: auto;
-  }
-
+  
   .about-service-content {
     grid-template-columns: 1fr;
     text-align: center;

@@ -1,0 +1,281 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
+
+.points-of-sale-page {
+  min-height: 100vh;
+  background: #efe7d6;
+  font-family: "Montserrat", sans-serif;
+}
+
+.points-page-frame {
+  background: #f7f1e5;
+}
+
+.points-main {
+  padding: 20px 24px 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.points-main h1 {
+  margin: 0 0 8px;
+  color: #0f4f93;
+  font-size: 2.2rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.points-subtitle {
+  text-align: center;
+  color: #5a5a5a;
+  font-size: 1rem;
+  margin-bottom: 24px;
+}
+
+.map-wrapper {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  border: 2px solid #e0c9a6;
+}
+
+/* ----- Tarjeta del punto seleccionado ----- */
+.selected-point-wrapper {
+  margin: 20px 0 30px;
+}
+
+.selected-point-card {
+  padding: 24px 28px;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.selected-point-card h2 {
+  margin: 0 0 20px;
+  font-size: 1.9rem;
+  font-weight: 800;
+  border-bottom: 2px dashed rgba(0,0,0,0.1);
+  padding-bottom: 12px;
+}
+
+.point-detail-item {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 14px;
+  color: #2c3e50;
+}
+
+.detail-icon {
+  margin-right: 10px;
+  color: #0f4f93;
+  flex-shrink: 0;
+}
+
+.detail-label {
+  font-weight: 700;
+  min-width: 80px;
+  font-size: 0.95rem;
+  color: #333;
+  margin: 0 25px 0 ;
+}
+
+.detail-value {
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.view-on-map-btn {
+  margin-top: 20px;
+  background-color: #0f4f93;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  padding: 12px 24px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  box-shadow: 0 4px 10px rgba(15, 79, 147, 0.2);
+}
+
+.view-on-map-btn:hover {
+  background-color: #0a3a6b;
+}
+
+/* ----- Sección Puntos más frecuentes ----- */
+.frequent-points-section {
+  margin-top: 40px;
+}
+
+.frequent-points-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+/* Tarjeta individual */
+.frequent-point-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Asegura que todas las tarjetas tengan la misma altura */
+}
+
+.frequent-point-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+}
+
+/* Línea superior naranja */
+.frequent-card-top {
+  height: 12px;
+  background-color: #FF9D2D;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Pestaña de color (azul, rojo, etc.) */
+.frequent-color-tab {
+  position: absolute;
+  top: 0;
+  left: 24px;
+  width: 60px;
+  height: 28px;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Contenido de la tarjeta */
+.frequent-card-content {
+  padding: 24px 24px 28px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.frequent-card-body {
+  flex: 1;
+}
+
+.frequent-department-name {
+  margin: 0 0 24px;
+  color: #0f4f93;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.frequent-info-row {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 14px;      
+  line-height: 1.6;        
+}
+
+.frequent-label {
+  font-weight: 700;
+  min-width: 80px;
+  color: #2c3e50;
+  font-size: 0.95rem;
+  margin: 0 25px;
+}
+
+.frequent-value {
+  font-weight: 600;
+  color: #1e1e1e;
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+/* Botón VER EN EL MAPA */
+.frequent-map-btn {
+  margin-top: 20px;
+  width: 100%;
+  background-color: #0f4f93;
+  color: white;
+  border: none;
+  border-radius: 40px;
+  padding: 14px 0;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  box-shadow: 0 4px 10px rgba(15, 79, 147, 0.2);
+}
+
+.frequent-map-btn:hover {
+  background-color: #0a3a6b;
+}
+
+/* Responsive */
+@media (max-width: 800px) {
+  .frequent-points-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .frequent-card-content {
+    padding: 18px 18px 24px;
+  }
+  .frequent-label {
+    min-width: 70px;
+    font-size: 0.85rem;
+  }
+  .frequent-value {
+    font-size: 0.85rem;
+  }
+}
+
+/* ----- Mensaje final ----- */
+.points-footer-message {
+  margin-top: 50px;
+  padding: 28px;
+  background: #f2e4d0;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.points-footer-message h3 {
+  color: #0f4f93;
+  font-size: 1.7rem;
+  margin-bottom: 8px;
+}
+
+.points-footer-message p {
+  color: #4a4a4a;
+  margin: 4px 0;
+}
+
+/* ----- Responsive ----- */
+@media (max-width: 800px) {
+  .frequent-points-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .points-main {
+    padding: 16px;
+  }
+  .selected-point-card {
+    padding: 18px;
+  }
+  .point-detail-item {
+    flex-wrap: wrap;
+  }
+  .detail-label {
+    min-width: 70px;
+  }
+}
