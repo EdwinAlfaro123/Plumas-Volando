@@ -26,8 +26,8 @@ const ContactoPage = () => {
                   <Mail size={24} className="info-icon" />
                   <div>
                     <h4>Correo electrónico</h4>
-                    <a href="mailto:plumasVioandoSV@gmail.com">
-                      plumasVioandoSV@gmail.com
+                    <a href="mailto:plumasvolando249@gmail.com">
+                      plumasvolando249@gmail.com
                     </a>
                   </div>
                 </div>
@@ -47,7 +47,15 @@ const ContactoPage = () => {
                 </div>
               </div>
               <button className="whatsapp-btn">
-                <Phone size={18} /> Contáctanos por WhatsApp
+                <a
+                  href="https://wa.me/50360651765?text=Hola%2C%20estoy%20interesado%20en%20sus%20productos%20av%C3%ADcolas."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="whatsapp-btn"
+                >
+                  <Phone size={18} />
+                  Contáctanos por WhatsApp
+                </a>
               </button>
             </div>
 

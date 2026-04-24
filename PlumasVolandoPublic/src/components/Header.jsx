@@ -93,7 +93,7 @@ const Header = () => {
       <div className="topbar-actions">
         {/* Instagram */}
         <a
-          href="https://www.instagram.com/plumasvolando.sv"
+          href="https://www.instagram.com/plumasvolando"
           target="_blank"
           rel="noopener noreferrer"
           className="icon-btn"
