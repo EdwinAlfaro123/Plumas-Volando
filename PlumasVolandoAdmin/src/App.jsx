@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import RecoverEmail from "./pages/RecoverEmailPasswordPage";
@@ -7,8 +7,10 @@ import NewPass from "./pages/RecoverNewPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import CustomerPage from "./pages/CustomerPage";
 import BillPage from "./pages/BillPage";
-import Employee from "./pages/EmployeePage"
+import Employee from "./pages/EmployeePage";
 import OrdersPage from "./pages/OrdersPage";
+import ChickenPage from "./pages/ChickenPage";
+import ProductsPage from "./pages/ProductsPage";
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
         <Route path="/bills" element={<BillPage />} />
         <Route path="/employees" element={<Employee />} />
         <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/chickens" element={<ChickenPage />} />
+        <Route path="/products" element={<ProductsPage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
