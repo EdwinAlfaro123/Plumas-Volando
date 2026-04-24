@@ -1,6 +1,25 @@
 import React from "react";
-import { Phone, Mail, MapPin } from "lucide-react";
+import { Phone, Mail } from "lucide-react";
+import { Link } from "react-router";
 import logoPlumas from "../assets/logo-plumas.png";
+
+// Icono SVG para Instagram
+const InstagramIcon = ({ size = 15 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+    <circle cx="12" cy="12" r="4" />
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+  </svg>
+);
 
 const Footer = () => {
   return (
@@ -25,13 +44,54 @@ const Footer = () => {
       <div className="footer-col">
         <h3>Contactos</h3>
         <p>
-          <MapPin size={15} /> plumasvolando.sv
+          <a
+            href="https://www.instagram.com/plumasvolando.sv"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              color: "inherit",
+              textDecoration: "none",
+            }}
+          >
+            <InstagramIcon size={15} />
+            @plumasvolando.sv
+          </a>
         </p>
         <p>
-          <Phone size={15} /> 503-6065-1765
+          <a
+            href="https://wa.me/50360651765"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              color: "inherit",
+              textDecoration: "none",
+            }}
+          >
+            <Phone size={15} />
+            503-6065-1765
+          </a>
         </p>
         <p>
-          <Mail size={15} /> 20210133@ricaldone.edu.sv
+          {/* Correo → redirige a la página de contacto */}
+          <Link
+            to="/contact"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              color: "inherit",
+              textDecoration: "none",
+            }}
+          >
+            <Mail size={15} />
+            plumasvolando.sv@gmail.com
+          </Link>
         </p>
       </div>
 
