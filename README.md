@@ -43,17 +43,14 @@ Plumas Volando es un emprendimiento dedicado a la producción y distribución de
 
 - npm install leaflet react-leaflet: Es el estándar para añadir mapas interactivos a tu web, permitiéndote colocar marcadores, rutas y capas geográficas mediante componentes de React de forma ligera y gratuita.
 
---
 <img width="651" height="46" alt="image" src="https://github.com/user-attachments/assets/8abb5618-d3ba-4ee1-8352-f5b4b07d8ea7" />
 
 - npm install @emailijs/browser: Sirve para enviar correos electrónicos directamente desde tu formulario de contacto al email que elijas, funcionando totalmente desde el frontend sin necesidad de programar un servidor (backend).
 
---
 <img width="565" height="40" alt="image" src="https://github.com/user-attachments/assets/a3a06515-49e0-4630-9f33-97530b3d1749" />
 
 - npm i react router: Es la herramienta que gestiona la navegación y las rutas, permitiendo que tu aplicación tenga diferentes secciones (como "Inicio" o "Contacto") con URLs propias sin que la página se recargue al navegar.
 
---
 <img width="607" height="39" alt="image" src="https://github.com/user-attachments/assets/aebbdcb4-9f64-4ca9-89fc-c4cd568af041" />
 
 - npm install lucide-react: Es un paquete de iconos modernos y minimalistas que se insertan como componentes, lo que facilita cambiarles el color, tamaño o grosor de forma rápida y consistente en toda tu interfaz.
