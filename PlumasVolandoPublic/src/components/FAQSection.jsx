@@ -34,9 +34,6 @@ const FAQItemComponent = ({ faq }) => {
       </button>
       {isOpen && (
         <div className="faq-answer">
-          <div className="faq-answer-image">
-            <img src={faq.image} alt={faq.question} />
-          </div>
           <p>{faq.answer}</p>
         </div>
       )}

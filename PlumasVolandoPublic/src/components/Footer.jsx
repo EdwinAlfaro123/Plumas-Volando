@@ -97,7 +97,7 @@ const Footer = () => {
 
       <div className="footer-bottom">
         <span>Plumas volando</span>
-        <span>© 2025 Plumas Volando. All rights reserved. Privacy Policy</span>
+        <span>© 2026 Plumas Volando. All rights reserved. Privacy Policy</span>
       </div>
     </footer>
   );
