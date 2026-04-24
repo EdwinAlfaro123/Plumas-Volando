@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
+import { User, Mail, Phone, Lock, Eye, EyeOff, CreditCard } from "lucide-react";
 import "../styles/Register.css";
 import { useNavigate } from "react-router-dom";
 import CustomButton from "../components/Buttons";
@@ -17,6 +17,7 @@ const RegisterPage = () => {
     nombre: "",
     correo: "",
     telefono: "",
+    dui: "",
     password: "",
     confirmPassword: "",
   });
@@ -30,9 +31,31 @@ const RegisterPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    let newValue = value;
+
+    // Validación en tiempo real para el teléfono (máximo 8 números + guion)
+    if (name === "telefono") {
+      const rawValue = value.replace(/\D/g, "").slice(0, 8); // Solo números, max 8
+      if (rawValue.length > 4) {
+        newValue = `${rawValue.slice(0, 4)}-${rawValue.slice(4)}`;
+      } else {
+        newValue = rawValue;
+      }
+    }
+
+    // Validación en tiempo real para el DUI (máximo 9 números + guion)
+    if (name === "dui") {
+      const rawValue = value.replace(/\D/g, "").slice(0, 9); // Solo números, max 9
+      if (rawValue.length > 8) {
+        newValue = `${rawValue.slice(0, 8)}-${rawValue.slice(8)}`;
+      } else {
+        newValue = rawValue;
+      }
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: newValue,
     }));
   };
 
@@ -43,6 +66,7 @@ const RegisterPage = () => {
       !formData.nombre ||
       !formData.correo ||
       !formData.telefono ||
+      !formData.dui ||
       !formData.password ||
       !formData.confirmPassword
     ) {
@@ -51,6 +75,30 @@ const RegisterPage = () => {
         type: "error",
         title: "Campos incompletos",
         message: "Por favor llena todos los campos",
+      });
+      return;
+    }
+
+    // Validación estricta final de teléfono (empieza con 6 o 7, incluye guion)
+    const phoneRegex = /^[67]\d{3}-\d{4}$/;
+    if (!phoneRegex.test(formData.telefono)) {
+      setAlert({
+        isOpen: true,
+        type: "error",
+        title: "Teléfono inválido",
+        message: "Ingresa un celular de El Salvador válido (ej. 7123-4567)",
+      });
+      return;
+    }
+
+    // Validación estricta final de DUI
+    const duiRegex = /^\d{8}-\d{1}$/;
+    if (!duiRegex.test(formData.dui)) {
+      setAlert({
+        isOpen: true,
+        type: "error",
+        title: "DUI inválido",
+        message: "Ingresa un formato de DUI válido (ej. 12345678-9)",
       });
       return;
     }
@@ -69,6 +117,7 @@ const RegisterPage = () => {
       nombre: formData.nombre,
       correo: formData.correo,
       telefono: formData.telefono,
+      dui: formData.dui,
       password: formData.password,
     };
 
@@ -87,6 +136,7 @@ const RegisterPage = () => {
       nombre: "",
       correo: "",
       telefono: "",
+      dui: "",
       password: "",
       confirmPassword: "",
     });
@@ -126,6 +176,20 @@ const RegisterPage = () => {
             value={formData.telefono}
             onChange={handleChange}
             icon={<Phone size={16} />}
+            placeholder="0000-0000"
+            maxLength={9}
+            required
+          />
+
+          <CustomInput
+            label="DUI"
+            type="text"
+            name="dui"
+            value={formData.dui}
+            onChange={handleChange}
+            icon={<CreditCard size={16} />}
+            placeholder="00000000-0"
+            maxLength={10}
             required
           />
 
