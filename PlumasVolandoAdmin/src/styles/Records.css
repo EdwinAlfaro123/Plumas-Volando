@@ -1,0 +1,325 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap');
+
+/* =========================================
+   CONTENEDOR PRINCIPAL
+========================================= */
+.records-page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: "Montserrat", sans-serif;
+  padding: 20px;
+  color: #40362d;
+  min-height: 100vh;
+}
+
+.records-page-header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 2.7rem);
+  font-weight: 800;
+  color: #40362d;
+  letter-spacing: -0.02em;
+}
+
+/* =========================================
+   TOOLBAR
+========================================= */
+.records-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px 80px;
+  gap: 16px;
+  align-items: center;
+}
+
+.records-search-bar,
+.records-filter-dropdown {
+  background: #f3f1ec;
+  border-radius: 18px;
+  box-shadow:
+    inset 2px 2px 5px rgba(196, 184, 162, 0.34),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.92),
+    6px 6px 16px rgba(194, 184, 161, 0.18),
+    -6px -6px 16px rgba(255, 255, 255, 0.72);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  min-height: 54px;
+  position: relative;
+}
+
+.records-search-bar input,
+.records-filter-dropdown select {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #40362d;
+  font-size: 0.95rem;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  appearance: none;
+}
+
+.records-search-bar input::placeholder {
+  color: #a2978a;
+  font-weight: 500;
+}
+
+.records-icon {
+  color: #8e7f6c;
+  flex-shrink: 0;
+  position: absolute;
+  right: 16px;
+}
+
+.records-pagination-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.records-pagination-info span {
+  min-width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  background: #f3f1ec;
+  color: #615548;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  box-shadow:
+    7px 7px 16px rgba(194, 184, 161, 0.22),
+    -7px -7px 16px rgba(255, 255, 255, 0.85);
+}
+
+/* =========================================
+   CONTENEDOR HISTORIAL
+========================================= */
+.records-container {
+  border-radius: 26px;
+  background: #ffffff;
+  min-height: 550px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow:
+    12px 12px 26px rgba(194, 184, 161, 0.18),
+    -12px -12px 26px rgba(255, 255, 255, 0.78);
+}
+
+/* =========================================
+   LISTA / SCROLL
+========================================= */
+.records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-height: 470px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.records-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.records-list::-webkit-scrollbar-track {
+  background: #ece7dd;
+  border-radius: 20px;
+}
+
+.records-list::-webkit-scrollbar-thumb {
+  background: #9d9d9d;
+  border-radius: 20px;
+}
+
+/* =========================================
+   CARD DEL HISTORIAL
+========================================= */
+.record-card {
+  background: #f3f1ec;
+  border-radius: 22px;
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  box-shadow:
+    8px 8px 18px rgba(194, 184, 161, 0.18),
+    -8px -8px 18px rgba(255, 255, 255, 0.78),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(164, 151, 135, 0.16);
+}
+
+.record-icon {
+  width: 76px;
+  height: 76px;
+  border-radius: 18px;
+  background: #f3f1ec;
+  color: #40362d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    6px 6px 14px rgba(194, 184, 161, 0.18),
+    -6px -6px 14px rgba(255, 255, 255, 0.85);
+  flex-shrink: 0;
+}
+
+.record-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.record-info h2 {
+  margin: 0 0 8px;
+  color: #40362d;
+  font-size: 1.55rem;
+  font-weight: 800;
+}
+
+.record-info p {
+  margin: 6px 0;
+  color: #5b5045;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.record-info strong {
+  color: #40362d;
+}
+
+.record-payment {
+  min-width: 220px;
+  text-align: right;
+}
+
+.record-payment p {
+  margin: 0;
+  color: #5b5045;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.record-payment strong {
+  color: #40362d;
+}
+
+/* =========================================
+   PAGINACIÓN
+========================================= */
+.records-bottom-pagination {
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.records-page-numbers {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.records-page-numbers span {
+  min-width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #f3f1ec;
+  color: #4b4137;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    5px 5px 12px rgba(194, 184, 161, 0.2),
+    -5px -5px 12px rgba(255, 255, 255, 0.84);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.records-page-numbers span:hover {
+  transform: translateY(-1px);
+}
+
+.records-page-numbers span.active {
+  background: #dd944c;
+  color: #fffaf2;
+  box-shadow:
+    inset 2px 2px 4px rgba(166, 103, 38, 0.24),
+    inset -2px -2px 4px rgba(255, 216, 180, 0.24);
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+@media (max-width: 1100px) {
+  .records-toolbar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 820px) {
+  .record-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .record-payment {
+    text-align: left;
+    min-width: auto;
+  }
+
+  .records-bottom-pagination {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 560px) {
+  .records-page-header h1 {
+    font-size: 1.7rem;
+  }
+
+  .records-search-bar,
+  .records-filter-dropdown {
+    min-height: 50px;
+  }
+
+  .record-info h2 {
+    font-size: 1.25rem;
+  }
+}
+
+.records-pagination-info select {
+  min-width: 54px;
+  height: 54px;
+  border: none;
+  border-radius: 18px;
+  background: #f3f1ec;
+  color: #615548;
+  font-weight: 800;
+  text-align: center;
+  box-shadow:
+    7px 7px 16px rgba(194, 184, 161, 0.22),
+    -7px -7px 16px rgba(255, 255, 255, 0.85);
+}
+
+.records-page-numbers button {
+  min-width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 12px;
+  background: #f3f1ec;
+  cursor: pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:
+    5px 5px 12px rgba(194, 184, 161, 0.2),
+    -5px -5px 12px rgba(255, 255, 255, 0.84);
+}

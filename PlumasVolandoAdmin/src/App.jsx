@@ -11,6 +11,7 @@ import Employee from "./pages/EmployeePage";
 import OrdersPage from "./pages/OrdersPage";
 import ChickenPage from "./pages/ChickenPage";
 import ProductsPage from "./pages/ProductsPage";
+import HistoryPage from "./pages/RecordsPage";
 
 function App() {
   return (
@@ -28,7 +29,9 @@ function App() {
         <Route path="/employees" element={<Employee />} />
         <Route path="/orders" element={<OrdersPage />} />
         <Route path="/chickens" element={<ChickenPage />} />
+        <Route path="/records" element={<HistoryPage />} />
         <Route path="/products" element={<ProductsPage />} />
+        
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
