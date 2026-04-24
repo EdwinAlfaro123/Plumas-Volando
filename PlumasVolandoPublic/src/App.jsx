@@ -6,6 +6,7 @@ import RecipesPage from "./pages/RecipesPage";
 import NewsPage from "./pages/NewsPage";
 import PointsOfSalePage from "./pages/PointsOfSalePage";
 import ShoppingCarPage from "./pages/ShoppingCarPage";
+import ContactoPage from "./pages/ContactoPage";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/news" element={<NewsPage />} />
         <Route path="/points-of-sale" element={<PointsOfSalePage />} />
         <Route path="/cart" element={<ShoppingCarPage />} />
+        <Route path="/contact" element={<ContactoPage />} />
       </Routes>
     </BrowserRouter>
   );

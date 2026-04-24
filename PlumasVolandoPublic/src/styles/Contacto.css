@@ -1,0 +1,356 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
+
+.contacto-page {
+  min-height: 100vh;
+  background: #efe7d6;
+  font-family: "Montserrat", sans-serif;
+}
+.contacto-page-frame {
+  background: #f7f1e5;
+}
+.contacto-main {
+  padding: 20px 24px 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.contacto-main h1 {
+  margin: 0 0 8px;
+  color: #0f4f93;
+  font-size: 2.2rem;
+  font-weight: 800;
+  text-align: center;
+}
+.contacto-subtitle {
+  text-align: center;
+  color: #5a5a5a;
+  font-size: 1rem;
+  margin-bottom: 30px;
+}
+
+/* Sección dividida */
+.contacto-split {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+/* Información de contacto */
+.contacto-info {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.info-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+}
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.info-item:last-child {
+  margin-bottom: 0;
+}
+.info-icon {
+  color: #0f4f93;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.info-item h4 {
+  margin: 0 0 4px;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.info-item a,
+.info-item p {
+  margin: 0;
+  color: #1a1a1a;
+  font-weight: 600;
+  text-decoration: none;
+}
+.whatsapp-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #25d366;
+  color: #fff;
+  border: none;
+  border-radius: 40px;
+  padding: 14px 24px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+  transition: background 0.2s;
+}
+.whatsapp-btn:hover {
+  background: #1da851;
+}
+
+/* Formulario */
+.contact-form-wrapper {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+}
+.contact-form-wrapper h3 {
+  margin-top: 0;
+  color: #0f4f93;
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+}
+.form-group {
+  margin-bottom: 18px;
+}
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: border 0.2s;
+}
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #0f4f93;
+}
+.error-text {
+  color: #d32f2f;
+  font-size: 0.75rem;
+}
+.submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: #0f4f93;
+  color: #fff;
+  border: none;
+  border-radius: 40px;
+  padding: 14px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.submit-btn:hover {
+  background: #0a3a6b;
+}
+.form-success-message {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+/* FAQ */
+.faq-section {
+  margin-top: 20px;
+}
+.faq-section h2 {
+  color: #0f4f93;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.faq-item {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  overflow: hidden;
+}
+.faq-question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  cursor: pointer;
+  gap: 12px;
+}
+.faq-q-icon {
+  color: #0f4f93;
+  flex-shrink: 0;
+}
+.faq-q-text {
+  flex: 1;
+}
+.faq-chevron {
+  color: #555;
+}
+.faq-answer {
+  display: flex;
+  gap: 20px;
+  padding: 0 20px 20px;
+  align-items: flex-start;
+}
+.faq-answer-image {
+  flex-shrink: 0;
+  width: 120px;
+  height: 100px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.faq-answer-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.faq-answer p {
+  margin: 0;
+  color: #444;
+  line-height: 1.6;
+  flex: 1;
+}
+
+/* Mensaje final */
+.contacto-footer-message {
+  margin-top: 50px;
+  padding: 28px;
+  background: #f2e4d0;
+  border-radius: 20px;
+  text-align: center;
+}
+.contacto-footer-message h3 {
+  color: #0f4f93;
+  font-size: 1.7rem;
+  margin-bottom: 8px;
+}
+.contacto-footer-message p {
+  color: #4a4a4a;
+  margin: 4px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contacto-split {
+    grid-template-columns: 1fr;
+  }
+  .faq-answer {
+    flex-direction: column;
+  }
+  .faq-answer-image {
+    width: 100%;
+    height: 150px;
+  }
+}
+/* FAQ - 2 columnas */
+.faq-section {
+  margin-top: 20px;
+}
+.faq-section h2 {
+  color: #0f4f93;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.faq-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.faq-item {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.faq-question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  cursor: pointer;
+  gap: 12px;
+}
+.faq-q-icon {
+  color: #0f4f93;
+  flex-shrink: 0;
+}
+.faq-q-text {
+  flex: 1;
+}
+.faq-chevron {
+  color: #555;
+}
+.faq-answer {
+  display: flex;
+  gap: 20px;
+  padding: 0 20px 20px;
+  align-items: flex-start;
+  flex: 1;
+}
+.faq-answer-image {
+  flex-shrink: 0;
+  width: 120px;
+  height: 100px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.faq-answer-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.faq-answer p {
+  margin: 0;
+  color: #444;
+  line-height: 1.6;
+  flex: 1;
+}
+
+/* Responsive: en pantallas pequeñas, una sola columna */
+@media (max-width: 700px) {
+  .faq-grid {
+    grid-template-columns: 1fr;
+  }
+  .faq-answer {
+    flex-direction: column;
+  }
+  .faq-answer-image {
+    width: 100%;
+    height: 150px;
+  }
+}
