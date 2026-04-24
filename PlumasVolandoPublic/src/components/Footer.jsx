@@ -45,7 +45,7 @@ const Footer = () => {
         <h3>Contactos</h3>
         <p>
           <a
-            href="https://www.instagram.com/plumasvolando.sv"
+            href="https://www.instagram.com/plumasvolando"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -90,7 +90,7 @@ const Footer = () => {
             }}
           >
             <Mail size={15} />
-            plumasvolando.sv@gmail.com
+            plumasvolando249@gmail.com
           </Link>
         </p>
       </div>
