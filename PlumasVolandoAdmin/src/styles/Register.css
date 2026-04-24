@@ -76,11 +76,13 @@
   box-shadow:
     7px 7px 13px rgba(189, 184, 184, 0.72),
     -6px -6px 12px rgba(255, 255, 255, 0.92);
+  box-sizing: border-box;
 }
 
 .neo-input input {
   flex: 1;
   height: 100%;
+  min-width: 0;
   border: none;
   background: transparent;
   outline: none;
@@ -158,6 +160,7 @@
   align-items: center;
   justify-content: center;
   padding: 26px;
+  box-sizing: border-box;
 }
 
 .register-right img {
@@ -187,54 +190,209 @@
   font-family: "Montserrat", sans-serif;
 }
 
-@media (max-width: 1024px) {
-  .register-card {
-    grid-template-columns: 1fr;
-    max-width: 760px;
-  }
+/* =========================
+   RESPONSIVE
+========================= */
 
-  .register-right {
-    min-height: 300px;
-    order: -1;
+/* laptops medianas */
+@media (max-width: 1200px) {
+  .register-card {
+    max-width: 1100px;
+    grid-template-columns: 1fr 0.95fr;
   }
 
   .register-left {
-    padding: 36px 28px 40px;
+    padding: 38px 52px 34px 52px;
+  }
+
+  .register-right img {
+    max-width: 440px;
+  }
+}
+
+/* tablets */
+@media (max-width: 992px) {
+  .register-wrapper {
+    padding: 20px;
+  }
+
+  .register-card {
+    grid-template-columns: 1fr;
+    max-width: 760px;
+    min-height: auto;
+  }
+
+  .register-right {
+    order: -1;
+    min-height: 280px;
+  }
+
+  .register-right-inner {
+    padding: 24px;
+  }
+
+  .register-right img {
+    max-width: 320px;
+  }
+
+  .register-left {
+    padding: 34px 30px 38px;
   }
 
   .register-form {
     max-width: 100%;
   }
-}
-
-@media (max-width: 640px) {
-  .register-wrapper {
-    padding: 14px;
-  }
-
-  .register-card {
-    border-radius: 22px;
-  }
-
-  .register-left {
-    padding: 28px 18px 34px;
-  }
 
   .register-header h1 {
-    font-size: 1.45rem;
+    font-size: 1.8rem;
   }
 
   .register-header h2 {
-    font-size: 1.3rem;
+    font-size: 1.6rem;
+  }
+}
+
+/* celulares grandes */
+@media (max-width: 768px) {
+  .register-wrapper {
+    padding: 16px;
+    align-items: flex-start;
+  }
+
+  .register-card {
+    border-radius: 24px;
+  }
+
+  .register-right {
+    min-height: 230px;
+  }
+
+  .register-right-inner {
+    padding: 20px;
+  }
+
+  .register-right img {
+    max-width: 260px;
+  }
+
+  .register-left {
+    padding: 28px 22px 32px;
+  }
+
+  .register-header {
+    margin-bottom: 22px;
+  }
+
+  .register-header h1 {
+    font-size: 1.55rem;
+  }
+
+  .register-header h2 {
+    font-size: 1.35rem;
+  }
+
+  .input-group {
+    margin-bottom: 18px;
   }
 
   .input-group label {
     font-size: 0.9rem;
+    margin-bottom: 8px;
   }
 
- .custom-btn {
-  width: 100%;
-  height: 42px;
-  font-size: 0.95rem;
+  .neo-input {
+    height: 42px;
+    padding: 0 14px 0 16px;
+  }
+
+  .neo-input input {
+    font-size: 0.9rem;
+  }
+
+  .custom-btn {
+    width: 100%;
+    height: 44px;
+    font-size: 0.95rem;
+    margin: 22px auto 12px;
+  }
+
+  .register-footer {
+    font-size: 0.88rem;
+  }
+}
+
+/* celulares pequeños */
+@media (max-width: 480px) {
+  .register-wrapper {
+    padding: 12px;
+  }
+
+  .register-card {
+    border-radius: 20px;
+  }
+
+  .register-right {
+    min-height: 190px;
+  }
+
+  .register-right-inner {
+    padding: 16px;
+  }
+
+  .register-right img {
+    max-width: 210px;
+  }
+
+  .register-left {
+    padding: 24px 16px 28px;
+  }
+
+  .register-header {
+    margin-bottom: 18px;
+  }
+
+  .register-header h1 {
+    font-size: 1.35rem;
+  }
+
+  .register-header h2 {
+    font-size: 1.18rem;
+  }
+
+  .register-form {
+    max-width: 100%;
+  }
+
+  .input-group {
+    margin-bottom: 16px;
+  }
+
+  .input-group label {
+    font-size: 0.86rem;
+  }
+
+  .neo-input {
+    height: 40px;
+    padding: 0 12px 0 14px;
+  }
+
+  .neo-input svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .neo-input input {
+    font-size: 0.88rem;
+  }
+
+  .custom-btn {
+    width: 100%;
+    height: 42px;
+    font-size: 0.92rem;
+  }
+
+  .register-footer {
+    font-size: 0.84rem;
+    line-height: 1.4;
   }
 }

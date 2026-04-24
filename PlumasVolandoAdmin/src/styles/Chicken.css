@@ -1,0 +1,340 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap');
+
+/* =========================================
+   CONTENEDOR PRINCIPAL Y TEXTOS
+========================================= */
+.chicken-page {
+  padding: 20px;
+  font-family: "Montserrat", sans-serif;
+  color: #3f3a37;
+}
+
+.chicken-page-header {
+  margin-bottom: 20px;
+}
+
+.chicken-page-header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #3f3a37;
+  margin: 0;
+}
+
+.chicken-page-header p {
+  font-size: 14px;
+  color: #6b655f;
+  margin-top: 6px;
+}
+
+/* =========================================
+   BARRA DE HERRAMIENTAS (Filtros)
+========================================= */
+.chicken-toolbar {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 20px;
+  align-items: end;
+  margin-bottom: 25px;
+}
+
+.chicken-toolbar-search,
+.chicken-toolbar-date {
+  width: 100%;
+}
+
+/* =========================================
+   TARJETAS DE TABLAS (Apiladas)
+========================================= */
+.chicken-table-card {
+  background: #f5f3ee;
+  border-radius: 20px;
+  padding: 20px;
+  /* Sombra idéntica a la de Empleados */
+  box-shadow: 10px 10px 20px rgba(190, 180, 160, 0.3), -10px -10px 20px rgba(255, 255, 255, 0.9);
+}
+
+.chicken-table-topbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.chicken-left-actions,
+.chicken-right-actions {
+  display: flex;
+  align-items: center;
+}
+
+/* =========================================
+   BOTONES SUPERIORES
+========================================= */
+.chicken-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: #e3c96f; /* Amarillo de tu diseño base */
+  color: white;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 5px 5px 10px rgba(180, 160, 120, 0.3);
+  font-family: "Montserrat", sans-serif;
+  transition: transform 0.2s ease;
+}
+
+.chicken-add-btn:hover {
+  transform: translateY(-2px);
+}
+
+.pagination-info {
+  font-size: 12px;
+  font-weight: 700;
+  color: #c1792d;
+  background: #e9dfd1;
+  padding: 6px 14px;
+  border-radius: 12px;
+}
+
+/* =========================================
+   TABLA Y ACCIONES
+========================================= */
+.chicken-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.chicken-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.chicken-icon-btn {
+  border: none;
+  background: #f3f1ec;
+  border-radius: 10px;
+  padding: 6px;
+  cursor: pointer;
+  box-shadow: 4px 4px 10px rgba(190, 180, 160, 0.25), -4px -4px 10px rgba(255, 255, 255, 0.9);
+  transition: transform 0.2s;
+}
+
+.chicken-icon-btn:hover {
+  transform: scale(1.1);
+}
+
+.chicken-icon-btn.edit {
+  color: #3f3a37;
+}
+
+.chicken-icon-btn.delete {
+  color: #c94c4c;
+}
+
+/* =========================================
+   PAGINACIÓN INFERIOR
+========================================= */
+.chicken-pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.chicken-pagination-info {
+  margin-right: auto;
+  font-size: 12px;
+  color: #6b655f;
+}
+
+.chicken-page-arrow {
+  border: none;
+  background: #f3f1ec;
+  border-radius: 10px;
+  padding: 6px;
+  cursor: pointer;
+}
+
+.chicken-page-arrow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chicken-page-numbers {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.chicken-page-numbers span {
+  border: none;
+  background: #f3f1ec;
+  border-radius: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.chicken-page-numbers span.active {
+  background: #e3c96f;
+  color: white;
+}
+
+/* =========================================
+   MODALES (Estilo Café de Gallinas/Huevos)
+========================================= */
+.chicken-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.chicken-modal {
+  background: #C09575; /* El café específico de tu diseño */
+  padding: 30px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 520px;
+  position: relative;
+  box-shadow: 10px 10px 30px rgba(0,0,0,0.15);
+}
+
+.chicken-create-modal {
+  max-width: 540px;
+}
+
+.chicken-modal-header h2 {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 20px;
+  margin-top: 0;
+}
+
+.chicken-modal-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.chicken-modal-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2px;
+}
+
+.chicken-modal-field-full {
+  grid-column: 1 / -1;
+}
+
+.chicken-modal-field label {
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.chicken-modal-field input,
+.chicken-modal-field select {
+  border: none;
+  border-radius: 20px;
+  padding: 10px 12px;
+  outline: none;
+  font-family: "Montserrat", sans-serif;
+  background: #F2F0E9;
+  color: #6b655f;
+  font-weight: 600;
+  box-shadow: inset 4px 4px 8px #d1cfc9, inset -4px -4px 8px #ffffff;
+}
+
+/* =========================================
+   BOTONES DEL MODAL
+========================================= */
+.chicken-modal-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  gap: 15px;
+}
+
+.chicken-modal-btn {
+  border: none;
+  border-radius: 20px;
+  padding: 10px 25px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: "Montserrat", sans-serif;
+  transition: transform 0.2s;
+}
+
+.chicken-modal-btn:hover {
+  transform: translateY(-2px);
+}
+
+.chicken-create-submit {
+  background: #E8CF82; /* Amarillo del modal */
+  color: #5b5147;
+}
+
+.chicken-create-cancel {
+  background: #D34848; /* Rojo del modal */
+  color: white;
+}
+
+.chicken-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+@media (max-width: 900px) {
+  .chicken-toolbar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .chicken-table-topbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .chicken-left-actions,
+  .chicken-right-actions {
+    width: 100%;
+  }
+
+  .chicken-right-actions {
+    justify-content: flex-end;
+  }
+
+  .chicken-modal-form {
+    grid-template-columns: 1fr;
+  }
+
+  .chicken-modal {
+    padding: 24px 18px;
+  }
+}

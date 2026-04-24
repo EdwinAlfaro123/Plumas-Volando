@@ -1,0 +1,250 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --about-bg: #f7f1e5;
+  --about-card: #f5f1e8;
+  --about-white: #ffffff;
+  --about-blue: #0d58c8;
+  --about-text: #222222;
+  --about-muted: #5f5f5f;
+  --about-orange: #f2a033;
+  --about-orange-strong: #eb9722;
+  --about-border: rgba(60, 60, 60, 0.12);
+  --about-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.about-page {
+  min-height: 100vh;
+  background: #efe7d6;
+  font-family: "Montserrat", sans-serif;
+}
+
+.about-page-frame {
+  width: 100%;
+  background: var(--about-bg);
+}
+
+.nav-links a.active {
+  color: #ef9322;
+}
+
+/* MAIN */
+.about-main {
+  padding: 20px 24px 0;
+}
+
+/* HERO */
+.about-hero {
+  padding: 12px 0 24px;
+}
+
+.about-hero h1 {
+  margin: 0 0 24px;
+  text-align: center;
+  color: #0f4f93;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.about-hero-content {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 26px;
+  align-items: stretch;
+}
+
+.about-hero-image {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--about-shadow);
+  border: 1px solid var(--about-border);
+  background: #fff;
+}
+
+.about-hero-image img {
+  width: 100%;
+  height: 100%;
+  min-height: 340px;
+  object-fit: cover;
+  display: block;
+}
+
+.about-hero-text {
+  padding: 10px 4px;
+}
+
+.about-hero-text h2 {
+  margin: 0 0 18px;
+  color: #194d9d;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.about-hero-text p {
+  margin: 0 0 14px;
+  color: #414141;
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+
+/* FEATURES */
+.about-features-section {
+  padding: 10px 0 20px;
+}
+
+.about-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.about-feature-card {
+  background: var(--about-card);
+  border: 1px solid var(--about-border);
+  border-radius: 10px;
+  min-height: 214px;
+  padding: 24px 18px 20px;
+  text-align: center;
+  box-shadow: var(--about-shadow);
+}
+
+.about-feature-icon {
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: var(--about-orange);
+  color: white;
+  display: grid;
+  place-items: center;
+}
+
+.about-feature-card h3 {
+  margin: 0 100px;
+  color: #444;
+  font-size: 0.95rem;
+  font-weight:800px;
+}
+
+.about-feature-card p {
+  margin: 0;
+  color: #666;
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+/* SERVICES */
+.about-services-section {
+  padding: 6px 0 30px;
+  max-width: 900px;
+  margin: 0 auto; 
+}
+
+.about-services-section h2 {
+  margin: 10px 0 26px;
+  text-align: center;
+  color: var(--about-blue);
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.about-services-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px; /* antes 18px */
+}
+
+.about-service-card {
+  background: var(--about-card);
+  border: 1px solid var(--about-border);
+  border-radius: 10px;
+  box-shadow: var(--about-shadow);
+  overflow: hidden;
+  min-height: 160px;
+  padding: 0;
+}
+
+.about-service-top-line {
+  height: 4px;
+  background: var(--about-orange);
+}
+
+.about-service-content {
+  display: grid;
+  grid-template-columns: 1fr 90px;
+  gap: 10px;
+  align-items: center;
+  padding: 60px 70px;
+}
+
+.about-service-text h3 {
+  margin: 0 0 15px;
+  color: #1f5cae;
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.about-service-text p {
+  margin: 10px;
+  color: #555;
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.about-service-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--about-orange);
+  color: white;
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+}
+
+/* RESPONSIVE */
+@media (max-width: 980px) {
+  .about-hero-content {
+    grid-template-columns: 1fr;
+  }
+
+  .about-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .about-services-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .about-main {
+    padding: 18px 16px 0;
+  }
+
+  .about-hero h1,
+  .about-services-section h2 {
+    font-size: 1.6rem;
+  }
+
+  .about-hero-text h2 {
+    font-size: 1.15rem;
+  }
+
+  .about-features-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .about-service-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .about-service-icon {
+    margin: 10px auto 0;
+  }
+}
