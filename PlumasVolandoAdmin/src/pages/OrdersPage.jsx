@@ -18,9 +18,10 @@ import "../styles/Orders.css";
 
 const PAGE_SIZE_OPTIONS = [5, 10, "Todos"];
 
+// Nombres de productos limpios sin cantidades fijas en el texto
 const PRODUCT_OPTIONS = [
-  { id: 1, nombre: "(2) Pollo (5) Huevos Jumbo", precioUnitario: 25 },
-  { id: 2, nombre: "Cartón de huevos medianos 30 unidades", precioUnitario: 12.7 },
+  { id: 1, nombre: "Combo Pollo y Huevos Jumbo", precioUnitario: 25 },
+  { id: 2, nombre: "Cartón de huevos medianos", precioUnitario: 12.7 },
   { id: 3, nombre: "Pollo entero", precioUnitario: 20 },
   { id: 4, nombre: "Bebedero para gallina", precioUnitario: 3 },
   { id: 5, nombre: "Comedero para gallina", precioUnitario: 2.5 },
@@ -37,12 +38,13 @@ const CUSTOMER_OPTIONS = [
 
 const STATUS_OPTIONS = ["Pendiente", "Entregado", "Cancelado"];
 
+// Actualizados para coincidir con los nuevos nombres de productos
 const initialOrders = [
   {
     id: 1,
     codigo: "213427",
     productoId: 2,
-    producto: "Cartón de huevos medianos 30 unidades",
+    producto: "Cartón de huevos medianos",
     ubicacion: "Santa Ana calle al cantón Primavera",
     cantidad: 1,
     fecha: "2026-05-29",
@@ -54,7 +56,7 @@ const initialOrders = [
     id: 2,
     codigo: "213428",
     productoId: 2,
-    producto: "Cartón de huevos medianos 30 unidades",
+    producto: "Cartón de huevos medianos",
     ubicacion: "Santa Ana calle al cantón Primavera",
     cantidad: 1,
     fecha: "2026-05-29",
@@ -66,7 +68,7 @@ const initialOrders = [
     id: 3,
     codigo: "836293",
     productoId: 2,
-    producto: "Cartón de huevos medianos 30 unidades",
+    producto: "Cartón de huevos medianos",
     ubicacion: "Santa Ana calle al cantón Primavera",
     cantidad: 1,
     fecha: "2026-05-29",
@@ -78,7 +80,7 @@ const initialOrders = [
     id: 4,
     codigo: "412908",
     productoId: 1,
-    producto: "(2) Pollo (5) Huevos Jumbo",
+    producto: "Combo Pollo y Huevos Jumbo",
     ubicacion: "Apopa",
     cantidad: 2,
     fecha: "2026-03-03",
@@ -126,7 +128,7 @@ const initialOrders = [
     id: 8,
     codigo: "781340",
     productoId: 1,
-    producto: "(2) Pollo (5) Huevos Jumbo",
+    producto: "Combo Pollo y Huevos Jumbo",
     ubicacion: "Ilopango",
     cantidad: 1,
     fecha: "2026-06-20",
@@ -146,7 +148,7 @@ const emptyForm = {
   fecha: "",
   precioFinal: PRODUCT_OPTIONS[0].precioUnitario,
   cliente: CUSTOMER_OPTIONS[0],
-  estado: "Pendiente",
+  estado: "Pendiente", // Siempre inicia en Pendiente
 };
 
 const formatMoney = (amount) => `$${Number(amount).toFixed(2)}`;
@@ -385,12 +387,13 @@ const OrdersPage = () => {
     setCreateForm({
       ...emptyForm,
       codigo: generateOrderCode(),
+      estado: "Pendiente", // Forzamos pendiente al crear
     });
     setIsCreateModalOpen(true);
   };
 
   const openEditModal = (order) => {
-    setEditForm({ ...order });
+    setEditForm({ ...order }); // Se cargan los datos previos al editar
     setIsEditModalOpen(true);
   };
 
@@ -418,6 +421,7 @@ const OrdersPage = () => {
       id: orders.length > 0 ? Math.max(...orders.map((item) => item.id)) + 1 : 1,
       precioFinal: Number(createForm.precioFinal),
       cantidad: Number(createForm.cantidad),
+      estado: "Pendiente", // Nos aseguramos de que el estado sea pendiente
     };
 
     setOrders((prev) => [newOrder, ...prev]);
@@ -812,21 +816,24 @@ const OrdersPage = () => {
                       </select>
                     </div>
 
-                    <div className="orders-modal-field orders-modal-field-full">
-                      <label htmlFor="estado">Estado</label>
-                      <select
-                        id="estado"
-                        name="estado"
-                        value={formState.estado}
-                        onChange={onFieldChange}
-                      >
-                        {STATUS_OPTIONS.map((status) => (
-                          <option key={status} value={status}>
-                            {status}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    {/* SOLO mostramos el campo Estado si estamos EDITANDO */}
+                    {!isCreateModalOpen && (
+                      <div className="orders-modal-field orders-modal-field-full">
+                        <label htmlFor="estado">Estado</label>
+                        <select
+                          id="estado"
+                          name="estado"
+                          value={formState.estado}
+                          onChange={onFieldChange}
+                        >
+                          {STATUS_OPTIONS.map((status) => (
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
 
                     <div className="orders-modal-actions">
                       <button type="submit" className="orders-modal-btn confirm">
