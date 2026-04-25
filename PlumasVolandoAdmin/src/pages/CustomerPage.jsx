@@ -127,6 +127,9 @@ const CustomerPage = () => {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editForm, setEditForm] = useState(emptyForm);
+  // 🔥 AGREGAR CLIENTE
+const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+const [addForm, setAddForm] = useState(emptyForm);
 
   const [alert, setAlert] = useState({
     isOpen: false,
@@ -344,15 +347,98 @@ const CustomerPage = () => {
     });
   };
 
+  // 🔥 FUNCIONES AGREGAR CLIENTE
+const openAddModal = () => {
+  setAddForm(emptyForm);
+  setIsAddModalOpen(true);
+};
+
+const closeAddModal = () => {
+  setIsAddModalOpen(false);
+  setAddForm(emptyForm);
+};
+
+const handleAddFormChange = (e) => {
+  const { name, value } = e.target;
+
+  setAddForm((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
+const handleAddSubmit = (e) => {
+  e.preventDefault();
+
+  if (
+    !addForm.nombre.trim() ||
+    !addForm.apellido.trim() ||
+    !addForm.fechaNacimiento ||
+    !addForm.telefono.trim() ||
+    !addForm.correo.trim() ||
+    !addForm.password.trim() ||
+    !addForm.dui.trim()
+  ) {
+    setAlert({
+      isOpen: true,
+      type: "error",
+      title: "Campos incompletos",
+      message: "Completa todos los campos antes de guardar.",
+      showCancel: false,
+      confirmText: "Aceptar",
+      cancelText: "Cancelar",
+      onConfirm: closeAlert,
+      onCancel: null,
+    });
+    return;
+  }
+
+  const newId =
+  customers.length > 0
+    ? Math.max(...customers.map(c => c.id)) + 1
+    : 1;
+
+const newCustomer = {
+  ...addForm,
+  id: newId,
+};
+
+  setCustomers((prev) => [newCustomer, ...prev]); // 🔥 tiempo real
+
+  closeAddModal();
+
+  setAlert({
+    isOpen: true,
+    type: "success",
+    title: "Cliente agregado",
+    message: "El cliente se agregó correctamente.",
+    showCancel: false,
+    confirmText: "Aceptar",
+    cancelText: "Cancelar",
+    onConfirm: closeAlert,
+    onCancel: null,
+  });
+};
+
   return (
     <DashboardLayout>
       <div className="customer-page">
         <div className="customer-page-header">
-          <div>
-            <h1>Gestionar Clientes</h1>
-            <p>Administra la información de tus clientes de forma clara y ordenada.</p>
-          </div>
-        </div>
+  <div>
+    <h1>Gestionar Clientes</h1>
+    <p>Administra la información de tus clientes de forma clara y ordenada.</p>
+  </div>
+
+  {/* 🔥 BOTÓN NUEVO */}
+  <button
+    type="button"
+    className="customer-primary-btn"
+    onClick={openAddModal}
+  >
+    <Plus size={18} />
+    Agregar Cliente
+  </button>
+</div>
 
         <div className="customer-toolbar">
           <div className="customer-search-wrap">
@@ -645,6 +731,84 @@ const CustomerPage = () => {
             </div>
           </div>
         )}
+
+        {/* 🔥 MODAL AGREGAR CLIENTE */}
+{isAddModalOpen && (
+  <div className="customer-modal-overlay" onClick={closeAddModal}>
+    <div
+      className="customer-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        type="button"
+        className="customer-modal-close"
+        onClick={closeAddModal}
+      >
+        <X size={20} />
+      </button>
+
+      <div className="customer-modal-header">
+        <h2>AGREGAR CLIENTE</h2>
+      </div>
+
+      <form className="customer-modal-form" onSubmit={handleAddSubmit}>
+        <div className="customer-modal-field">
+          <label>Nombre</label>
+          <input name="nombre" value={addForm.nombre} onChange={handleAddFormChange}/>
+        </div>
+
+        <div className="customer-modal-field">
+          <label>Apellido</label>
+          <input name="apellido" value={addForm.apellido} onChange={handleAddFormChange}/>
+        </div>
+
+        <div className="customer-modal-field">
+          <label>Correo</label>
+          <input name="correo" value={addForm.correo} onChange={handleAddFormChange}/>
+        </div>
+
+        <div className="customer-modal-field">
+          <label>Teléfono</label>
+          <input name="telefono" value={addForm.telefono} onChange={handleAddFormChange}/>
+        </div>
+
+        <div className="customer-modal-field">
+          <label>Fecha de nacimiento</label>
+          <input
+            type="date"
+            name="fechaNacimiento"
+            value={addForm.fechaNacimiento}
+            onChange={handleAddFormChange}
+          />
+        </div>
+
+        <div className="customer-modal-field">
+          <label>DUI</label>
+          <input name="dui" value={addForm.dui} onChange={handleAddFormChange}/>
+        </div>
+
+        <div className="customer-modal-field customer-modal-field-full">
+          <label>Contraseña</label>
+          <input name="password" value={addForm.password} onChange={handleAddFormChange}/>
+        </div>
+
+        <div className="customer-modal-actions">
+          <button type="submit" className="customer-modal-save">
+            Agregar
+          </button>
+
+          <button
+            type="button"
+            className="customer-modal-cancel"
+            onClick={closeAddModal}
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
 
         <CustomAlert
           isOpen={alert.isOpen}
