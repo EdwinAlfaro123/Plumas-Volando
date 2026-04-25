@@ -1,8 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap');
 
-/* =========================================
-   CONTENEDOR PRINCIPAL Y TEXTOS
-========================================= */
 .chicken-page {
   padding: 20px;
   font-family: "Montserrat", sans-serif;
@@ -26,9 +23,6 @@
   margin-top: 6px;
 }
 
-/* =========================================
-   BARRA DE HERRAMIENTAS (Filtros)
-========================================= */
 .chicken-toolbar {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
@@ -42,14 +36,10 @@
   width: 100%;
 }
 
-/* =========================================
-   TARJETAS DE TABLAS (Apiladas)
-========================================= */
 .chicken-table-card {
   background: #f5f3ee;
   border-radius: 20px;
   padding: 20px;
-  /* Sombra idéntica a la de Empleados */
   box-shadow: 10px 10px 20px rgba(190, 180, 160, 0.3), -10px -10px 20px rgba(255, 255, 255, 0.9);
 }
 
@@ -67,16 +57,13 @@
   align-items: center;
 }
 
-/* =========================================
-   BOTONES SUPERIORES
-========================================= */
 .chicken-add-btn {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
   border-radius: 999px;
-  background: #e3c96f; /* Amarillo de tu diseño base */
+  background: #e3c96f;
   color: white;
   font-weight: 700;
   border: none;
@@ -99,9 +86,6 @@
   border-radius: 12px;
 }
 
-/* =========================================
-   TABLA Y ACCIONES
-========================================= */
 .chicken-table-wrapper {
   width: 100%;
   overflow-x: auto;
@@ -135,9 +119,6 @@
   color: #c94c4c;
 }
 
-/* =========================================
-   PAGINACIÓN INFERIOR
-========================================= */
 .chicken-pagination {
   display: flex;
   justify-content: flex-end;
@@ -187,9 +168,6 @@
   color: white;
 }
 
-/* =========================================
-   MODALES (Estilo Café de Gallinas/Huevos)
-========================================= */
 .chicken-modal-overlay {
   position: fixed;
   inset: 0;
@@ -202,7 +180,7 @@
 }
 
 .chicken-modal {
-  background: #C09575; /* El café específico de tu diseño */
+  background: #C09575;
   padding: 30px;
   border-radius: 20px;
   width: 100%;
@@ -260,9 +238,6 @@
   box-shadow: inset 4px 4px 8px #d1cfc9, inset -4px -4px 8px #ffffff;
 }
 
-/* =========================================
-   BOTONES DEL MODAL
-========================================= */
 .chicken-modal-actions {
   grid-column: 1 / -1;
   display: flex;
@@ -286,12 +261,12 @@
 }
 
 .chicken-create-submit {
-  background: #E8CF82; /* Amarillo del modal */
+  background: #E8CF82;
   color: #5b5147;
 }
 
 .chicken-create-cancel {
-  background: #D34848; /* Rojo del modal */
+  background: #D34848;
   color: white;
 }
 
@@ -305,9 +280,6 @@
   cursor: pointer;
 }
 
-/* =========================================
-   RESPONSIVE
-========================================= */
 @media (max-width: 900px) {
   .chicken-toolbar {
     grid-template-columns: 1fr;

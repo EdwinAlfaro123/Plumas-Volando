@@ -355,7 +355,6 @@
   flex-wrap: wrap;
 }
 
-/* Modal */
 .bill-modal-overlay {
   position: fixed;
   inset: 0;

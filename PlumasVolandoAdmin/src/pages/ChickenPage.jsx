@@ -14,7 +14,6 @@ import Table from "../components/Table";
 import CustomAlert from "../components/CustomAlert";
 import "../styles/Chicken.css";
 
-// --- DATOS DE PRUEBA ---
 const GALLINAS_DATA = [
   { id: 1, lote: "75", perdidas: "20", enfermas: "5", fechaInicio: "2024-06-30", fechaFin: "2026-06-30", semanasVida: "17" },
   { id: 2, lote: "52", perdidas: "38", enfermas: "3", fechaInicio: "2020-11-10", fechaFin: "2022-11-10", semanasVida: "23" },
@@ -28,7 +27,6 @@ const HUEVOS_DATA = [
 ];
 
 const ChickenPage = () => {
-  // --- ESTADOS GLOBALES ---
   const [gallinas, setGallinas] = useState(GALLINAS_DATA);
   const [huevos, setHuevos] = useState(HUEVOS_DATA);
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,11 +36,9 @@ const ChickenPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // --- ESTADOS DE MODALES ---
   const [isGallinaModalOpen, setIsGallinaModalOpen] = useState(false);
   const [isHuevoModalOpen, setIsHuevoModalOpen] = useState(false);
 
-  // --- ESTADOS DE FORMULARIOS ---
   const [gallinaForm, setGallinaForm] = useState({
     id: "", lote: "", perdidas: "", enfermas: "", semanasVida: "", fechaInicio: "", fechaFin: ""
   });
@@ -51,7 +47,6 @@ const ChickenPage = () => {
     id: "", jumbo: "", grande: "", mediano: "", pequeno: "", total: "", perdidos: "", fecha: ""
   });
 
-  // --- ALERTA ---
   const [alert, setAlert] = useState({
     isOpen: false, type: "success", title: "", message: "", showCancel: false,
     confirmText: "Aceptar", cancelText: "Cancelar", onConfirm: null, onCancel: null,
@@ -61,7 +56,6 @@ const ChickenPage = () => {
 
   const normalizeText = (value) => String(value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-  // --- FILTROS ---
   const filteredGallinas = useMemo(() => {
     return gallinas.filter((g) => {
       const matchesSearch = searchTerm.trim() === "" || normalizeText(g.lote).includes(normalizeText(searchTerm));
@@ -81,9 +75,6 @@ const ChickenPage = () => {
   const paginatedGallinas = filteredGallinas.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const paginatedHuevos = filteredHuevos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  // ==========================================
-  // LÓGICA DE GALLINAS
-  // ==========================================
   const openGallinaModal = (gallina = null) => {
     setGallinaForm(gallina ? { ...gallina } : { id: "", lote: "", perdidas: "", enfermas: "", semanasVida: "", fechaInicio: "", fechaFin: "" });
     setIsGallinaModalOpen(true);
@@ -122,9 +113,6 @@ const ChickenPage = () => {
     });
   };
 
-  // ==========================================
-  // LÓGICA DE HUEVOS
-  // ==========================================
   const openHuevoModal = (huevo = null) => {
     setHuevoForm(huevo ? { ...huevo } : { id: "", jumbo: "", grande: "", mediano: "", pequeno: "", total: "", perdidos: "", fecha: "" });
     setIsHuevoModalOpen(true);
@@ -163,9 +151,6 @@ const ChickenPage = () => {
     });
   };
 
-  // ==========================================
-  // COLUMNAS Y RENDERIZADO
-  // ==========================================
   const gallinasColumns = [
     { key: "id", label: "ID" }, { key: "lote", label: "Lote de gallinas" }, { key: "perdidas", label: "Gallinas perdidas" },
     { key: "enfermas", label: "Gallinas enfermas" }, { key: "fechaInicio", label: "Fecha de Inicio" }, { key: "fechaFin", label: "Fecha Fin" },
@@ -206,7 +191,6 @@ const ChickenPage = () => {
           <p>Administra los lotes de gallinas y el registro diario de huevos.</p>
         </div>
 
-        {/* TOOLBAR SUPERIOR */}
         <div className="chicken-toolbar">
           <div className="chicken-toolbar-search">
             <SearchBar value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Búsqueda general..." />
@@ -219,10 +203,8 @@ const ChickenPage = () => {
           </div>
         </div>
 
-        {/* CONTENEDOR DE TABLAS (APILADAS VERTICALMENTE) */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
           
-          {/* TABLA 1: GALLINAS */}
           <div className="chicken-table-card">
             <div className="chicken-table-topbar">
               <div className="chicken-left-actions">
@@ -245,7 +227,6 @@ const ChickenPage = () => {
             </div>
           </div>
 
-          {/* TABLA 2: HUEVOS */}
           <div className="chicken-table-card">
             <div className="chicken-table-topbar">
               <div className="chicken-left-actions">
@@ -270,9 +251,7 @@ const ChickenPage = () => {
 
         </div>
 
-        {/* ================= MODALES ================= */}
         
-        {/* MODAL GALLINAS */}
         {isGallinaModalOpen && (
           <div className="chicken-modal-overlay" onClick={closeGallinaModal}>
             <div className="chicken-modal chicken-create-modal" onClick={(e) => e.stopPropagation()}>
@@ -296,7 +275,6 @@ const ChickenPage = () => {
           </div>
         )}
 
-        {/* MODAL HUEVOS */}
         {isHuevoModalOpen && (
           <div className="chicken-modal-overlay" onClick={closeHuevoModal}>
             <div className="chicken-modal chicken-create-modal" onClick={(e) => e.stopPropagation()}>

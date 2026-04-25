@@ -1,8 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap');
 
-/* =========================================
-   CONTENEDOR PRINCIPAL
-========================================= */
 .records-page {
   width: 100%;
   display: flex;
@@ -22,9 +19,6 @@
   letter-spacing: -0.02em;
 }
 
-/* =========================================
-   TOOLBAR
-========================================= */
 .records-toolbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px 80px;
@@ -95,9 +89,6 @@
     -7px -7px 16px rgba(255, 255, 255, 0.85);
 }
 
-/* =========================================
-   CONTENEDOR HISTORIAL
-========================================= */
 .records-container {
   border-radius: 26px;
   background: #ffffff;
@@ -111,9 +102,6 @@
     -12px -12px 26px rgba(255, 255, 255, 0.78);
 }
 
-/* =========================================
-   LISTA / SCROLL
-========================================= */
 .records-list {
   display: flex;
   flex-direction: column;
@@ -137,9 +125,6 @@
   border-radius: 20px;
 }
 
-/* =========================================
-   CARD DEL HISTORIAL
-========================================= */
 .record-card {
   background: #f3f1ec;
   border-radius: 22px;
@@ -209,9 +194,6 @@
   color: #40362d;
 }
 
-/* =========================================
-   PAGINACIÓN
-========================================= */
 .records-bottom-pagination {
   margin-top: 22px;
   display: flex;
@@ -255,9 +237,6 @@
     inset -2px -2px 4px rgba(255, 216, 180, 0.24);
 }
 
-/* =========================================
-   RESPONSIVE
-========================================= */
 @media (max-width: 1100px) {
   .records-toolbar {
     grid-template-columns: 1fr;

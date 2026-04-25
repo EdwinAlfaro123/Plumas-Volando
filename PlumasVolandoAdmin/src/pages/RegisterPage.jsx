@@ -33,9 +33,8 @@ const RegisterPage = () => {
     const { name, value } = e.target;
     let newValue = value;
 
-    // Validación en tiempo real para el teléfono (máximo 8 números + guion)
     if (name === "telefono") {
-      const rawValue = value.replace(/\D/g, "").slice(0, 8); // Solo números, max 8
+      const rawValue = value.replace(/\D/g, "").slice(0, 8);
       if (rawValue.length > 4) {
         newValue = `${rawValue.slice(0, 4)}-${rawValue.slice(4)}`;
       } else {
@@ -43,9 +42,8 @@ const RegisterPage = () => {
       }
     }
 
-    // Validación en tiempo real para el DUI (máximo 9 números + guion)
     if (name === "dui") {
-      const rawValue = value.replace(/\D/g, "").slice(0, 9); // Solo números, max 9
+      const rawValue = value.replace(/\D/g, "").slice(0, 9);
       if (rawValue.length > 8) {
         newValue = `${rawValue.slice(0, 8)}-${rawValue.slice(8)}`;
       } else {
@@ -79,7 +77,6 @@ const RegisterPage = () => {
       return;
     }
 
-    // Validación estricta final de teléfono (empieza con 6 o 7, incluye guion)
     const phoneRegex = /^[67]\d{3}-\d{4}$/;
     if (!phoneRegex.test(formData.telefono)) {
       setAlert({
@@ -91,7 +88,6 @@ const RegisterPage = () => {
       return;
     }
 
-    // Validación estricta final de DUI
     const duiRegex = /^\d{8}-\d{1}$/;
     if (!duiRegex.test(formData.dui)) {
       setAlert({
