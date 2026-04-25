@@ -170,7 +170,6 @@
   filter: brightness(1.03);
 }
 
-/* MODAL */
 .recipe-modal-overlay {
   position: fixed;
   inset: 0;
@@ -289,7 +288,6 @@
   text-decoration: none;
 }
 
-/* MODAL MODERNO */
 .recipe-modal-overlay {
   position: fixed;
   inset: 0;
@@ -347,7 +345,6 @@
   transform: scale(1.04);
 }
 
-/* HERO */
 .recipe-modal-hero {
   display: grid;
   grid-template-columns: 350px 1fr;
@@ -427,7 +424,6 @@
   box-shadow: 0 5px 12px rgba(0, 0, 0, 0.04);
 }
 
-/* LAYOUT */
 .recipe-modal-layout {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
@@ -441,7 +437,6 @@
   gap: 18px;
 }
 
-/* CARDS */
 .recipe-modal-card {
   background: #ffffff;
   border-radius: 20px;
@@ -483,7 +478,6 @@
   margin-bottom: 8px;
 }
 
-/* VIDEO */
 .recipe-video-wrapper {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -499,7 +493,6 @@
   border: none;
 }
 
-/* LINK BUTTON */
 .recipe-link-btn {
   display: inline-flex;
   align-items: center;
@@ -520,7 +513,6 @@
   transform: translateY(-1px);
 }
 
-/* DIFFICULTY BADGES */
 .difficulty-badge {
   display: inline-flex;
   align-items: center;
@@ -547,7 +539,6 @@
   color: #c54848;
 }
 
-/* RESPONSIVE */
 @media (max-width: 900px) {
   .recipe-modal-hero {
     grid-template-columns: 1fr;

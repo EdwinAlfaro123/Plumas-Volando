@@ -3,7 +3,6 @@ import { Phone, Mail } from "lucide-react";
 import { Link } from "react-router";
 import logoPlumas from "../assets/logo-plumas.png";
 
-// Icono SVG para Instagram
 const InstagramIcon = ({ size = 15 }) => (
   <svg
     width={size}
@@ -78,7 +77,6 @@ const Footer = () => {
           </a>
         </p>
         <p>
-          {/* Correo → redirige a la página de contacto */}
           <Link
             to="/contact"
             style={{

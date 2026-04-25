@@ -9,15 +9,13 @@ import "../styles/PointsOfSale.css";
 
 const PointsOfSalePage = () => {
   const [selectedPoint, setSelectedPoint] = useState(null);
-  const mapRef = useRef(null); // Referencia al componente mapa para centrar
+  const mapRef = useRef(null);
 
   const handleSelectPoint = (point) => {
     setSelectedPoint(point);
-    // Si hay referencia al mapa, centrar en el punto
     if (mapRef.current) {
       mapRef.current.setView(point.coordinates, 11);
     }
-    // Hacer scroll suave hacia el mapa (opcional)
     document.querySelector(".map-wrapper")?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 

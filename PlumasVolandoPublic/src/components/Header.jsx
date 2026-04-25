@@ -4,7 +4,6 @@ import { ShoppingCart, MessageCircle, Mail } from "lucide-react";
 import logoPlumas from "../assets/logo-plumas.png";
 import { getCart } from "../utils/cartStorage";
 
-// Icono SVG para Instagram
 const InstagramIcon = ({ size = 16 }) => (
   <svg
     width={size}
@@ -91,7 +90,6 @@ const Header = () => {
       </nav>
 
       <div className="topbar-actions">
-        {/* Instagram */}
         <a
           href="https://www.instagram.com"
           target="_blank"
@@ -102,7 +100,6 @@ const Header = () => {
           <InstagramIcon size={18} />
         </a>
 
-        {/* WhatsApp */}
         <a
           href="https://wa.me/50360651765"
           target="_blank"
@@ -113,12 +110,10 @@ const Header = () => {
           <MessageCircle size={18} />
         </a>
 
-        {/* Correo → redirige a la página de contacto */}
         <Link to="/contact" className="icon-btn" aria-label="Contacto">
           <Mail size={18} />
         </Link>
 
-        {/* Carrito */}
         <Link to="/cart" className="icon-btn cart-link" aria-label="Carrito">
           <ShoppingCart size={18} />
           {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}

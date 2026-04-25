@@ -27,7 +27,6 @@
   margin-bottom: 30px;
 }
 
-/* Sección dividida */
 .contacto-split {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
@@ -35,7 +34,6 @@
   margin-bottom: 50px;
 }
 
-/* Información de contacto */
 .contacto-info {
   display: flex;
   flex-direction: column;
@@ -94,7 +92,6 @@
   background: #1da851;
 }
 
-/* Formulario */
 .contact-form-wrapper {
   background: #fff;
   border-radius: 16px;
@@ -165,7 +162,6 @@
   font-weight: 600;
 }
 
-/* FAQ */
 .faq-section {
   margin-top: 20px;
 }
@@ -236,7 +232,6 @@
   flex: 1;
 }
 
-/* Mensaje final */
 .contacto-footer-message {
   margin-top: 50px;
   padding: 28px;
@@ -254,7 +249,6 @@
   margin: 4px 0;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .contacto-split {
     grid-template-columns: 1fr;
@@ -267,7 +261,6 @@
     height: 150px;
   }
 }
-/* FAQ - 2 columnas */
 .faq-section {
   margin-top: 20px;
 }
