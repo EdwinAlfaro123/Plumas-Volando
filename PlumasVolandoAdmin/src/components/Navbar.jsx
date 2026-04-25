@@ -49,7 +49,7 @@ const Navbar = () => {
       onCancel: () => setAlert({ ...alert, isOpen: false }),
     });
     setIsEditable(false);
-    setIsProfileOpen(false); // Cerrar el modal al guardar cambios
+    setIsProfileOpen(false);
   };
 
   return (

@@ -7,13 +7,12 @@ import {
   Plus,
   X,
   Star,
-  Upload // <-- IMPORTACIÓN NUEVA (Agrégala en las importaciones)
+  Upload
 } from "lucide-react";
 import DashboardLayout from "../components/DashboardLayout";
 import CustomAlert from "../components/CustomAlert";
 import "../styles/Products.css";
 
-// --- DATOS DE PRUEBA (Con imágenes genéricas) ---
 const INITIAL_PRODUCTS = [
   {
     id: 1,
@@ -40,18 +39,16 @@ const INITIAL_PRODUCTS = [
 ];
 
 const ProductsPage = () => {
-  // --- ESTADOS ---
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("");
   
-  // Estados para la paginación funcional
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4; // Cantidad de productos por página
+  const itemsPerPage = 4;
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
-  const [fileName, setFileName] = useState("Ningún archivo seleccionado"); // Estado para el nombre del archivo
+  const [fileName, setFileName] = useState("Ningún archivo seleccionado");
 
   const [formData, setFormData] = useState({
     id: "", tipo: "", nombre: "", imagen: "", stock: "", descripcion: "", precio: ""
@@ -65,7 +62,6 @@ const ProductsPage = () => {
   const closeAlert = () => setAlert((prev) => ({ ...prev, isOpen: false, onConfirm: null, onCancel: null }));
   const normalizeText = (value) => String(value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-  // --- FILTROS ---
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       const matchesSearch = searchTerm.trim() === "" || normalizeText(p.nombre).includes(normalizeText(searchTerm));
@@ -74,19 +70,16 @@ const ProductsPage = () => {
     });
   }, [products, searchTerm, filterType]);
 
-  // Resetear paginación si se busca o filtra
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filterType]);
 
-  // Lógica de paginación funcional
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  // --- HANDLERS DEL MODAL ---
   const openModal = (product = null) => {
     if (product) {
       setFormData({ ...product });
@@ -117,13 +110,12 @@ const ProductsPage = () => {
       const imageUrl = URL.createObjectURL(file);
       setImagePreview(imageUrl);
       setFormData((prev) => ({ ...prev, imagen: imageUrl }));
-      setFileName(file.name); // Guarda el nombre del archivo para mostrarlo bonito
+      setFileName(file.name);
     } else {
       setFileName("Ningún archivo seleccionado");
     }
   };
 
-  // --- VALIDACIÓN Y SUBMIT ---
   const validateForm = (form) => {
     if (!form.nombre || !form.tipo || !form.precio || form.stock === "" || !form.descripcion) {
       return "Por favor completa todos los campos obligatorios.";
@@ -155,7 +147,6 @@ const ProductsPage = () => {
     setAlert({ isOpen: true, type: "success", title: "Éxito", message: "Producto guardado correctamente.", showCancel: false, onConfirm: closeAlert });
   };
 
-  // --- ELIMINAR ---
   const handleDelete = (product) => {
     setAlert({
       isOpen: true, type: "warning", title: "Eliminar Producto", message: `¿Estás seguro de eliminar "${product.nombre}"?`,
@@ -171,12 +162,10 @@ const ProductsPage = () => {
   return (
     <DashboardLayout>
       <div className="products-page">
-        {/* HEADER */}
         <div className="products-page-header">
           <h1>Productos</h1>
         </div>
 
-        {/* TOOLBAR */}
         <div className="products-toolbar">
           <div className="products-search-bar products-neumorphic-input">
             <input 
@@ -202,7 +191,6 @@ const ProductsPage = () => {
           </div>
         </div>
 
-        {/* GRID DE PRODUCTOS (Ahora paginado) */}
         <div className="products-grid">
           {paginatedProducts.map((product) => (
             <div key={product.id} className="product-card">
@@ -249,7 +237,6 @@ const ProductsPage = () => {
             </div>
           ))}
 
-          {/* BOTÓN FLOTANTE PARA AGREGAR */}
           <div className="add-product-wrapper">
             <button className="add-product-circle-btn" onClick={() => openModal()} title="Agregar Producto">
               <Plus size={40} strokeWidth={3} />
@@ -257,7 +244,6 @@ const ProductsPage = () => {
           </div>
         </div>
 
-        {/* PAGINACIÓN INFERIOR (Ahora totalmente funcional) */}
         <div className="products-bottom-pagination">
           <div className="products-page-numbers">
             {Array.from({ length: totalPages || 1 }, (_, i) => i + 1).map((page) => (
@@ -272,7 +258,6 @@ const ProductsPage = () => {
           </div>
         </div>
 
-        {/* ================= MODAL DE PRODUCTOS ================= */}
         {isModalOpen && (
           <div className="products-modal-overlay" onClick={closeModal}>
             <div className="products-modal" onClick={(e) => e.stopPropagation()}>
@@ -308,13 +293,10 @@ const ProductsPage = () => {
                   <input name="stock" type="number" value={formData.stock} onChange={handleChange} />
                 </div>
 
-                {/* --- NUEVA SUBIDA DE IMAGEN ESTILIZADA ("BONITA") --- */}
                 <div className="products-modal-field products-image-upload">
                   <label>Imagen del Producto</label>
                   
-                  {/* Contenedor "well" (hundido) */}
                   <div className="custom-file-upload-well neumorphic-input-wrapper">
-                    {/* El input real está oculto */}
                     <input 
                       type="file" 
                       id="customFile" 
@@ -323,17 +305,14 @@ const ProductsPage = () => {
                       className="hidden-file-input" 
                     />
                     
-                    {/* El label funciona como botón falso (ESTILIZADO) */}
                     <label htmlFor="customFile" className="custom-file-button-pretty">
-                      <Upload size={16} /> {/* Ícono */}
+                      <Upload size={16} />
                       Elegir Imagen
                     </label>
                     
-                    {/* Muestra el nombre del archivo seleccionado */}
                     <span className="custom-file-name-pretty" title={fileName}>{fileName}</span>
                   </div>
 
-                  {/* Preview de la imagen */}
                   {imagePreview && (
                     <div className="products-image-preview-wrapper">
                       <img src={imagePreview} alt="Vista previa" className="products-image-preview" />
@@ -356,7 +335,6 @@ const ProductsPage = () => {
           </div>
         )}
 
-        {/* ALERTA CUSTOM */}
         <CustomAlert
           isOpen={alert.isOpen} type={alert.type} title={alert.title} message={alert.message}
           showCancel={alert.showCancel} confirmText={alert.confirmText} cancelText={alert.cancelText}

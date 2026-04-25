@@ -171,7 +171,6 @@
   display: block;
 }
 
-/* fuerza Montserrat en todo el bloque */
 .register-wrapper,
 .register-card,
 .register-left,
@@ -190,11 +189,7 @@
   font-family: "Montserrat", sans-serif;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
 
-/* laptops medianas */
 @media (max-width: 1200px) {
   .register-card {
     max-width: 1100px;
@@ -210,7 +205,6 @@
   }
 }
 
-/* tablets */
 @media (max-width: 992px) {
   .register-wrapper {
     padding: 20px;
@@ -252,7 +246,6 @@
   }
 }
 
-/* celulares grandes */
 @media (max-width: 768px) {
   .register-wrapper {
     padding: 16px;
@@ -321,7 +314,6 @@
   }
 }
 
-/* celulares pequeños */
 @media (max-width: 480px) {
   .register-wrapper {
     padding: 12px;
