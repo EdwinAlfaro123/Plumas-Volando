@@ -19,7 +19,6 @@ const ContactoPage = () => {
           </p>
 
           <div className="contacto-split">
-            {/* Información de contacto directa */}
             <div className="contacto-info">
               <div className="info-card">
                 <div className="info-item">
@@ -59,11 +58,9 @@ const ContactoPage = () => {
               </button>
             </div>
 
-            {/* Formulario */}
             <ContactForm />
           </div>
 
-          {/* Preguntas Frecuentes */}
           <FAQSection />
         </main>
 

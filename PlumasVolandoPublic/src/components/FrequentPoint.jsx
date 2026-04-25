@@ -4,7 +4,6 @@ import { MapPinned } from "lucide-react";
 const FrequentPointItem = ({ point, onSelect }) => {
   return (
     <div className="frequent-point-card">
-      {/* Línea superior naranja con pestaña de color */}
       <div className="frequent-card-top">
         <div
           className="frequent-color-tab"

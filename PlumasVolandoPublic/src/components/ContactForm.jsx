@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import { Mail, Phone, User, MessageSquare, Send } from "lucide-react";
 import emailjs from "@emailjs/browser";
 
-// ⚠️ Reemplaza estos valores con los que obtengas de tu cuenta EmailJS
-const SERVICE_ID = "service_uwswysh";   // ID del servicio de Gmail
-const TEMPLATE_ID = "template_m3ol8yx"; // ID de la plantilla
-const PUBLIC_KEY = "_qAHdfmeTx7M1X0Ut"; // Tu clave pública
+const SERVICE_ID = "service_uwswysh";
+const TEMPLATE_ID = "template_m3ol8yx";
+const PUBLIC_KEY = "_qAHdfmeTx7M1X0Ut";
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -44,7 +43,6 @@ const ContactForm = () => {
 
     setSending(true);
 
-    // Llamada real a EmailJS
     emailjs
       .send(
         SERVICE_ID,

@@ -3,7 +3,6 @@ import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaf
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Componente interno para límites de El Salvador
 const MapBoundsHandler = () => {
   const map = useMapEvents({
     load: () => {
@@ -44,7 +43,6 @@ const createEggIcon = (color) => {
 const MapContainerComponent = forwardRef(({ points, onSelectPoint }, ref) => {
   const [map, setMap] = React.useState(null);
 
-  // Exponer setView al padre
   useImperativeHandle(ref, () => ({
     setView: (coords, zoom) => {
       if (map) {
