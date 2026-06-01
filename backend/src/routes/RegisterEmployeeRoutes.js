@@ -1,6 +1,7 @@
 import express from "express";
 import registerEmployeeController from "../controller/RegisterEmployeeController.js";
-import upload from "../utils/CloudinaryConfig.js";
+import upload from "../utils/cloudinaryConfig.js"
+
 
 const router = express.Router();
 
