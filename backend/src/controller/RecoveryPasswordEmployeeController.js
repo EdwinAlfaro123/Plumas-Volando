@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs"//Encriptacion de contrasenas
 import nodemailer from "nodemailer" //Para enviar correos
 import crypto from "crypto"
 
-import HTMLRecoveryEmail from "../utils/sendMailRecovery.js"
+import HTMLRecoveryEmail from "../utils/sentMailVerificationCode.js"
 
 import {config} from "../../config.js"
 import employeeModel from "../model/Employees.js"

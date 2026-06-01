@@ -1,13 +1,8 @@
-import express from "express";
-import registerEmployeeController from "../controller/RegisterEmployeeController.js";
-import upload from "../utils/CloudinaryConfig.js";
+import express from "express"
+import employeeController from "../controller/RegisterEmployeeController.js";
 
 const router = express.Router();
 
-router.route("/")
-  .post(registerEmployeeController.register);
-
-router.route("/verifyCodeEmail")
-  .post(registerEmployeeController.verifyCode);
+router.route("/").post(employeeController.insertEmployees)
 
 export default router;
