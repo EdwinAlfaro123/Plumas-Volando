@@ -1,12 +1,12 @@
 import { Schema, model } from "mongoose"
 
 const ChickensSchema = new Schema({
-    quantity: {type: Number},
-    lostChickens: {type: Number},
-    weekLife: {type: Number},
-    sickChickens: {type: Number},
-    StartDate: {type: Date},
-    EndDate: {type: Date}
+    quantityChickens: {type: Number},
+    chickensLosts: {type: Number},
+    weeksLife: {type: Number},
+    quantitySick: {type: Number},
+    startDate: {type: Date},
+    endDate: {type: Date}
 },{
     timestamps: true,
     strict: false
