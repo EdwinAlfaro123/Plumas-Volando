@@ -15,7 +15,7 @@ productsController.getAllProducts = async (req, res) => {
 
 productsController.insertProduct = async (req, res) => {
     try {
-        const {name, TypeProduct, description, unitPrice, quantity} = req.body
+        const {name, TypeProduct, description, unitPrice, quantity, review} = req.body
 
         const newProduct = new productsModel({
             name,
@@ -23,6 +23,7 @@ productsController.insertProduct = async (req, res) => {
             description,
             unitPrice,
             quantity,
+            review,
             image: req.file.path,
             public_id: req.file.filename
         })
@@ -38,7 +39,7 @@ productsController.insertProduct = async (req, res) => {
 
 productsController.updateProduct = async (req, res) => {
     try {
-        const {name, TypeProduct, description, unitPrice, quantity} = req.body
+        const {name, TypeProduct, description, unitPrice, quantity, review} = req.body
 
         const productFound = await productsModel.findById(req.params.id)
 
@@ -47,11 +48,12 @@ productsController.updateProduct = async (req, res) => {
             TypeProduct,
             description,
             unitPrice,
-            quantity
+            quantity,
+            review
         }
 
         if(req.file){
-            await clodinary.uploader.destroy(productFound.public_id)
+            await cloudinary.uploader.destroy(productFound.public_id)
 
             updatedData.image = req.file.path
             updatedData.public_id = req.file.filename

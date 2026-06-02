@@ -6,6 +6,7 @@ const ProductsSchema = new Schema({
     description: {type: String},
     unitPrice: {type: Number},
     quantity: {type: Number},
+    review: {type: Number},
     image: {type: String},
     public_id: {type: String}
 },{
