@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 mongoose
-  .connect("", {
+  .connect("mongodb+srv://Plumasvolando:Plumasvolando123@cluster0.2f8enfz.mongodb.net/PlumasVolando", {
     serverSelectionTimeoutMS: 10000,
   })
   .then(() => {

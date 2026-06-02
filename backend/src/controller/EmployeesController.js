@@ -23,7 +23,8 @@ employeeController.updateEmployees = async (req, res) => {
         email,
         phone,
         DateContract,
-        Status
+        Status,
+        isActive
       } = req.body;
   
       // Sanitizar
@@ -83,7 +84,8 @@ employeeController.updateEmployees = async (req, res) => {
           email,
           phone,
           DateContract,
-          Status
+          Status,
+          isActive
         },
         { new: true }
       );

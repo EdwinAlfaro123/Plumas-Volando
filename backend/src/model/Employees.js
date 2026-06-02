@@ -6,9 +6,7 @@ const EmployeesSchema = new Schema({
     password: {type: String},
     phone: {type: String},
     DateContract: {type: Date},
-    Status: {type: String},
     isActive: {type: Boolean},
-    isVerified: {type: Boolean},
     loginAttemps: {type: Number},
     timeOut: {type: Date}
 },{

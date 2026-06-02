@@ -11,7 +11,8 @@ employeeController.insertEmployees = async (req, res) => {
         password,
         phone,
         DateContract,
-        Status
+        Status,
+        isActive
       } = req.body;
   
       // Sanitizar
@@ -76,7 +77,8 @@ employeeController.insertEmployees = async (req, res) => {
         password: passwordHash,
         phone,
         DateContract,
-        Status
+        Status,
+        isActive: true
       });
   
       await newEmployee.save();
