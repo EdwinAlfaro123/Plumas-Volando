@@ -7,6 +7,9 @@ import recoveryPasswordEmployee from "./src/routes/RecoveryPasswordEmployeeRoute
 import ProductsRoutes from "./src/routes/ProductsRoutes.js"
 import EggsRoutes from "./src/routes/EggsRoutes.js"
 import ChickensRoutes from "./src/routes/ChickensRoutes.js"
+import customerRoutes from "./src/routes/CustomerRoutes.js"
+import registerCustomer from "./src/routes/RegisterCustomerRoutes.js"
+import loginCustomerRoutes from "./src/routes/loginCustomerRoutes.js"
 
 const app = express();
 
@@ -21,5 +24,8 @@ app.use("/api/loginEmployee", loginEmployeeRoutes);
 app.use("/api/products", ProductsRoutes);
 app.use("/api/egg", EggsRoutes);
 app.use("/api/chicken", ChickensRoutes);
+app.use("/api/customer", customerRoutes);
+app.use("/api/registerCustomer", registerCustomer);
+app.use("/api/loginCustomer", loginCustomerRoutes);
 
 export default app

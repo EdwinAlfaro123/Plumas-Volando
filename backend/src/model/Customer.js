@@ -9,7 +9,6 @@ const CustomersSchema = new Schema({
     password: {type: String},
     DUI: {type: String},
     isActive: {type: Boolean},
-    isVerified: {type: Boolean},
     loginAttemps: {type: Number},
     timeOut: {type: Date}
 },{
@@ -17,4 +16,4 @@ const CustomersSchema = new Schema({
     strict: false
 })
 
-export default model("Customers", CustomersSchema, "Customers")
+export default model("Customers", CustomersSchema, "Customers(listo)")
