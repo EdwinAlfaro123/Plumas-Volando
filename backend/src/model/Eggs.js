@@ -6,13 +6,13 @@ const EggsSchema = new Schema({
             jumbo: {type: Number},
             grande: {type: Number},
             mediano: {type: Number},
-            pequeno: {type: Number}
+            pequeno: {type: Number},
+            _id: false
         }
     ],
-    totalEggs: {Number},
+    totalEggs: {type: Number},
     date: {type: Date},
-    lostEggs: {type: Number},
-    date: {type: Date}
+    eggsLosts: {type: Number}
 },{
     timestamps: true,
     strict: false

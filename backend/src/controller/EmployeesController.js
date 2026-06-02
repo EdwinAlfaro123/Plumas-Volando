@@ -33,35 +33,27 @@ employeeController.updateEmployees = async (req, res) => {
       phone = phone?.trim();
   
       // Campos obligatorios
-      if (!name || !email || !phone) {
-        return res.status(400).json({
-          message: "All fields are required"
-        });
+      if (!name || !email || !phone){
+        return res.status(400).json({message: "All fields are required"});
       }
   
       // Validar nombre
-      if (name.length < 3 || name.length > 50) {
-        return res.status(400).json({
-          message: "Name must contain between 3 and 50 characters"
-        });
+      if (name.length < 3 || name.length > 50){
+        return res.status(400).json({message: "Name must contain between 3 and 50 characters"});
       }
   
       // Validar email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({
-          message: "Invalid email"
-        });
+      if (!emailRegex.test(email)){
+        return res.status(400).json({message: "Invalid email"});
       }
   
       // Validar teléfono
       const phoneRegex = /^[0-9]{8}$/;
   
-      if (!phoneRegex.test(phone)) {
-        return res.status(400).json({
-          message: "Phone must contain exactly 8 digits"
-        });
+      if (!phoneRegex.test(phone)){
+        return res.status(400).json({message: "Phone must contain exactly 8 digits"});
       }
   
       // Verificar si el email ya existe en otro empleado
@@ -70,10 +62,8 @@ employeeController.updateEmployees = async (req, res) => {
         _id: { $ne: req.params.id }
       });
   
-      if (existingEmployee) {
-        return res.status(400).json({
-          message: "Email already exists"
-        });
+      if (existingEmployee){
+        return res.status(400).json({message: "Email already exists"});
       }
   
       // Actualizar empleado
@@ -91,20 +81,14 @@ employeeController.updateEmployees = async (req, res) => {
       );
   
       if (!employeeUpdated) {
-        return res.status(404).json({
-          message: "Employee not found"
-        });
+        return res.status(404).json({message: "Employee not found"});
       }
   
-      return res.status(200).json({
-        message: "Employee updated"
-      });
+      return res.status(200).json({message: "Employee updated"});
   
     } catch (error) {
       console.log("error " + error);
-      return res.status(500).json({
-        message: "Internal Server Error"
-      });
+      return res.status(500).json({message: "Internal Server Error"});
     }
 };
 
