@@ -8,6 +8,9 @@ import ProductsRoutes from "./src/routes/ProductsRoutes.js"
 import EggsRoutes from "./src/routes/EggsRoutes.js"
 import ChickensRoutes from "./src/routes/ChickensRoutes.js"
 import OrderROutes from "./src/routes/OrderRoutes.js"
+import customersRoutes from "./src/routes/CustomerRoutes.js"
+import loginCustomerRoutes from "./src/routes/loginCustomerRoutes.js"
+import registerCustomers from "./src/routes/RegisterCustomerRoutes.js"
 
 const app = express();
 
@@ -23,5 +26,8 @@ app.use("/api/products", ProductsRoutes);
 app.use("/api/egg", EggsRoutes);
 app.use("/api/chicken", ChickensRoutes);
 app.use("/api/orders", OrderROutes)
+app.use("/api/loginCustomer", loginCustomerRoutes);
+app.use("/api/customer", customersRoutes);
+app.use("/api/registerCustomer", registerCustomers);
 
 export default app
