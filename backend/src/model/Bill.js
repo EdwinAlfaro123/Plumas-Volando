@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, mongoosePopulatedDocumentMarker } from "mongoose"
+import mongoose, { Schema, model } from "mongoose"
 
 const BillSchema = new Schema({
     OrderId: {type: mongoose.Types.ObjectId, ref: "Order"},
