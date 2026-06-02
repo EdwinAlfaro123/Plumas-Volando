@@ -6,11 +6,10 @@ const OrdersSchema = new Schema({
             productId: {type: mongoose.Types.ObjectId, ref: "Products"},
             quantity: {type: Number},
             subtotal: {type: Number}
-
         }
     ],
     location: {type: String},
-    date: {type: Number},
+    date: {type: Date},
     totalPrice: {type: Number},
     customerId: {type: mongoose.Types.ObjectId, ref: "Customers"},
 },{
