@@ -11,6 +11,7 @@ import OrderROutes from "./src/routes/OrderRoutes.js"
 import customersRoutes from "./src/routes/CustomerRoutes.js"
 import loginCustomerRoutes from "./src/routes/loginCustomerRoutes.js"
 import registerCustomers from "./src/routes/RegisterCustomerRoutes.js"
+import recoveryPasswordCustomer from "./src/routes/RecoveryPasswordCustomer.js"
 
 const app = express();
 
@@ -29,5 +30,6 @@ app.use("/api/orders", OrderROutes)
 app.use("/api/loginCustomer", loginCustomerRoutes);
 app.use("/api/customer", customersRoutes);
 app.use("/api/registerCustomer", registerCustomers);
+app.use("/api/recoveryPasswordCustomer", recoveryPasswordCustomer);
 
 export default app
