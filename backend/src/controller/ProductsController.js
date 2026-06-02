@@ -15,7 +15,7 @@ productsController.getAllProducts = async (req, res) => {
 
 productsController.insertProduct = async (req, res) => {
     try {
-        const {name, TypeProduct, description, unitPrice, quantity}
+        const {name, TypeProduct, description, unitPrice, quantity} = req.body
 
         const newProduct = new productsModel({
             name,
@@ -38,7 +38,7 @@ productsController.insertProduct = async (req, res) => {
 
 productsController.updateProduct = async (req, res) => {
     try {
-        const {name, TypeProduct, description, unitPrice, quantity}
+        const {name, TypeProduct, description, unitPrice, quantity} = req.body
 
         const productFound = await productsModel.findById(req.params.id)
 
