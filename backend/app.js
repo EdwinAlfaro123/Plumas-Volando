@@ -7,7 +7,7 @@ import recoveryPasswordEmployee from "./src/routes/RecoveryPasswordEmployeeRoute
 import ProductsRoutes from "./src/routes/ProductsRoutes.js"
 import EggsRoutes from "./src/routes/EggsRoutes.js"
 import ChickensRoutes from "./src/routes/ChickensRoutes.js"
-
+import OrderROutes from "./src/routes/OrderRoutes.js"
 const app = express();
 
 app.use(cookieParser());
@@ -21,5 +21,6 @@ app.use("/api/loginEmployee", loginEmployeeRoutes);
 app.use("/api/products", ProductsRoutes);
 app.use("/api/egg", EggsRoutes);
 app.use("/api/chicken", ChickensRoutes);
+app.use("/api/orders", OrderROutes)
 
 export default app
