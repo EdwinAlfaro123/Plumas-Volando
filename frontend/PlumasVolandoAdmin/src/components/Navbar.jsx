@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Bell, UserCircle2 } from "lucide-react";
+import { Bell, UserCircle2, X } from "lucide-react";
 import "../styles/Navbar.css";
 import { useNavigate } from "react-router-dom";
 import CustomAlert from "../components/CustomAlert";
@@ -63,90 +63,174 @@ const Navbar = () => {
       
 
       {isProfileOpen && (
-        <div className="profile-modal">
-          <h2>Perfil de Usuario</h2>
-          <form>
-            <div className="profile-modal-row">
-              <div className="profile-modal-field">
-                <label>Nombre</label>
-                <input
-                  type="text"
-                  value={profileData.name}
-                  onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                  disabled={!isEditable}
-                />
-              </div>
-              <div className="profile-modal-field">
-                <label>Apellido</label>
-                <input
-                  type="text"
-                  value={profileData.lastName}
-                  onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
-                  disabled={!isEditable}
-                />
-              </div>
-            </div>
-
-            <div className="profile-modal-row">
-              <div className="profile-modal-field">
-                <label>Usuario</label>
-                <input
-                  type="text"
-                  value={profileData.username}
-                  onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
-                  disabled={!isEditable}
-                />
-              </div>
-              <div className="profile-modal-field">
-                <label>Correo</label>
-                <input type="email" value={profileData.email} disabled />
-              </div>
-            </div>
-
-            <div className="profile-modal-row">
-              <div className="profile-modal-field">
-                <label>Teléfono</label>
-                <input type="tel" value={profileData.phone} disabled />
-              </div>
-              <div className="profile-modal-field">
-                <label>Contraseña</label>
-                <input
-                  type="password"
-                  value={profileData.password}
-                  onChange={(e) => setProfileData({ ...profileData, password: e.target.value })}
-                  disabled={!isEditable}
-                />
-              </div>
-            </div>
-
-            <div className="profile-modal-row">
-              <div className="profile-modal-field">
-                <label>Estado</label>
-                <input type="text" value={profileData.status} disabled />
-              </div>
-              <div className="profile-modal-field">
-                <label>Fecha de Contrato</label>
-                <input type="text" value={profileData.contractDate} disabled />
-              </div>
-            </div>
-
-            <button type="button" onClick={() => setIsEditable(true)}>
-              Editar
+        <div
+          className="profile-overlay"
+          onClick={() => {
+            setIsProfileOpen(false);
+            setIsEditable(false);
+          }}
+        >
+          <div
+            className="profile-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="close-modal-btn"
+              onClick={() => {
+                setIsProfileOpen(false);
+                setIsEditable(false);
+              }}
+            >
+              <X size={20} />
             </button>
-            {isEditable && (
-              <>
-                <button type="button" onClick={handleSaveChanges}>
-                  Guardar cambios
-                </button>
-                <button type="button" onClick={() => setIsEditable(false)}>
-                  Cancelar
-                </button>
-              </>
-            )}
-            <button type="button" className="logout-btn" onClick={() => setAlert({ ...alert, isOpen: true })}>
-              Cerrar sesión
-            </button>
-          </form>
+
+            <h2>Perfil de Usuario</h2>
+
+            <form>
+              <div className="profile-modal-row">
+                <div className="profile-modal-field">
+                  <label>Nombre</label>
+                  <input
+                    type="text"
+                    value={profileData.name}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        name: e.target.value,
+                      })
+                    }
+                    disabled={!isEditable}
+                  />
+                </div>
+
+                <div className="profile-modal-field">
+                  <label>Apellido</label>
+                  <input
+                    type="text"
+                    value={profileData.lastName}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        lastName: e.target.value,
+                      })
+                    }
+                    disabled={!isEditable}
+                  />
+                </div>
+              </div>
+
+              <div className="profile-modal-row">
+                <div className="profile-modal-field">
+                  <label>Usuario</label>
+                  <input
+                    type="text"
+                    value={profileData.username}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        username: e.target.value,
+                      })
+                    }
+                    disabled={!isEditable}
+                  />
+                </div>
+
+                <div className="profile-modal-field">
+                  <label>Correo</label>
+                  <input
+                    type="email"
+                    value={profileData.email}
+                    disabled
+                  />
+                </div>
+              </div>
+
+              <div className="profile-modal-row">
+                <div className="profile-modal-field">
+                  <label>Teléfono</label>
+                  <input
+                    type="tel"
+                    value={profileData.phone}
+                    disabled
+                  />
+                </div>
+
+                <div className="profile-modal-field">
+                  <label>Contraseña</label>
+                  <input
+                    type="password"
+                    value={profileData.password}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        password: e.target.value,
+                      })
+                    }
+                    disabled={!isEditable}
+                  />
+                </div>
+              </div>
+
+              <div className="profile-modal-row">
+                <div className="profile-modal-field">
+                  <label>Estado</label>
+                  <input
+                    type="text"
+                    value={profileData.status}
+                    disabled
+                  />
+                </div>
+
+                <div className="profile-modal-field">
+                  <label>Fecha de Contrato</label>
+                  <input
+                    type="text"
+                    value={profileData.contractDate}
+                    disabled
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsEditable(true)}
+              >
+                Editar
+              </button>
+
+              {isEditable && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleSaveChanges}
+                  >
+                    Guardar cambios
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsEditable(false)}
+                  >
+                    Cancelar
+                  </button>
+                </>
+              )}
+
+              <button
+                type="button"
+                className="logout-btn"
+                onClick={() =>
+                  setAlert({
+                    ...alert,
+                    isOpen: true,
+                  })
+                }
+              >
+                Cerrar sesión
+              </button>
+            </form>
+          </div>
         </div>
       )}
 
