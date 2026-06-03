@@ -5,13 +5,14 @@ import "../styles/Login.css";
 import CustomAlert from "../components/CustomAlert";
 import LoginImage from "../img/LoginImage.png";
 import Logo from "../img/PlumasVolandoLogo.png";
+import api from "../services/api"
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
-    correo: "",
+    email: "",
     password: "",
   });
 
@@ -30,10 +31,10 @@ const LoginPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.correo || !formData.password) {
+    if (!formData.email || !formData.password) {
       setAlert({
         isOpen: true,
         type: "error",
@@ -43,41 +44,31 @@ const LoginPage = () => {
       return;
     }
 
-    const savedUser = JSON.parse(localStorage.getItem("usuarioRegistrado"));
-
-    if (!savedUser) {
-      setAlert({
-        isOpen: true,
-        type: "error",
-        title: "Sin usuarios",
-        message: "No hay ningún usuario registrado todavía",
+    try {
+      const response = await api.post("/Loginemployee", {
+        email: formData.email,
+        password: formData.password,
       });
-      return;
-    }
-
-    if (
-      formData.correo === savedUser.correo &&
-      formData.password === savedUser.password
-    ) {
-      localStorage.setItem("sesionActiva", "true");
-      localStorage.setItem("usuarioActivo", JSON.stringify(savedUser));
 
       setAlert({
         isOpen: true,
         type: "success",
         title: "Bienvenido",
-        message: `Hola ${savedUser.nombre}, sesión iniciada correctamente`,
+        message: `Hola, sesión iniciada correctamente`,
       });
 
       setTimeout(() => {
         navigate("/dashboard");
       }, 1500);
-    } else {
+
+    } catch (error) {
       setAlert({
         isOpen: true,
         type: "error",
         title: "Error",
-        message: "Correo o contraseña incorrectos",
+        message:
+          error.response?.data?.message ||
+          "Correo o contraseña incorrectos",
       });
     }
   };
@@ -104,10 +95,10 @@ const LoginPage = () => {
                 <label htmlFor="correo">Correo</label>
                 <div className="login-input-wrapper">
                   <input
-                    id="correo"
+                    id="email"
                     type="email"
-                    name="correo"
-                    value={formData.correo}
+                    name="email"
+                    value={formData.email}
                     onChange={handleChange}
                   />
                   <Mail size={18} className="login-input-icon" />
