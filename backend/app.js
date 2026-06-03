@@ -1,5 +1,6 @@
 import express from "express"
 import cookieParser from "cookie-parser"
+import cors from "cors"
 import registerEmployee from "./src/routes/RegisterEmployeeRoutes.js"
 import employeeRoutes from "./src/routes/EmployeesRoutes.js"
 import loginEmployeeRoutes from "./src/routes/LoginEmployeeRoutes.js"
@@ -16,6 +17,11 @@ import BillRoutes from "./src/routes/BillRoutes.js"
 import SalesHistoryRoutes from "./src/routes/SalesHistoryRoutes.js"
 
 const app = express();
+
+app.use(cors({
+    origin: ["http://localhost:5173", "http://localhost:5174"],
+    credentials: true
+}));
 
 app.use(cookieParser());
 
