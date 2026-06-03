@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, mongoosePopulatedDocumentMarker } from "mongoose"
+import mongoose, { Schema, model } from "mongoose"
 
 const SalesHistorySchema = new Schema({
     date: {type: Date},
@@ -10,4 +10,4 @@ const SalesHistorySchema = new Schema({
     strict: false
 })
 
-export default model("SalesHistory", SalesHistorySchema, "SalesHistory")
+export default model("SalesHistory", SalesHistorySchema, "salesHistory")
