@@ -11,4 +11,7 @@ router.route("/:id")
     .put(eggController.updateEggs)
     .delete(eggController.deleteEggs)
 
+router.get("/monthly-production", eggController.getMonthlyProduction)
+
+
 export default router;

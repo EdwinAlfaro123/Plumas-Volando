@@ -17,4 +17,4 @@ const OrdersSchema = new Schema({
     strict: false
 })
 
-export default model("Orders", OrdersSchema, "Orders(listo)")
+export default model("Orders", OrdersSchema, "Orders")

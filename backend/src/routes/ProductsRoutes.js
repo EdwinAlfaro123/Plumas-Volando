@@ -11,5 +11,6 @@ router.route("/")
 router.route("/:id")
 .put(upload.single("image"), productController.updateProduct)
 .delete(productController.deleteProduct)
+router.get("/top-selling", productController.getTopSellingProducts)
 
 export default router

@@ -10,4 +10,6 @@ router.route("/")
 router.route("/:id")
 .put(orderController.updateOrder)
 .delete(orderController.deleteOrder)
+router.get("/states", orderController.getOrdersByState)
+router.get("/recent", orderController.getRecentOrders)
 export default router

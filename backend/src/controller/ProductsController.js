@@ -1,4 +1,5 @@
 import productsModel from "../model/Products.js"
+import ordersModel from "../model/Orders.js"
 import {v2 as cloudinary} from "cloudinary"
 
 const productsController = {}
@@ -88,4 +89,62 @@ productsController.deleteProduct = async (req, res) =>{
     }
 }
 
-export default productsController
+productsController.getTopSellingProducts = async (req, res) => {
+    try {
+        const topProducts = await ordersModel.aggregate([
+            {
+                $match: {
+                    state: "Entregado"
+                }
+            },
+            {
+                $unwind: "$products"
+            },
+            {
+                $group: {
+                    _id: {
+                        idProduct: "$products.idProduct",
+                        name: "$products.name"
+                    },
+                    quantitySold: {
+                        $sum: "$products.quantity"
+                    },
+                    totalSold: {
+                        $sum: {
+                            $multiply: [
+                                "$products.quantity",
+                                {
+                                    $ifNull: ["$products.price", 0]
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                $sort: {
+                    quantitySold: -1
+                }
+            },
+            {
+                $limit: 5
+            },
+            {
+                $project: {
+                    _id: 0,
+                    idProduct: "$_id.idProduct",
+                    name: "$_id.name",
+                    quantitySold: 1,
+                    totalSold: 1
+                }
+            }
+        ])
+
+        return res.status(200).json(topProducts)
+    } catch (error) {
+        console.log("error" + error)
+        return res.status(500).json({message: "Internal Server Error"})
+    }
+}
+
+export default productsController;
