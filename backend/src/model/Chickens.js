@@ -12,4 +12,4 @@ const ChickensSchema = new Schema({
     strict: false
 })
 
-export default model("Chickens", ChickensSchema, "Chickens(listo)")
+export default model("Chickens", ChickensSchema, "Chickens")

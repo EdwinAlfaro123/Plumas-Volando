@@ -18,4 +18,4 @@ const EggsSchema = new Schema({
     strict: false
 })
 
-export default model("Eggs", EggsSchema, "Eggs(listo)")
+export default model("Eggs", EggsSchema, "Eggs")

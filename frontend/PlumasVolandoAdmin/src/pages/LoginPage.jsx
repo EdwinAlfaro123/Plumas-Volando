@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Mail, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
 import "../styles/Login.css";
 import CustomAlert from "../components/CustomAlert";
 import LoginImage from "../img/LoginImage.png";
 import Logo from "../img/PlumasVolandoLogo.png";
-import api from "../services/api"
+import api from "../services/api";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -25,10 +26,33 @@ const LoginPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+  };
+
+  const getLoggedUser = (data) => {
+    return (
+      data?.employee ||
+      data?.employeeFound ||
+      data?.user ||
+      data?.userFound ||
+      data?.data ||
+      null
+    );
+  };
+
+  const getUserName = (user) => {
+    return (
+      user?.name ||
+      user?.nombre ||
+      user?.firstName ||
+      user?.username ||
+      formData.email.split("@")[0] ||
+      "usuario"
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -45,22 +69,42 @@ const LoginPage = () => {
     }
 
     try {
-      const response = await api.post("/Loginemployee", {
+      const response = await api.post("/loginEmployee", {
         email: formData.email,
         password: formData.password,
       });
+
+      const loggedUser = getLoggedUser(response.data);
+
+      localStorage.setItem("loginEmail", formData.email);
+
+      if (loggedUser) {
+        localStorage.setItem("user", JSON.stringify(loggedUser));
+      } else {
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            email: formData.email,
+          })
+        );
+      }
+
+      if (response.data?.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+
+      window.dispatchEvent(new Event("plumas:user-updated"));
 
       setAlert({
         isOpen: true,
         type: "success",
         title: "Bienvenido",
-        message: `Hola, sesión iniciada correctamente`,
+        message: `Hola ${getUserName(loggedUser)}, sesión iniciada correctamente`,
       });
 
       setTimeout(() => {
         navigate("/dashboard");
-      }, 1500);
-
+      }, 1200);
     } catch (error) {
       setAlert({
         isOpen: true,
@@ -89,10 +133,11 @@ const LoginPage = () => {
             </div>
 
             <form className="login-form" onSubmit={handleSubmit}>
-              <h1 className="login-form-title">Iniciar Sesion</h1>
+              <h1 className="login-form-title">Iniciar Sesión</h1>
 
               <div className="login-field">
-                <label htmlFor="correo">Correo</label>
+                <label htmlFor="email">Correo</label>
+
                 <div className="login-input-wrapper">
                   <input
                     id="email"
@@ -101,12 +146,14 @@ const LoginPage = () => {
                     value={formData.email}
                     onChange={handleChange}
                   />
+
                   <Mail size={18} className="login-input-icon" />
                 </div>
               </div>
 
               <div className="login-field">
                 <label htmlFor="password">Contraseña</label>
+
                 <div className="login-input-wrapper">
                   <input
                     id="password"
@@ -115,6 +162,7 @@ const LoginPage = () => {
                     value={formData.password}
                     onChange={handleChange}
                   />
+
                   <button
                     type="button"
                     className="login-icon-btn"

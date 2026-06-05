@@ -65,6 +65,96 @@ orderController.insertOrder = async (req, res) => {
     }
 };
 
+
+orderController.getOrdersByState = async (req, res) => {
+    try {
+        const states = await ordersModel.aggregate([
+            {
+                $addFields: {
+                    realState: {
+                        $ifNull: [
+                            "$state",
+                            {
+                                $ifNull: [
+                                    "$estado",
+                                    {
+                                        $ifNull: ["$status", "Sin estado"]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$realState",
+                    total: { $sum: 1 }
+                }
+            },
+            {
+                $sort: {
+                    total: -1
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    state: "$_id",
+                    total: 1
+                }
+            }
+        ])
+
+        return res.status(200).json(states)
+    } catch (error) {
+        console.log("error" + error)
+        return res.status(500).json({message: "Internal Server Error"})
+    }
+}
+
+orderController.getRecentOrders = async (req, res) => {
+    try {
+        const recentOrders = await ordersModel.aggregate([
+            {
+                $addFields: {
+                    realDate: {
+                        $toDate: {
+                            $ifNull: ["$date", "$createdAt"]
+                        }
+                    }
+                }
+            },
+            {
+                $sort: {
+                    realDate: -1
+                }
+            },
+            {
+                $limit: 5
+            },
+            {
+                $project: {
+                    _id: 1,
+                    date: 1,
+                    clientName: 1,
+                    location: 1,
+                    products: 1,
+                    state: 1,
+                    idClient: 1,
+                    idEmployee: 1,
+                    employeeName: 1
+                }
+            }
+        ])
+
+        return res.status(200).json(recentOrders)
+    } catch (error) {
+        console.log("error" + error)
+        return res.status(500).json({message: "Internal Server Error"})
+    }
+}
+
 orderController.updateOrder = async (req, res) => {
     try {
         const { products, location, date, customerId } = req.body;

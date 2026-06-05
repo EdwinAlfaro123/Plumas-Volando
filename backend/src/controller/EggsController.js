@@ -66,6 +66,121 @@ eggController.insertEggs = async (req, res) => {
     }
 };
 
+eggController.getMonthlyProduction = async (req, res) => {
+    try {
+        const year = req.query.year ? Number(req.query.year) : null
+
+        const pipeline = [
+            {
+                $addFields: {
+                    realDate: {
+                        $toDate: {
+                            $ifNull: [
+                                "$date",
+                                {
+                                    $ifNull: [
+                                        "$fecha",
+                                        {
+                                            $ifNull: ["$createdAt", "$startDate"]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    quantityValue: {
+                        $ifNull: [
+                            "$quantityEggs",
+                            {
+                                $ifNull: [
+                                    "$cantidadHuevos",
+                                    {
+                                        $ifNull: [
+                                            "$totalEggs",
+                                            {
+                                                $ifNull: ["$quantity", 0]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+
+        if (year) {
+            pipeline.push({
+                $match: {
+                    realDate: {
+                        $gte: new Date(`${year}-01-01`),
+                        $lt: new Date(`${year + 1}-01-01`)
+                    }
+                }
+            })
+        }
+
+        pipeline.push(
+            {
+                $group: {
+                    _id: { $month: "$realDate" },
+                    total: { $sum: "$quantityValue" }
+                }
+            },
+            {
+                $sort: {
+                    _id: 1
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    monthNumber: "$_id",
+                    total: 1
+                }
+            }
+        )
+
+        const monthlyData = await eggsModel.aggregate(pipeline)
+
+        const months = [
+            "Enero",
+            "Febrero",
+            "Marzo",
+            "Abril",
+            "Mayo",
+            "Junio",
+            "Julio",
+            "Agosto",
+            "Septiembre",
+            "Octubre",
+            "Noviembre",
+            "Diciembre"
+        ]
+
+        const result = months.map((month, index) => {
+            const found = monthlyData.find(
+                item => item.monthNumber === index + 1
+            )
+
+            return {
+                month,
+                shortMonth: month.slice(0, 3),
+                monthNumber: index + 1,
+                total: found ? found.total : 0
+            }
+        })
+
+        return res.status(200).json(result)
+    } catch (error) {
+        console.log("error" + error)
+        return res.status(500).json({message: "Internal Server Error"})
+    }
+}
+
+
+
 //UPDATE
 eggController.updateEggs = async (req, res) => {
     try{

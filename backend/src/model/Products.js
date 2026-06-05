@@ -14,4 +14,4 @@ const ProductsSchema = new Schema({
     strict: false
 })
 
-export default model("Products", ProductsSchema, "Products(listo)")
+export default model("Products", ProductsSchema, "Products")
