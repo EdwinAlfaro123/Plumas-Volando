@@ -17,13 +17,10 @@ import "../styles/Navbar.css";
 import "../styles/NeumorphicCard.css";
 import "../styles/StatCard.css";
 
-const STATE_COLORS = [
-  "#d28d65",
-  "#f0b02f",
-  "#e9282d",
-  "#dd944c",
-  "#b8744f",
-  "#e6c84f",
+const ORDER_STATES = [
+  { key: "entregado", label: "Entregado", color: "#d28d65" },
+  { key: "pendiente", label: "Pendiente", color: "#f0b02f" },
+  { key: "cancelado", label: "Cancelado", color: "#e9282d" },
 ];
 
 const getArray = (response) => {
@@ -40,8 +37,56 @@ const getArray = (response) => {
   if (Array.isArray(data?.products)) return data.products;
   if (Array.isArray(data?.product)) return data.product;
   if (Array.isArray(data?.Products)) return data.Products;
+  if (Array.isArray(data?.orders)) return data.orders;
+  if (Array.isArray(data?.order)) return data.order;
+  if (Array.isArray(data?.Orders)) return data.Orders;
 
   return [];
+};
+
+const normalizeText = (value = "") => {
+  return String(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+};
+
+const normalizeOrderState = (state) => {
+  const value = normalizeText(state);
+
+  if (
+    value.includes("entregado") ||
+    value.includes("entregada") ||
+    value.includes("completado") ||
+    value.includes("completada") ||
+    value.includes("finalizado") ||
+    value.includes("finalizada")
+  ) {
+    return "entregado";
+  }
+
+  if (
+    value.includes("cancelado") ||
+    value.includes("cancelada") ||
+    value.includes("rechazado") ||
+    value.includes("rechazada")
+  ) {
+    return "cancelado";
+  }
+
+  return "pendiente";
+};
+
+const getOrderStatus = (order) => {
+  return (
+    order.estado ||
+    order.state ||
+    order.status ||
+    order.orderStatus ||
+    order.estadoPedido ||
+    "Pendiente"
+  );
 };
 
 const formatDate = (date) => {
@@ -54,30 +99,121 @@ const formatDate = (date) => {
   return parsedDate.toLocaleDateString("es-SV");
 };
 
-const getProductsResume = (products = []) => {
-  if (!Array.isArray(products) || products.length === 0) {
-    return "Sin producto";
+const normalizeId = (value) => {
+  if (!value) return "";
+
+  if (typeof value === "object") {
+    return String(
+      value._id ||
+        value.id ||
+        value.idProduct ||
+        value.idProducto ||
+        value.productId ||
+        ""
+    );
   }
 
-  const names = products.map((product) => {
-    return product.name || product.nombre || "Producto sin nombre";
-  });
+  return String(value);
+};
 
-  if (names.length <= 2) {
-    return names.join(", ");
+const getProductName = (item, productIndex) => {
+  const product =
+    item.productId ||
+    item.idProduct ||
+    item.idProducto ||
+    item.product ||
+    item.producto ||
+    item.Products ||
+    item.Product;
+
+  const productId = normalizeId(product || item.productId || item.idProduct);
+
+  return (
+    item.name ||
+    item.nombre ||
+    item.productName ||
+    item.nombreProducto ||
+    product?.name ||
+    product?.nombre ||
+    productIndex.get(productId) ||
+    "Producto sin nombre"
+  );
+};
+
+const getQuantity = (item) => {
+  const quantity = Number(
+    item.quantity ??
+      item.cantidad ??
+      item.Quantity ??
+      item.qty ??
+      item.unidades ??
+      1
+  );
+
+  return quantity > 0 ? quantity : 1;
+};
+
+const getOrderItems = (order) => {
+  const items =
+    order.products ||
+    order.productos ||
+    order.items ||
+    order.detalle ||
+    order.details ||
+    order.orderProducts ||
+    [];
+
+  if (Array.isArray(items)) return items;
+
+  if (items && typeof items === "object") return [items];
+
+  if (order.productId || order.idProduct || order.idProducto) {
+    return [
+      {
+        productId: order.productId || order.idProduct || order.idProducto,
+        quantity: order.quantity || order.cantidad || 1,
+        name: order.productName || order.nombreProducto,
+      },
+    ];
   }
+
+  return [];
+};
+
+const getProductsResume = (order, productIndex) => {
+  const items = getOrderItems(order);
+
+  if (!items.length) return "Sin producto";
+
+  const names = items.map((item) => getProductName(item, productIndex));
+
+  if (names.length <= 2) return names.join(", ");
 
   return `${names[0]}, ${names[1]} +${names.length - 2} más`;
+};
+
+const getPersonName = (...values) => {
+  for (const value of values) {
+    if (!value) continue;
+
+    if (typeof value === "string") return value;
+
+    const fullName = `${value.name || value.nombre || ""} ${
+      value.lastName || value.apellido || ""
+    }`.trim();
+
+    if (fullName) return fullName;
+  }
+
+  return "";
 };
 
 const DashboardPage = () => {
   const [customers, setCustomers] = useState([]);
   const [chickens, setChickens] = useState([]);
   const [products, setProducts] = useState([]);
-  const [ordersStates, setOrdersStates] = useState([]);
-  const [recentOrders, setRecentOrders] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [monthlyProduction, setMonthlyProduction] = useState([]);
-  const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const safeGet = async (path) => {
@@ -85,8 +221,18 @@ const DashboardPage = () => {
       return await api.get(path);
     } catch (error) {
       console.log(`Error en ${path}:`, error.response?.data || error.message);
-      return { data: [] };
+      return null;
     }
+  };
+
+  const safeGetFirst = async (paths) => {
+    for (const path of paths) {
+      const response = await safeGet(path);
+
+      if (response) return response;
+    }
+
+    return { data: [] };
   };
 
   const getDashboardData = async () => {
@@ -95,41 +241,21 @@ const DashboardPage = () => {
         customersRes,
         chickensRes,
         productsRes,
-        ordersStatesRes,
-        recentOrdersRes,
+        ordersRes,
         monthlyProductionRes,
-        topProductsRes,
       ] = await Promise.all([
-        safeGet("/customer"),
-        safeGet("/chicken"),
-        safeGet("/products"),
-        safeGet("/orders/states"),
-        safeGet("/orders/recent"),
-        safeGet("/egg/monthly-production"),
-        safeGet("/products/top-selling"),
+        safeGetFirst(["/customer", "/customers"]),
+        safeGetFirst(["/chicken", "/chickens"]),
+        safeGetFirst(["/products", "/product"]),
+        safeGetFirst(["/orders", "/order"]),
+        safeGetFirst(["/egg/monthly-production"]),
       ]);
 
       setCustomers(getArray(customersRes));
       setChickens(getArray(chickensRes));
       setProducts(getArray(productsRes));
-
-      setOrdersStates(
-        Array.isArray(ordersStatesRes.data) ? ordersStatesRes.data : []
-      );
-
-      setRecentOrders(
-        Array.isArray(recentOrdersRes.data) ? recentOrdersRes.data : []
-      );
-
-      setMonthlyProduction(
-        Array.isArray(monthlyProductionRes.data)
-          ? monthlyProductionRes.data
-          : []
-      );
-
-      setTopProducts(
-        Array.isArray(topProductsRes.data) ? topProductsRes.data : []
-      );
+      setOrders(getArray(ordersRes));
+      setMonthlyProduction(getArray(monthlyProductionRes));
     } finally {
       setLoading(false);
     }
@@ -148,45 +274,76 @@ const DashboardPage = () => {
 
     window.addEventListener("focus", refreshDashboard);
     window.addEventListener("plumas:orders-updated", refreshDashboard);
+    window.addEventListener("plumas:products-updated", refreshDashboard);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener("focus", refreshDashboard);
       window.removeEventListener("plumas:orders-updated", refreshDashboard);
+      window.removeEventListener("plumas:products-updated", refreshDashboard);
     };
   }, []);
 
+  const productIndex = useMemo(() => {
+    const map = new Map();
+
+    products.forEach((product) => {
+      const id = normalizeId(product);
+
+      if (id) {
+        map.set(id, product.name || product.nombre || "Producto sin nombre");
+      }
+    });
+
+    return map;
+  }, [products]);
+
+  const orderStateCounts = useMemo(() => {
+    const counts = {
+      entregado: 0,
+      pendiente: 0,
+      cancelado: 0,
+    };
+
+    orders.forEach((order) => {
+      const stateKey = normalizeOrderState(getOrderStatus(order));
+      counts[stateKey] += 1;
+    });
+
+    return counts;
+  }, [orders]);
+
   const ordersCount = useMemo(() => {
-    return ordersStates.reduce((total, item) => {
-      return total + Number(item.total || 0);
+    return Object.values(orderStateCounts).reduce((total, value) => {
+      return total + Number(value || 0);
     }, 0);
-  }, [ordersStates]);
+  }, [orderStateCounts]);
 
   const orderStateData = useMemo(() => {
-    return ordersStates.map((item, index) => {
-      const total = Number(item.total || 0);
+    return ORDER_STATES.map((state) => {
+      const total = Number(orderStateCounts[state.key] || 0);
 
       return {
-        state: item.state || item.estado || "Sin estado",
+        ...state,
         total,
-        color: STATE_COLORS[index % STATE_COLORS.length],
         percent: ordersCount > 0 ? Math.round((total / ordersCount) * 100) : 0,
       };
     });
-  }, [ordersStates, ordersCount]);
+  }, [orderStateCounts, ordersCount]);
 
   const stateColorMap = useMemo(() => {
     const map = {};
 
-    orderStateData.forEach((item) => {
-      map[item.state] = item.color;
+    ORDER_STATES.forEach((state) => {
+      map[state.key] = state.color;
+      map[state.label] = state.color;
     });
 
     return map;
-  }, [orderStateData]);
+  }, []);
 
   const donutStyle = useMemo(() => {
-    if (!orderStateData.length || ordersCount === 0) {
+    if (ordersCount === 0) {
       return {
         background: "#e9dfd2",
       };
@@ -194,14 +351,16 @@ const DashboardPage = () => {
 
     let current = 0;
 
-    const segments = orderStateData.map((item) => {
-      const start = current;
-      const end = current + (item.total / ordersCount) * 100;
+    const segments = orderStateData
+      .filter((item) => item.total > 0)
+      .map((item) => {
+        const start = current;
+        const end = current + (item.total / ordersCount) * 100;
 
-      current = end;
+        current = end;
 
-      return `${item.color} ${start}% ${end}%`;
-    });
+        return `${item.color} ${start}% ${end}%`;
+      });
 
     return {
       background: `conic-gradient(${segments.join(", ")})`,
@@ -227,39 +386,112 @@ const DashboardPage = () => {
   }, [monthlyProduction]);
 
   const formattedTopProducts = useMemo(() => {
-    const max = Math.max(
-      ...topProducts.map((product) => Number(product.quantitySold || 0)),
+    const soldProducts = new Map();
+
+    orders
+      .filter((order) => normalizeOrderState(getOrderStatus(order)) === "entregado")
+      .forEach((order) => {
+        getOrderItems(order).forEach((item) => {
+          const product =
+            item.productId ||
+            item.idProduct ||
+            item.idProducto ||
+            item.product ||
+            item.producto;
+
+          const id =
+            normalizeId(product) ||
+            normalizeId(item.productId) ||
+            normalizeId(item.idProduct) ||
+            getProductName(item, productIndex);
+
+          const name = getProductName(item, productIndex);
+          const quantity = getQuantity(item);
+
+          if (!soldProducts.has(id)) {
+            soldProducts.set(id, {
+              idProduct: id,
+              name,
+              quantitySold: 0,
+            });
+          }
+
+          soldProducts.get(id).quantitySold += quantity;
+        });
+      });
+
+    const result = Array.from(soldProducts.values()).sort((a, b) => {
+      return b.quantitySold - a.quantitySold;
+    });
+
+    const totalSold = result.reduce((total, product) => {
+      return total + Number(product.quantitySold || 0);
+    }, 0);
+
+    const maxSold = Math.max(
+      ...result.map((product) => Number(product.quantitySold || 0)),
       1
     );
 
-    return topProducts.map((product) => {
+    return result.slice(0, 5).map((product) => {
       const quantitySold = Number(product.quantitySold || 0);
-      const totalSold = Number(product.totalSold || 0);
 
       return {
-        idProduct: product.idProduct || product._id || product.name,
-        name: product.name || "Producto sin nombre",
-        quantitySold,
-        totalSold,
-        percent: Math.round((quantitySold / max) * 100),
+        ...product,
+        percent:
+          totalSold > 0 ? Math.round((quantitySold / totalSold) * 100) : 0,
+        barPercent: quantitySold > 0 ? (quantitySold / maxSold) * 100 : 0,
       };
     });
-  }, [topProducts]);
+  }, [orders, productIndex]);
 
   const formattedRecentOrders = useMemo(() => {
-    return recentOrders.map((order) => {
-      const estado = order.state || order.estado || order.status || "Sin estado";
+    return [...orders]
+      .sort((a, b) => {
+        const dateA = new Date(a.createdAt || a.date || a.fecha || 0);
+        const dateB = new Date(b.createdAt || b.date || b.fecha || 0);
 
-      return {
-        fecha: formatDate(order.date || order.fecha || order.createdAt),
-        empleado: order.employeeName || order.empleadoName || "No asignado",
-        producto: getProductsResume(order.products || order.productos),
-        ubicacion: order.location || order.ubicacion || "No registrada",
-        cliente: order.clientName || order.customerName || "No registrado",
-        estado,
-      };
-    });
-  }, [recentOrders]);
+        return dateB - dateA;
+      })
+      .slice(0, 6)
+      .map((order) => {
+        const stateKey = normalizeOrderState(getOrderStatus(order));
+        const stateLabel =
+          ORDER_STATES.find((state) => state.key === stateKey)?.label ||
+          "Pendiente";
+
+        return {
+          fecha: formatDate(order.date || order.fecha || order.createdAt),
+          empleado:
+            getPersonName(
+              order.employeeName,
+              order.empleadoName,
+              order.employee,
+              order.empleado,
+              order.idEmpleado
+            ) || "No asignado",
+          producto: getProductsResume(order, productIndex),
+          ubicacion:
+            order.location ||
+            order.ubicacion ||
+            order.address ||
+            order.direccion ||
+            "No registrada",
+          cliente:
+            getPersonName(
+              order.clientName,
+              order.customerName,
+              order.clienteName,
+              order.customer,
+              order.cliente,
+              order.idCliente,
+              order.customerId
+            ) || "No registrado",
+          estado: stateLabel,
+          estadoKey: stateKey,
+        };
+      });
+  }, [orders, productIndex]);
 
   const stats = [
     {
@@ -376,25 +608,21 @@ const DashboardPage = () => {
               </div>
 
               <div className="orders-state-list">
-                {orderStateData.length === 0 ? (
-                  <p>No hay estados registrados</p>
-                ) : (
-                  orderStateData.map((item) => (
-                    <div key={item.state} className="orders-state-item">
-                      <div className="orders-state-left">
-                        <span
-                          className="orders-state-dot"
-                          style={{ backgroundColor: item.color }}
-                        ></span>
-                        <p>{item.state}</p>
-                      </div>
-
-                      <strong>
-                        {item.total} ({item.percent}%)
-                      </strong>
+                {orderStateData.map((item) => (
+                  <div key={item.key} className="orders-state-item">
+                    <div className="orders-state-left">
+                      <span
+                        className="orders-state-dot"
+                        style={{ backgroundColor: item.color }}
+                      ></span>
+                      <p>{item.label}</p>
                     </div>
-                  ))
-                )}
+
+                    <strong>
+                      {item.total} ({item.percent}%)
+                    </strong>
+                  </div>
+                ))}
               </div>
             </div>
           </NeumorphicCard>
@@ -409,13 +637,10 @@ const DashboardPage = () => {
 
               <div className="top-products-list">
                 {formattedTopProducts.length === 0 ? (
-                  <p>No hay productos vendidos registrados</p>
+                  <p>No hay productos entregados registrados</p>
                 ) : (
                   formattedTopProducts.map((product) => (
-                    <div
-                      key={product.idProduct}
-                      className="top-product-item"
-                    >
+                    <div key={product.idProduct} className="top-product-item">
                       <div className="top-product-top">
                         <span>{product.name}</span>
                         <strong>
@@ -426,7 +651,7 @@ const DashboardPage = () => {
                       <div className="top-product-progress">
                         <div
                           className="top-product-progress-fill"
-                          style={{ width: `${product.percent}%` }}
+                          style={{ width: `${product.barPercent}%` }}
                         ></div>
                       </div>
                     </div>
@@ -472,9 +697,10 @@ const DashboardPage = () => {
                             className="order-status"
                             style={{
                               backgroundColor: `${
-                                stateColorMap[order.estado] || "#dd944c"
+                                stateColorMap[order.estadoKey] || "#dd944c"
                               }22`,
-                              color: stateColorMap[order.estado] || "#94602f",
+                              color:
+                                stateColorMap[order.estadoKey] || "#94602f",
                             }}
                           >
                             {order.estado}
