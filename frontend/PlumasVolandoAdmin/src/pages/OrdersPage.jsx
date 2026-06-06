@@ -14,147 +14,109 @@ import {
 import DashboardLayout from "../components/DashboardLayout";
 import SearchBar from "../components/SearchBar";
 import CustomAlert from "../components/CustomAlert";
+import api from "../services/api.js";
 import "../styles/Orders.css";
 
+const ENDPOINTS = {
+  orders: ["/order", "/orders"],
+  products: ["/product", "/products"],
+  customers: ["/customer", "/customers"],
+};
+
 const PAGE_SIZE_OPTIONS = [5, 10, "Todos"];
-
-// Nombres de productos limpios sin cantidades fijas en el texto
-const PRODUCT_OPTIONS = [
-  { id: 1, nombre: "Combo Pollo y Huevos Jumbo", precioUnitario: 25 },
-  { id: 2, nombre: "Cartón de huevos medianos", precioUnitario: 12.7 },
-  { id: 3, nombre: "Pollo entero", precioUnitario: 20 },
-  { id: 4, nombre: "Bebedero para gallina", precioUnitario: 3 },
-  { id: 5, nombre: "Comedero para gallina", precioUnitario: 2.5 },
-];
-
-const CUSTOMER_OPTIONS = [
-  "Joshua Daniel",
-  "Daniel Alvarado",
-  "Daniel Gonzalez",
-  "Andrea Sofia",
-  "Gerardo Andres",
-  "Maria Fernanda",
-];
-
 const STATUS_OPTIONS = ["Pendiente", "Entregado", "Cancelado"];
 
-// Actualizados para coincidir con los nuevos nombres de productos
-const initialOrders = [
-  {
-    id: 1,
-    codigo: "213427",
-    productoId: 2,
-    producto: "Cartón de huevos medianos",
-    ubicacion: "Santa Ana calle al cantón Primavera",
-    cantidad: 1,
-    fecha: "2026-05-29",
-    precioFinal: 12.7,
-    cliente: "Daniel Alvarado",
-    estado: "Pendiente",
-  },
-  {
-    id: 2,
-    codigo: "213428",
-    productoId: 2,
-    producto: "Cartón de huevos medianos",
-    ubicacion: "Santa Ana calle al cantón Primavera",
-    cantidad: 1,
-    fecha: "2026-05-29",
-    precioFinal: 12.7,
-    cliente: "Daniel Gonzalez",
-    estado: "Entregado",
-  },
-  {
-    id: 3,
-    codigo: "836293",
-    productoId: 2,
-    producto: "Cartón de huevos medianos",
-    ubicacion: "Santa Ana calle al cantón Primavera",
-    cantidad: 1,
-    fecha: "2026-05-29",
-    precioFinal: 12.7,
-    cliente: "Daniel Gonzalez",
-    estado: "Entregado",
-  },
-  {
-    id: 4,
-    codigo: "412908",
-    productoId: 1,
-    producto: "Combo Pollo y Huevos Jumbo",
-    ubicacion: "Apopa",
-    cantidad: 2,
-    fecha: "2026-03-03",
-    precioFinal: 50,
-    cliente: "Joshua Daniel",
-    estado: "Pendiente",
-  },
-  {
-    id: 5,
-    codigo: "195632",
-    productoId: 3,
-    producto: "Pollo entero",
-    ubicacion: "Mejicanos",
-    cantidad: 3,
-    fecha: "2026-06-02",
-    precioFinal: 60,
-    cliente: "Maria Fernanda",
-    estado: "Cancelado",
-  },
-  {
-    id: 6,
-    codigo: "458102",
-    productoId: 4,
-    producto: "Bebedero para gallina",
-    ubicacion: "Soyapango",
-    cantidad: 4,
-    fecha: "2026-06-11",
-    precioFinal: 12,
-    cliente: "Gerardo Andres",
-    estado: "Pendiente",
-  },
-  {
-    id: 7,
-    codigo: "654220",
-    productoId: 5,
-    producto: "Comedero para gallina",
-    ubicacion: "Santa Tecla",
-    cantidad: 6,
-    fecha: "2026-06-14",
-    precioFinal: 15,
-    cliente: "Andrea Sofia",
-    estado: "Entregado",
-  },
-  {
-    id: 8,
-    codigo: "781340",
-    productoId: 1,
-    producto: "Combo Pollo y Huevos Jumbo",
-    ubicacion: "Ilopango",
-    cantidad: 1,
-    fecha: "2026-06-20",
-    precioFinal: 25,
-    cliente: "Daniel Alvarado",
-    estado: "Pendiente",
-  },
-];
+const emptyProduct = {
+  productId: "",
+  quantity: 1,
+};
 
 const emptyForm = {
   id: null,
   codigo: "",
-  productoId: PRODUCT_OPTIONS[0].id,
-  producto: PRODUCT_OPTIONS[0].nombre,
+  products: [{ ...emptyProduct }],
   ubicacion: "",
-  cantidad: 1,
   fecha: "",
-  precioFinal: PRODUCT_OPTIONS[0].precioUnitario,
-  cliente: CUSTOMER_OPTIONS[0],
-  estado: "Pendiente", // Siempre inicia en Pendiente
+  customerId: "",
+  cliente: "",
+  estado: "Pendiente",
 };
 
-const formatMoney = (amount) => `$${Number(amount).toFixed(2)}`;
+const formatMoney = (amount) => `$${Number(amount || 0).toFixed(2)}`;
+
+const formatDate = (date) => {
+  if (!date) return "";
+  return String(date).slice(0, 10);
+};
+
+const normalizeText = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+const extractArray = (payload) => {
+  if (Array.isArray(payload)) return payload;
+
+  if (payload && typeof payload === "object") {
+    const arrayValue = Object.values(payload).find((value) => Array.isArray(value));
+    return arrayValue || [];
+  }
+
+  return [];
+};
+
+const parseNumber = (value) => {
+  if (value === undefined || value === null || value === "") return 0;
+
+  if (typeof value === "object" && value.$numberDecimal) {
+    return Number(value.$numberDecimal) || 0;
+  }
+
+  return Number(String(value).replace(/[^0-9.-]/g, "")) || 0;
+};
+
+const getProductId = (product) => product?._id || product?.id || "";
+
+const getProductName = (product) =>
+  product?.name ||
+  product?.nombre ||
+  product?.productName ||
+  product?.ProductName ||
+  "Producto";
+
+const getProductPrice = (product) =>
+  parseNumber(
+    product?.unitPrice ??
+      product?.UnitPrice ??
+      product?.price ??
+      product?.Price ??
+      product?.precio ??
+      product?.Precio ??
+      product?.precioUnitario ??
+      product?.unit_price
+  );
+
+const getCustomerId = (customer) => customer?._id || customer?.id || "";
+
+const getCustomerName = (customer) => {
+  if (!customer) return "";
+  if (typeof customer === "string") return customer;
+
+  return (
+    `${customer.name || customer.nombre || ""} ${
+      customer.lastName || customer.lastname || customer.apellido || ""
+    }`.trim() ||
+    customer.email ||
+    "Cliente"
+  );
+};
 
 const OrdersPage = () => {
-  const [orders, setOrders] = useState(initialOrders);
+  const [rawOrders, setRawOrders] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [customers, setCustomers] = useState([]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -165,6 +127,7 @@ const OrdersPage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [createForm, setCreateForm] = useState(emptyForm);
   const [editForm, setEditForm] = useState(emptyForm);
+  const [loading, setLoading] = useState(false);
 
   const [alert, setAlert] = useState({
     isOpen: false,
@@ -178,7 +141,29 @@ const OrdersPage = () => {
     onCancel: null,
   });
 
+  const activeEndpointRef = useRef({
+    orders: ENDPOINTS.orders[0],
+    products: ENDPOINTS.products[0],
+    customers: ENDPOINTS.customers[0],
+  });
+
   const pageSizeMenuRef = useRef(null);
+
+  const apiGetFirst = async (type) => {
+    let lastError = null;
+
+    for (const endpoint of ENDPOINTS[type]) {
+      try {
+        const res = await api.get(endpoint);
+        activeEndpointRef.current[type] = endpoint;
+        return res;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError;
+  };
 
   const closeAlert = () => {
     setAlert((prev) => ({
@@ -189,20 +174,157 @@ const OrdersPage = () => {
     }));
   };
 
-  const closeCreateModal = () => {
-    setIsCreateModalOpen(false);
-    setCreateForm({
-      ...emptyForm,
-      codigo: generateOrderCode(),
-      fecha: "",
-      ubicacion: "",
+  const showAlert = ({
+    type = "success",
+    title = "",
+    message = "",
+    showCancel = false,
+    confirmText = "Aceptar",
+    cancelText = "Cancelar",
+    onConfirm = closeAlert,
+    onCancel = null,
+  }) => {
+    setAlert({
+      isOpen: true,
+      type,
+      title,
+      message,
+      showCancel,
+      confirmText,
+      cancelText,
+      onConfirm,
+      onCancel,
     });
   };
 
-  const closeEditModal = () => {
-    setIsEditModalOpen(false);
-    setEditForm(emptyForm);
+  const findProductById = (productId) =>
+    products.find((product) => String(getProductId(product)) === String(productId));
+
+  const findCustomerById = (customerId) =>
+    customers.find((customer) => String(getCustomerId(customer)) === String(customerId));
+
+  const calculateProductsTotal = (formProducts) =>
+    formProducts.reduce((total, item) => {
+      const product = findProductById(item.productId);
+      const price = getProductPrice(product);
+      const quantity = Number(item.quantity || 0);
+      return total + price * quantity;
+    }, 0);
+
+  const normalizeOrder = (order) => {
+    const orderProducts = Array.isArray(order.products) ? order.products : [];
+
+    const normalizedProducts = orderProducts.map((item) => {
+      const productId =
+        typeof item.productId === "object"
+          ? getProductId(item.productId)
+          : item.productId || "";
+
+      return {
+        productId,
+        quantity: Number(item.quantity || 1),
+      };
+    });
+
+    const productNames = orderProducts
+      .map((item) => {
+        if (typeof item.productId === "object") {
+          return getProductName(item.productId);
+        }
+
+        const productFound = findProductById(item.productId);
+        return getProductName(productFound);
+      })
+      .filter(Boolean)
+      .join(", ");
+
+    const quantity = orderProducts.reduce(
+      (total, item) => total + Number(item.quantity || 0),
+      0
+    );
+
+    const calculatedTotal = normalizedProducts.reduce((total, item) => {
+      const productFound = findProductById(item.productId);
+      return total + getProductPrice(productFound) * Number(item.quantity || 0);
+    }, 0);
+
+    const dbTotal = parseNumber(order.totalPrice);
+    const customerId =
+      typeof order.customerId === "object"
+        ? getCustomerId(order.customerId)
+        : order.customerId || "";
+
+    const customerFound =
+      typeof order.customerId === "object"
+        ? order.customerId
+        : findCustomerById(customerId);
+
+    return {
+      id: order._id || order.id,
+      codigo: String(order._id || order.id || "").slice(-6).toUpperCase(),
+      products: normalizedProducts.length > 0 ? normalizedProducts : [{ ...emptyProduct }],
+      producto: productNames || "Sin producto",
+      ubicacion: order.location || "",
+      cantidad: quantity,
+      fecha: formatDate(order.date || order.createdAt),
+      precioFinal: dbTotal > 0 ? dbTotal : calculatedTotal,
+      customerId,
+      cliente: getCustomerName(customerFound),
+      estado: order.state || order.estado || order.status || "Pendiente",
+    };
   };
+
+  const orders = useMemo(
+    () => rawOrders.map((order) => normalizeOrder(order)),
+    [rawOrders, products, customers]
+  );
+
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      const res = await apiGetFirst("orders");
+      setRawOrders(extractArray(res.data));
+    } catch (error) {
+      console.log(error);
+      showAlert({
+        type: "error",
+        title: "Error",
+        message: "No se pudieron cargar los pedidos.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadProducts = async () => {
+    try {
+      const res = await apiGetFirst("products");
+      setProducts(extractArray(res.data));
+    } catch (error) {
+      console.log(error);
+      showAlert({
+        type: "error",
+        title: "Error",
+        message: "No se pudieron cargar los productos.",
+      });
+    }
+  };
+
+  const loadCustomers = async () => {
+    try {
+      const res = await apiGetFirst("customers");
+      setCustomers(extractArray(res.data));
+    } catch (error) {
+      console.log(error);
+      setCustomers([]);
+    }
+  };
+
+  useEffect(() => {
+    loadProducts();
+    loadCustomers();
+    loadOrders();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -219,26 +341,13 @@ const OrdersPage = () => {
   }, []);
 
   useEffect(() => {
-    if (isCreateModalOpen || isEditModalOpen || alert.isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
+    document.body.style.overflow =
+      isCreateModalOpen || isEditModalOpen || alert.isOpen ? "hidden" : "auto";
 
     return () => {
       document.body.style.overflow = "auto";
     };
   }, [isCreateModalOpen, isEditModalOpen, alert.isOpen]);
-
-  const normalizeText = (value) =>
-    String(value)
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-
-  const generateOrderCode = () => {
-    return String(Math.floor(100000 + Math.random() * 900000));
-  };
 
   const filteredOrders = useMemo(() => {
     const normalizedSearch = normalizeText(searchTerm.trim());
@@ -246,7 +355,7 @@ const OrdersPage = () => {
     return orders.filter((order) => {
       const matchesSearch =
         !normalizedSearch ||
-        normalizeText(`Pedido #${order.id}`).includes(normalizedSearch) ||
+        normalizeText(`Pedido #${order.codigo}`).includes(normalizedSearch) ||
         normalizeText(order.producto).includes(normalizedSearch) ||
         normalizeText(order.ubicacion).includes(normalizedSearch) ||
         normalizeText(order.cliente).includes(normalizedSearch) ||
@@ -278,9 +387,7 @@ const OrdersPage = () => {
   );
 
   useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
+    if (currentPage > totalPages) setCurrentPage(totalPages);
   }, [currentPage, totalPages]);
 
   const handleItemsPerPageChange = (value) => {
@@ -289,80 +396,66 @@ const OrdersPage = () => {
     setIsPageSizeMenuOpen(false);
   };
 
-  const syncProductData = (formState, value) => {
-    const selectedProduct = PRODUCT_OPTIONS.find(
-      (item) => Number(item.id) === Number(value)
-    );
+  const updateProductRow = (mode, index, field, value) => {
+    const setForm = mode === "create" ? setCreateForm : setEditForm;
 
-    if (!selectedProduct) return formState;
+    setForm((prev) => {
+      const updatedProducts = prev.products.map((item, currentIndex) => {
+        if (currentIndex !== index) return item;
 
-    return {
-      ...formState,
-      productoId: selectedProduct.id,
-      producto: selectedProduct.nombre,
-      precioFinal: Number(selectedProduct.precioUnitario) * Number(formState.cantidad || 1),
-    };
+        return {
+          ...item,
+          [field]: field === "quantity" ? Math.max(1, Number(value) || 1) : value,
+        };
+      });
+
+      return {
+        ...prev,
+        products: updatedProducts,
+      };
+    });
   };
 
-  const syncQuantityData = (formState, value) => {
-    const selectedProduct = PRODUCT_OPTIONS.find(
-      (item) => Number(item.id) === Number(formState.productoId)
-    );
+  const addProductRow = (mode) => {
+    const setForm = mode === "create" ? setCreateForm : setEditForm;
 
-    const quantityValue = Math.max(1, Number(value) || 1);
-    const unitPrice = selectedProduct?.precioUnitario || 0;
+    setForm((prev) => ({
+      ...prev,
+      products: [...prev.products, { ...emptyProduct }],
+    }));
+  };
 
-    return {
-      ...formState,
-      cantidad: quantityValue,
-      precioFinal: Number((unitPrice * quantityValue).toFixed(2)),
-    };
+  const removeProductRow = (mode, index) => {
+    const setForm = mode === "create" ? setCreateForm : setEditForm;
+
+    setForm((prev) => {
+      if (prev.products.length === 1) return prev;
+
+      return {
+        ...prev,
+        products: prev.products.filter((_, currentIndex) => currentIndex !== index),
+      };
+    });
   };
 
   const handleCreateChange = (e) => {
     const { name, value } = e.target;
-
-    setCreateForm((prev) => {
-      if (name === "productoId") {
-        return syncProductData(prev, value);
-      }
-
-      if (name === "cantidad") {
-        return syncQuantityData(prev, value);
-      }
-
-      return {
-        ...prev,
-        [name]: name === "precioFinal" ? Number(value) : value,
-      };
-    });
+    setCreateForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
-
-    setEditForm((prev) => {
-      if (name === "productoId") {
-        return syncProductData(prev, value);
-      }
-
-      if (name === "cantidad") {
-        return syncQuantityData(prev, value);
-      }
-
-      return {
-        ...prev,
-        [name]: name === "precioFinal" ? Number(value) : value,
-      };
-    });
+    setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const validateForm = (form) => {
+    const validProducts = form.products.filter((item) => item.productId);
+
     if (
-      !form.producto ||
+      validProducts.length === 0 ||
       !form.ubicacion.trim() ||
       !form.fecha ||
-      !form.cliente ||
+      !form.customerId ||
       !form.estado
     ) {
       return "Completa todos los campos antes de guardar.";
@@ -372,147 +465,240 @@ const OrdersPage = () => {
       return "La ubicación debe tener al menos 3 caracteres.";
     }
 
-    if (Number(form.cantidad) <= 0) {
-      return "La cantidad debe ser mayor que 0.";
-    }
+    const invalidQuantity = validProducts.some((item) => Number(item.quantity) <= 0);
 
-    if (Number(form.precioFinal) <= 0) {
-      return "El precio final debe ser mayor que 0.";
+    if (invalidQuantity) {
+      return "La cantidad debe ser mayor que 0.";
     }
 
     return "";
   };
 
+  const buildOrderPayload = (form) => ({
+    products: form.products
+      .filter((item) => item.productId)
+      .map((item) => ({
+        productId: item.productId,
+        quantity: Number(item.quantity),
+      })),
+    location: form.ubicacion.trim(),
+    date: form.fecha,
+    customerId: form.customerId,
+    state: form.estado || "Pendiente",
+  });
+
+  const closeCreateModal = () => {
+    setIsCreateModalOpen(false);
+    setCreateForm(emptyForm);
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditForm(emptyForm);
+  };
+
   const openCreateModal = () => {
+    const firstProduct = products[0];
+    const firstCustomer = customers[0];
+
     setCreateForm({
       ...emptyForm,
-      codigo: generateOrderCode(),
-      estado: "Pendiente", // Forzamos pendiente al crear
+      products: [
+        {
+          productId: firstProduct ? getProductId(firstProduct) : "",
+          quantity: 1,
+        },
+      ],
+      customerId: firstCustomer ? getCustomerId(firstCustomer) : "",
+      cliente: firstCustomer ? getCustomerName(firstCustomer) : "",
+      estado: "Pendiente",
     });
+
     setIsCreateModalOpen(true);
   };
 
   const openEditModal = (order) => {
-    setEditForm({ ...order }); // Se cargan los datos previos al editar
+    setEditForm({
+      ...emptyForm,
+      ...order,
+      estado: order.estado || "Pendiente",
+      products: order.products?.length ? order.products : [{ ...emptyProduct }],
+    });
+
     setIsEditModalOpen(true);
   };
 
-  const handleCreateSubmit = (e) => {
+  const handleCreateSubmit = async (e) => {
     e.preventDefault();
 
     const error = validateForm(createForm);
+
     if (error) {
-      setAlert({
-        isOpen: true,
+      showAlert({
         type: "error",
         title: "Campos inválidos",
         message: error,
-        showCancel: false,
-        confirmText: "Aceptar",
-        cancelText: "Cancelar",
-        onConfirm: closeAlert,
-        onCancel: null,
       });
       return;
     }
 
-    const newOrder = {
-      ...createForm,
-      id: orders.length > 0 ? Math.max(...orders.map((item) => item.id)) + 1 : 1,
-      precioFinal: Number(createForm.precioFinal),
-      cantidad: Number(createForm.cantidad),
-      estado: "Pendiente", // Nos aseguramos de que el estado sea pendiente
-    };
+    try {
+      await api.post(activeEndpointRef.current.orders, buildOrderPayload(createForm));
+      await loadOrders();
+      closeCreateModal();
+      setCurrentPage(1);
 
-    setOrders((prev) => [newOrder, ...prev]);
-    closeCreateModal();
-    setCurrentPage(1);
-
-    setAlert({
-      isOpen: true,
-      type: "success",
-      title: "Pedido agregado",
-      message: "El pedido fue registrado correctamente.",
-      showCancel: false,
-      confirmText: "Aceptar",
-      cancelText: "Cancelar",
-      onConfirm: closeAlert,
-      onCancel: null,
-    });
+      showAlert({
+        type: "success",
+        title: "Pedido agregado",
+        message: "El pedido fue registrado correctamente.",
+      });
+    } catch (error) {
+      console.log(error);
+      showAlert({
+        type: "error",
+        title: "Error",
+        message: error.response?.data?.message || "No se pudo agregar el pedido.",
+      });
+    }
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
 
     const error = validateForm(editForm);
+
     if (error) {
-      setAlert({
-        isOpen: true,
+      showAlert({
         type: "error",
         title: "Campos inválidos",
         message: error,
-        showCancel: false,
-        confirmText: "Aceptar",
-        cancelText: "Cancelar",
-        onConfirm: closeAlert,
-        onCancel: null,
       });
       return;
     }
 
-    setOrders((prev) =>
-      prev.map((item) =>
-        item.id === editForm.id
-          ? {
-              ...editForm,
-              precioFinal: Number(editForm.precioFinal),
-              cantidad: Number(editForm.cantidad),
-            }
-          : item
-      )
-    );
+    try {
+      await api.put(
+        `${activeEndpointRef.current.orders}/${editForm.id}`,
+        buildOrderPayload(editForm)
+      );
 
-    closeEditModal();
+      await loadOrders();
+      closeEditModal();
 
-    setAlert({
-      isOpen: true,
-      type: "success",
-      title: "Pedido actualizado",
-      message: "Los datos del pedido se editaron correctamente.",
-      showCancel: false,
-      confirmText: "Aceptar",
-      cancelText: "Cancelar",
-      onConfirm: closeAlert,
-      onCancel: null,
-    });
+      showAlert({
+        type: "success",
+        title: "Pedido actualizado",
+        message:
+          editForm.estado === "Entregado"
+            ? "El pedido fue marcado como entregado correctamente."
+            : "Los datos del pedido se editaron correctamente.",
+      });
+    } catch (error) {
+      console.log(error);
+      showAlert({
+        type: "error",
+        title: "Error",
+        message: error.response?.data?.message || "No se pudo actualizar el pedido.",
+      });
+    }
   };
 
   const handleDelete = (order) => {
-    setAlert({
-      isOpen: true,
+    showAlert({
       type: "warning",
       title: "Eliminar pedido",
-      message: `¿Estás seguro de eliminar el Pedido #${order.id}?`,
+      message: `¿Estás seguro de eliminar el Pedido #${order.codigo}?`,
       showCancel: true,
       confirmText: "Eliminar",
       cancelText: "Cancelar",
-      onConfirm: () => {
-        setOrders((prev) => prev.filter((item) => item.id !== order.id));
-        setAlert({
-          isOpen: true,
-          type: "success",
-          title: "Pedido eliminado",
-          message: "El pedido se eliminó correctamente.",
-          showCancel: false,
-          confirmText: "Aceptar",
-          cancelText: "Cancelar",
-          onConfirm: closeAlert,
-          onCancel: null,
-        });
+      onConfirm: async () => {
+        try {
+          await api.delete(`${activeEndpointRef.current.orders}/${order.id}`);
+          await loadOrders();
+
+          showAlert({
+            type: "success",
+            title: "Pedido eliminado",
+            message: "El pedido se eliminó correctamente.",
+          });
+        } catch (error) {
+          console.log(error);
+          showAlert({
+            type: "error",
+            title: "Error",
+            message: error.response?.data?.message || "No se pudo eliminar el pedido.",
+          });
+        }
       },
       onCancel: closeAlert,
     });
   };
+
+  const getStatusClass = (status) => normalizeText(status).replace(/\s+/g, "-");
+
+  const renderProductRows = (formState, mode) => (
+    <div className="orders-modal-field orders-modal-field-full">
+      <label>Productos</label>
+
+      <div className="orders-products-box">
+        {formState.products.map((item, index) => {
+          const selectedProduct = findProductById(item.productId);
+          const subtotal = getProductPrice(selectedProduct) * Number(item.quantity || 0);
+
+          return (
+            <div className="orders-product-row" key={`${mode}-${index}`}>
+              <select
+                value={item.productId}
+                onChange={(e) =>
+                  updateProductRow(mode, index, "productId", e.target.value)
+                }
+              >
+                <option value="">Selecciona un producto</option>
+
+                {products.map((product) => (
+                  <option key={getProductId(product)} value={getProductId(product)}>
+                    {getProductName(product)} - {formatMoney(getProductPrice(product))}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                type="number"
+                min="1"
+                value={item.quantity}
+                onChange={(e) =>
+                  updateProductRow(mode, index, "quantity", e.target.value)
+                }
+                placeholder="Cantidad"
+              />
+
+              <span className="orders-product-subtotal">{formatMoney(subtotal)}</span>
+
+              {formState.products.length > 1 && (
+                <button
+                  type="button"
+                  className="orders-remove-product-btn"
+                  onClick={() => removeProductRow(mode, index)}
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          );
+        })}
+
+        <button
+          type="button"
+          className="orders-add-product-row"
+          onClick={() => addProductRow(mode)}
+        >
+          <Plus size={16} />
+          Agregar otro producto
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <DashboardLayout>
@@ -543,6 +729,7 @@ const OrdersPage = () => {
               className="orders-status-select"
             >
               <option value="">Estado del pedido</option>
+
               {STATUS_OPTIONS.map((status) => (
                 <option key={status} value={status}>
                   {status}
@@ -554,11 +741,7 @@ const OrdersPage = () => {
 
         <div className="orders-card-container">
           <div className="orders-topbar">
-            <button
-              type="button"
-              className="orders-add-btn"
-              onClick={openCreateModal}
-            >
+            <button type="button" className="orders-add-btn" onClick={openCreateModal}>
               <Plus size={18} />
               Agregar
             </button>
@@ -598,7 +781,9 @@ const OrdersPage = () => {
           </div>
 
           <div className="orders-list">
-            {paginatedOrders.length > 0 ? (
+            {loading ? (
+              <div className="orders-empty-state">Cargando pedidos...</div>
+            ) : paginatedOrders.length > 0 ? (
               paginatedOrders.map((order) => (
                 <article key={order.id} className="orders-item">
                   <div className="orders-item-left">
@@ -608,7 +793,7 @@ const OrdersPage = () => {
 
                     <div className="orders-item-content">
                       <div className="orders-item-header-row">
-                        <h3>Pedido #{order.id}</h3>
+                        <h3>Pedido #{order.codigo}</h3>
                         <p>
                           <strong>Fecha:</strong> {order.fecha}
                         </p>
@@ -617,17 +802,21 @@ const OrdersPage = () => {
                       <p>
                         <strong>Producto:</strong> {order.producto}
                       </p>
+
                       <p>
-                        <strong>Cantidad:</strong> {order.cantidad}
+                        <strong>Cantidad total:</strong> {order.cantidad}
                       </p>
+
                       <p>
                         <strong>Precio final:</strong> {formatMoney(order.precioFinal)}
                       </p>
+
                       <p>
                         <strong>Ubicación:</strong> {order.ubicacion}
                       </p>
+
                       <p>
-                        <strong>Cliente:</strong> {order.cliente}
+                        <strong>Cliente:</strong> {order.cliente || order.customerId}
                       </p>
                     </div>
                   </div>
@@ -654,9 +843,8 @@ const OrdersPage = () => {
                     </div>
 
                     <span className="orders-code-badge">{order.codigo}</span>
-                    <span
-                      className={`orders-status-badge ${order.estado.toLowerCase()}`}
-                    >
+
+                    <span className={`orders-status-badge ${getStatusClass(order.estado)}`}>
                       {order.estado}
                     </span>
                   </div>
@@ -727,27 +915,12 @@ const OrdersPage = () => {
                 const onFieldChange = isCreateModalOpen
                   ? handleCreateChange
                   : handleEditChange;
+                const mode = isCreateModalOpen ? "create" : "edit";
+                const total = calculateProductsTotal(formState.products);
 
                 return (
                   <>
-                    <div className="orders-modal-field">
-                      <label htmlFor="productoId">Producto</label>
-                      <div className="orders-modal-input-wrap select-wrap small-plus">
-                        <select
-                          id="productoId"
-                          name="productoId"
-                          value={formState.productoId}
-                          onChange={onFieldChange}
-                        >
-                          {PRODUCT_OPTIONS.map((product) => (
-                            <option key={product.id} value={product.id}>
-                              {product.nombre}
-                            </option>
-                          ))}
-                        </select>
-                        <Plus size={16} />
-                      </div>
-                    </div>
+                    {renderProductRows(formState, mode)}
 
                     <div className="orders-modal-field">
                       <label htmlFor="ubicacion">Ubicación</label>
@@ -762,18 +935,6 @@ const OrdersPage = () => {
                         />
                         <MapPin size={18} />
                       </div>
-                    </div>
-
-                    <div className="orders-modal-field">
-                      <label htmlFor="cantidad">Cantidad</label>
-                      <input
-                        id="cantidad"
-                        name="cantidad"
-                        type="number"
-                        min="1"
-                        value={formState.cantidad}
-                        onChange={onFieldChange}
-                      />
                     </div>
 
                     <div className="orders-modal-field">
@@ -792,31 +953,30 @@ const OrdersPage = () => {
                       <input
                         id="precioFinal"
                         name="precioFinal"
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        value={formState.precioFinal}
-                        onChange={onFieldChange}
+                        type="text"
+                        value={formatMoney(total)}
+                        readOnly
                       />
                     </div>
 
                     <div className="orders-modal-field">
-                      <label htmlFor="cliente">Cliente</label>
+                      <label htmlFor="customerId">Cliente</label>
                       <select
-                        id="cliente"
-                        name="cliente"
-                        value={formState.cliente}
+                        id="customerId"
+                        name="customerId"
+                        value={formState.customerId}
                         onChange={onFieldChange}
                       >
-                        {CUSTOMER_OPTIONS.map((customer) => (
-                          <option key={customer} value={customer}>
-                            {customer}
+                        <option value="">Selecciona un cliente</option>
+
+                        {customers.map((customer) => (
+                          <option key={getCustomerId(customer)} value={getCustomerId(customer)}>
+                            {getCustomerName(customer)}
                           </option>
                         ))}
                       </select>
                     </div>
 
-                    {/* SOLO mostramos el campo Estado si estamos EDITANDO */}
                     {!isCreateModalOpen && (
                       <div className="orders-modal-field orders-modal-field-full">
                         <label htmlFor="estado">Estado</label>
