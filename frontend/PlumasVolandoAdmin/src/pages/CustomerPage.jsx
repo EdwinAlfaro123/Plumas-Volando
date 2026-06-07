@@ -15,89 +15,7 @@ import DashboardLayout from "../components/DashboardLayout";
 import NeumorphicCard from "../components/NeumorphisCard";
 import CustomAlert from "../components/CustomAlert";
 import "../styles/Customer.css";
-
-const initialCustomers = [
-  {
-    id: 1,
-    nombre: "Daniel Alejandro",
-    apellido: "Alvarado Tobar",
-    fechaNacimiento: "2008-02-10",
-    telefono: "1234-5678",
-    correo: "daniel@gmail.com",
-    password: "12345678",
-    dui: "01234567-8",
-  },
-  {
-    id: 2,
-    nombre: "Edwin Geovanny",
-    apellido: "Alfaro Alfaro",
-    fechaNacimiento: "2007-12-18",
-    telefono: "9876-5432",
-    correo: "edwin@gmail.com",
-    password: "87654321",
-    dui: "05829103-4",
-  },
-  {
-    id: 3,
-    nombre: "Diego Josue",
-    apellido: "Rodriguez Alvarado",
-    fechaNacimiento: "2000-01-01",
-    telefono: "2468-1357",
-    correo: "diego@gmail.com",
-    password: "24681357",
-    dui: "02468135-7",
-  },
-  {
-    id: 4,
-    nombre: "Joshua Daniel",
-    apellido: "Gonzalez Perez",
-    fechaNacimiento: "2006-02-23",
-    telefono: "1357-2468",
-    correo: "joshua@gmail.com",
-    password: "13572468",
-    dui: "06712349-0",
-  },
-  {
-    id: 5,
-    nombre: "Gerardo Andres",
-    apellido: "Jovel Franco",
-    fechaNacimiento: "2008-05-15",
-    telefono: "4545-1535",
-    correo: "gerardo@gmail.com",
-    password: "67541238",
-    dui: "03948576-1",
-  },
-  {
-    id: 6,
-    nombre: "Maria Fernanda",
-    apellido: "Lopez Castillo",
-    fechaNacimiento: "2004-09-11",
-    telefono: "7722-8855",
-    correo: "maria@gmail.com",
-    password: "99887766",
-    dui: "04785612-3",
-  },
-  {
-    id: 7,
-    nombre: "Kevin Andres",
-    apellido: "Ruiz Martinez",
-    fechaNacimiento: "2003-06-08",
-    telefono: "7012-4312",
-    correo: "kevin@gmail.com",
-    password: "55667788",
-    dui: "01928374-5",
-  },
-  {
-    id: 8,
-    nombre: "Andrea Sofia",
-    apellido: "Molina Rivas",
-    fechaNacimiento: "2005-03-19",
-    telefono: "7894-1203",
-    correo: "andrea@gmail.com",
-    password: "44332211",
-    dui: "08273645-9",
-  },
-];
+import api from "../services/api"
 
 const PAGE_SIZE_OPTIONS = [5, 10, "Todos"];
 
@@ -118,7 +36,7 @@ const formatDate = (dateString) => {
 };
 
 const CustomerPage = () => {
-  const [customers, setCustomers] = useState(initialCustomers);
+  const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -127,9 +45,6 @@ const CustomerPage = () => {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editForm, setEditForm] = useState(emptyForm);
-  // 🔥 AGREGAR CLIENTE
-const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-const [addForm, setAddForm] = useState(emptyForm);
 
   const [alert, setAlert] = useState({
     isOpen: false,
@@ -225,6 +140,34 @@ const [addForm, setAddForm] = useState(emptyForm);
     }));
   };
 
+  const loadCustomers = async () => {
+    try {
+      const response = await api.get("/customer");
+
+      const formattedCustomers = response.data.map((customer) => ({
+        id: customer._id,
+        nombre: customer.name,
+        apellido: customer.lastname,
+        correo: customer.email,
+        telefono: customer.phone,
+        dui: customer.DUI,
+        fechaNacimiento: customer.birthdate
+          ? customer.birthdate.split("T")[0]
+          : "",
+        estado: customer.isActive ? "Activo" : "Inactivo",
+        intentos: customer.loginAttemps,
+      }));
+
+      setCustomers(formattedCustomers);
+    } catch (error) {
+      console.error("Error cargando clientes:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadCustomers();
+  }, []);
+
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
@@ -260,7 +203,7 @@ const [addForm, setAddForm] = useState(emptyForm);
     }));
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
 
     if (
@@ -269,7 +212,6 @@ const [addForm, setAddForm] = useState(emptyForm);
       !editForm.fechaNacimiento ||
       !editForm.telefono.trim() ||
       !editForm.correo.trim() ||
-      !editForm.password.trim() ||
       !editForm.dui.trim()
     ) {
       setAlert({
@@ -286,25 +228,49 @@ const [addForm, setAddForm] = useState(emptyForm);
       return;
     }
 
-    setCustomers((prevCustomers) =>
-      prevCustomers.map((customer) =>
-        customer.id === editForm.id ? { ...editForm } : customer
-      )
-    );
+    try {
+      await api.put(`/customer/${editForm.id}`, {
+        name: editForm.nombre,
+        lastname: editForm.apellido,
+        birthdate: editForm.fechaNacimiento,
+        phone: editForm.telefono,
+        email: editForm.correo,
+        DUI: editForm.dui,
+        isActive: editForm.estado === "Activo",
+      });
 
-    closeEditModal();
+      await loadCustomers();
 
-    setAlert({
-      isOpen: true,
-      type: "success",
-      title: "Cambios guardados",
-      message: "Los datos del cliente se editaron correctamente.",
-      showCancel: false,
-      confirmText: "Aceptar",
-      cancelText: "Cancelar",
-      onConfirm: closeAlert,
-      onCancel: null,
-    });
+      closeEditModal();
+
+      setAlert({
+        isOpen: true,
+        type: "success",
+        title: "Cambios guardados",
+        message: "Los datos del cliente se editaron correctamente.",
+        showCancel: false,
+        confirmText: "Aceptar",
+        cancelText: "Cancelar",
+        onConfirm: closeAlert,
+        onCancel: null,
+      });
+    } catch (error) {
+      console.error(error);
+
+      setAlert({
+        isOpen: true,
+        type: "error",
+        title: "Error",
+        message:
+          error.response?.data?.message ||
+          "No se pudo actualizar el cliente.",
+        showCancel: false,
+        confirmText: "Aceptar",
+        cancelText: "Cancelar",
+        onConfirm: closeAlert,
+        onCancel: null,
+      });
+    }
   };
 
   const handleDelete = (customer) => {
@@ -316,21 +282,43 @@ const [addForm, setAddForm] = useState(emptyForm);
       showCancel: true,
       confirmText: "Eliminar",
       cancelText: "Cancelar",
-      onConfirm: () => {
-        setCustomers((prev) => prev.filter((item) => item.id !== customer.id));
 
-        setAlert({
-          isOpen: true,
-          type: "success",
-          title: "Registro eliminado",
-          message: "El cliente se eliminó correctamente.",
-          showCancel: false,
-          confirmText: "Aceptar",
-          cancelText: "Cancelar",
-          onConfirm: closeAlert,
-          onCancel: null,
-        });
+      onConfirm: async () => {
+        try {
+          await api.delete(`/customer/${customer.id}`);
+
+          await loadCustomers();
+
+          setAlert({
+            isOpen: true,
+            type: "success",
+            title: "Registro eliminado",
+            message: "El cliente se eliminó correctamente.",
+            showCancel: false,
+            confirmText: "Aceptar",
+            cancelText: "Cancelar",
+            onConfirm: closeAlert,
+            onCancel: null,
+          });
+        } catch (error) {
+          console.error(error);
+
+          setAlert({
+            isOpen: true,
+            type: "error",
+            title: "Error",
+            message:
+              error.response?.data?.message ||
+              "No se pudo eliminar el cliente.",
+            showCancel: false,
+            confirmText: "Aceptar",
+            cancelText: "Cancelar",
+            onConfirm: closeAlert,
+            onCancel: null,
+          });
+        }
       },
+
       onCancel: () => {
         setAlert({
           isOpen: true,
@@ -347,98 +335,15 @@ const [addForm, setAddForm] = useState(emptyForm);
     });
   };
 
-  // 🔥 FUNCIONES AGREGAR CLIENTE
-const openAddModal = () => {
-  setAddForm(emptyForm);
-  setIsAddModalOpen(true);
-};
-
-const closeAddModal = () => {
-  setIsAddModalOpen(false);
-  setAddForm(emptyForm);
-};
-
-const handleAddFormChange = (e) => {
-  const { name, value } = e.target;
-
-  setAddForm((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
-};
-
-const handleAddSubmit = (e) => {
-  e.preventDefault();
-
-  if (
-    !addForm.nombre.trim() ||
-    !addForm.apellido.trim() ||
-    !addForm.fechaNacimiento ||
-    !addForm.telefono.trim() ||
-    !addForm.correo.trim() ||
-    !addForm.password.trim() ||
-    !addForm.dui.trim()
-  ) {
-    setAlert({
-      isOpen: true,
-      type: "error",
-      title: "Campos incompletos",
-      message: "Completa todos los campos antes de guardar.",
-      showCancel: false,
-      confirmText: "Aceptar",
-      cancelText: "Cancelar",
-      onConfirm: closeAlert,
-      onCancel: null,
-    });
-    return;
-  }
-
-  const newId =
-  customers.length > 0
-    ? Math.max(...customers.map(c => c.id)) + 1
-    : 1;
-
-const newCustomer = {
-  ...addForm,
-  id: newId,
-};
-
-  setCustomers((prev) => [newCustomer, ...prev]); // 🔥 tiempo real
-
-  closeAddModal();
-
-  setAlert({
-    isOpen: true,
-    type: "success",
-    title: "Cliente agregado",
-    message: "El cliente se agregó correctamente.",
-    showCancel: false,
-    confirmText: "Aceptar",
-    cancelText: "Cancelar",
-    onConfirm: closeAlert,
-    onCancel: null,
-  });
-};
-
   return (
     <DashboardLayout>
       <div className="customer-page">
         <div className="customer-page-header">
-  <div>
-    <h1>Gestionar Clientes</h1>
-    <p>Administra la información de tus clientes de forma clara y ordenada.</p>
-  </div>
-
-  {/* 🔥 BOTÓN NUEVO */}
-  <button
-    type="button"
-    className="customer-primary-btn"
-    onClick={openAddModal}
-  >
-    <Plus size={18} />
-    Agregar Cliente
-  </button>
-</div>
+          <div>
+            <h1>Gestionar Clientes</h1>
+            <p>Administra la información de tus clientes de forma clara y ordenada.</p>
+          </div>
+        </div>
 
         <div className="customer-toolbar">
           <div className="customer-search-wrap">
@@ -521,7 +426,6 @@ const newCustomer = {
                   <th>Fecha de nacimiento</th>
                   <th>Teléfono</th>
                   <th>Correo</th>
-                  <th>Contraseña</th>
                   <th>DUI</th>
                   <th>Acciones</th>
                 </tr>
@@ -537,7 +441,6 @@ const newCustomer = {
                       <td>{formatDate(customer.fechaNacimiento)}</td>
                       <td>{customer.telefono}</td>
                       <td>{customer.correo}</td>
-                      <td>{customer.password}</td>
                       <td>{customer.dui}</td>
                       <td>
                         <div className="customer-actions">
@@ -703,17 +606,6 @@ const newCustomer = {
                   />
                 </div>
 
-                <div className="customer-modal-field customer-modal-field-full">
-                  <label htmlFor="password">Contraseña</label>
-                  <input
-                    id="password"
-                    name="password"
-                    type="text"
-                    value={editForm.password}
-                    onChange={handleEditFormChange}
-                  />
-                </div>
-
                 <div className="customer-modal-actions">
                   <button type="submit" className="customer-modal-save">
                     Guardar cambios
@@ -731,84 +623,6 @@ const newCustomer = {
             </div>
           </div>
         )}
-
-        {/* 🔥 MODAL AGREGAR CLIENTE */}
-{isAddModalOpen && (
-  <div className="customer-modal-overlay" onClick={closeAddModal}>
-    <div
-      className="customer-modal"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <button
-        type="button"
-        className="customer-modal-close"
-        onClick={closeAddModal}
-      >
-        <X size={20} />
-      </button>
-
-      <div className="customer-modal-header">
-        <h2>AGREGAR CLIENTE</h2>
-      </div>
-
-      <form className="customer-modal-form" onSubmit={handleAddSubmit}>
-        <div className="customer-modal-field">
-          <label>Nombre</label>
-          <input name="nombre" value={addForm.nombre} onChange={handleAddFormChange}/>
-        </div>
-
-        <div className="customer-modal-field">
-          <label>Apellido</label>
-          <input name="apellido" value={addForm.apellido} onChange={handleAddFormChange}/>
-        </div>
-
-        <div className="customer-modal-field">
-          <label>Correo</label>
-          <input name="correo" value={addForm.correo} onChange={handleAddFormChange}/>
-        </div>
-
-        <div className="customer-modal-field">
-          <label>Teléfono</label>
-          <input name="telefono" value={addForm.telefono} onChange={handleAddFormChange}/>
-        </div>
-
-        <div className="customer-modal-field">
-          <label>Fecha de nacimiento</label>
-          <input
-            type="date"
-            name="fechaNacimiento"
-            value={addForm.fechaNacimiento}
-            onChange={handleAddFormChange}
-          />
-        </div>
-
-        <div className="customer-modal-field">
-          <label>DUI</label>
-          <input name="dui" value={addForm.dui} onChange={handleAddFormChange}/>
-        </div>
-
-        <div className="customer-modal-field customer-modal-field-full">
-          <label>Contraseña</label>
-          <input name="password" value={addForm.password} onChange={handleAddFormChange}/>
-        </div>
-
-        <div className="customer-modal-actions">
-          <button type="submit" className="customer-modal-save">
-            Agregar
-          </button>
-
-          <button
-            type="button"
-            className="customer-modal-cancel"
-            onClick={closeAddModal}
-          >
-            Cancelar
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
 
         <CustomAlert
           isOpen={alert.isOpen}
