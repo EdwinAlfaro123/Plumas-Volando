@@ -454,4 +454,17 @@
   .products-modal-form {
     grid-template-columns: 1fr;
   }
-}   
+}
+
+.product-card-header-only-type {
+  justify-content: center;
+  text-align: center;
+  padding: 14px 18px;
+}
+
+.product-card-header-only-type .product-type {
+  width: 100%;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.2;
+}
