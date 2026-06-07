@@ -19,7 +19,7 @@ El proyecto nace de una propuesta de negocio real combinada con el desarrollo de
 * Diego Josue Rodriguez Alvarado        20210032
 ---
 
-## Stack tecnológico
+## Tecnologías
 
 | Área             | Tecnologías                                                                        |
 | ---------------- | ---------------------------------------------------------------------------------- |
