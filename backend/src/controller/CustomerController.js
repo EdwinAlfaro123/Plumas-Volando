@@ -85,7 +85,7 @@ customerController.updateCustomers = async (req, res) => {
       }
 
       //Validar si existe el DUI
-      const existingDUI = await customerModel.findOne({ DUI });
+      const existingDUI = await customerModel.findOne({ DUI, _id: { $ne: req.params.id }});
 
       if (existingDUI) {
         return res.status(400).json({message: "DUI already exists"});
