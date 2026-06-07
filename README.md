@@ -1,32 +1,31 @@
-<p align="center">
-  <img src="./docs/plumas-volando-banner.png" alt="Plumas Volando" width="100%" />
-</p>
+![Plumas Volando](./docs/plumas-volando-banner.png)
 
 # Plumas Volando
 
-**Plumas Volando** es una plataforma web para una empresa avícola salvadoreña dedicada a la venta y distribución de huevos, gallinas, pollo e insumos.
+Plumas Volando es una plataforma web para una empresa avícola salvadoreña dedicada a la venta y distribución de huevos, gallinas, pollo e insumos.
 
-El sistema está dividido en tres partes: una **web pública** para los clientes, un **panel administrativo** para la gestión interna y un **backend** encargado de la API, base de datos, autenticación, correos e imágenes.
+El sistema integra una web pública para clientes, un panel administrativo para la gestión interna y un backend encargado de la API, autenticación, base de datos, correos e imágenes.
 
-## Equipo de desarrollo
+---
+
+## Equipo
 
 * Joshua Daniel Gonzalez Perez
 * Daniel Alejandro Alvarado Tobar
 * Edwin Geovanny Alfaro Alfaro
 * Diego Josue Rodriguez Alvarado
 
-## Tecnologías utilizadas
+---
 
-* React
-* Vite
-* Node.js
-* Express
-* MongoDB
-* Mongoose
-* Cloudinary
-* Nodemailer
-* JWT
-* CSS
+## Stack tecnológico
+
+| Área             | Tecnologías                                                                        |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| Frontend Admin   | React, Vite, React Router DOM, Axios, Lucide React, CSS                            |
+| Frontend Público | React, Vite, React Router, EmailJS, Leaflet, React Leaflet, Lucide React, CSS      |
+| Backend          | Node.js, Express, MongoDB, Mongoose, JWT, Bcryptjs, Nodemailer, Cloudinary, Multer |
+
+---
 
 ## Estructura del proyecto
 
@@ -263,29 +262,19 @@ Plumas-Volando/
 └── README.md
 ```
 
-## Requisitos previos
+---
 
-* Node.js
-* npm
-* MongoDB Atlas
-* Cuenta de Cloudinary
-* Correo para recuperación y verificación
+## Instalación
 
-## Instalación del backend
-
-Entrar a la carpeta del backend:
+### Backend
 
 ```bash
 cd backend
-```
-
-Instalar dependencias:
-
-```bash
 npm install
+npm run dev
 ```
 
-Dependencias usadas en el backend:
+Dependencias principales:
 
 ```bash
 bcryptjs
@@ -303,46 +292,15 @@ nodemailer
 nodemon
 ```
 
-Crear archivo `.env` dentro de `backend/`:
-
-```env
-JWT_Secret_Ket=tu_clave_jwt
-USER_EMAIL=tu_correo
-USER_PASSWORD=tu_clave_de_aplicacion
-MONGO_URI=tu_conexion_mongodb
-
-CLOUDINARY_CLOUD_NAME=tu_cloud_name
-CLOUDINARY_API_KEY=tu_api_key
-CLOUDINARY_API_SECRET=tu_api_secret
-```
-
-Ejecutar backend:
-
-```bash
-npm run dev
-```
-
-Servidor local:
-
-```bash
-http://localhost:4000
-```
-
-## Instalación del frontend administrativo
-
-Entrar a la carpeta del frontend administrativo:
+### Frontend administrativo
 
 ```bash
 cd frontend/PlumasVolandoAdmin
-```
-
-Instalar dependencias:
-
-```bash
 npm install
+npm run dev
 ```
 
-Dependencias usadas en el frontend administrativo:
+Dependencias principales:
 
 ```bash
 axios
@@ -353,33 +311,15 @@ react-router-dom
 vite
 ```
 
-Ejecutar panel administrativo:
-
-```bash
-npm run dev
-```
-
-URL local:
-
-```bash
-http://localhost:5173
-```
-
-## Instalación del frontend público
-
-Entrar a la carpeta del frontend público:
+### Frontend público
 
 ```bash
 cd frontend/PlumasVolandoPublic
-```
-
-Instalar dependencias:
-
-```bash
 npm install
+npm run dev
 ```
 
-Dependencias usadas en el frontend público:
+Dependencias principales:
 
 ```bash
 @emailjs/browser
@@ -392,61 +332,63 @@ react-router
 vite
 ```
 
-Ejecutar web pública:
+---
 
-```bash
-npm run dev
+## Variables de entorno
+
+Dentro de la carpeta `backend/` se debe crear un archivo `.env` con la siguiente estructura:
+
+```env
+JWT_Secret_Ket=tu_clave_jwt
+USER_EMAIL=tu_correo
+USER_PASSWORD=tu_clave_de_aplicacion
+MONGO_URI=tu_conexion_mongodb
+
+CLOUDINARY_CLOUD_NAME=tu_cloud_name
+CLOUDINARY_API_KEY=tu_api_key
+CLOUDINARY_API_SECRET=tu_api_secret
 ```
 
-URL local:
-
-```bash
-http://localhost:5174
-```
+---
 
 ## Rutas principales del backend
 
-```bash
-/api/registerEmployee
-/api/loginEmployee
-/api/recoveryPasswordEmployee
-/api/employee
+| Ruta                            | Descripción                             |
+| ------------------------------- | --------------------------------------- |
+| `/api/registerEmployee`         | Registro de empleados                   |
+| `/api/loginEmployee`            | Inicio de sesión de empleados           |
+| `/api/recoveryPasswordEmployee` | Recuperación de contraseña de empleados |
+| `/api/employee`                 | Gestión de empleados                    |
+| `/api/registerCustomer`         | Registro de clientes                    |
+| `/api/loginCustomer`            | Inicio de sesión de clientes            |
+| `/api/recoveryPasswordCustomer` | Recuperación de contraseña de clientes  |
+| `/api/customer`                 | Gestión de clientes                     |
+| `/api/products`                 | Gestión de productos                    |
+| `/api/egg`                      | Gestión de huevos                       |
+| `/api/chicken`                  | Gestión de gallinas                     |
+| `/api/orders`                   | Gestión de pedidos                      |
+| `/api/bill`                     | Gestión de facturación                  |
+| `/api/salesHistory`             | Historial de ventas                     |
 
-/api/registerCustomer
-/api/loginCustomer
-/api/recoveryPasswordCustomer
-/api/customer
-
-/api/products
-/api/egg
-/api/chicken
-/api/orders
-/api/bill
-/api/salesHistory
-```
+---
 
 ## Funcionalidades principales
 
 ### Panel administrativo
 
-* Gestión de empleados
-* Gestión de clientes
-* Gestión de productos
-* Gestión de huevos
-* Gestión de gallinas
-* Gestión de pedidos
-* Facturación
-* Historial de ventas
-* Inicio de sesión y recuperación de contraseña
+* Inicio de sesión y recuperación de contraseña.
+* Gestión de empleados y clientes.
+* Gestión de productos, huevos y gallinas.
+* Gestión de pedidos.
+* Facturación e historial de ventas.
 
 ### Web pública
 
-* Página principal de la empresa
-* Información del negocio
-* Catálogo visual de productos
-* Recetas
-* Noticias
-* Puntos de venta
-* Carrito de compras
-* Formulario de contacto
-* Ubicación mediante mapa
+* Página principal de la empresa.
+* Información del negocio.
+* Catálogo visual de productos.
+* Recetas y noticias.
+* Puntos de venta.
+* Carrito de compras.
+* Formulario de contacto.
+* Ubicación mediante mapa.
