@@ -1,6 +1,8 @@
 <p align="center">
   <img src="https://res.cloudinary.com/dvbpyufp2/image/upload/v1780870654/banner-plumas-volando.png_k40nfy.png" alt="Plumas Volando" width="100%" />
 </p>
+
+
 # Plumas Volando
 
 Plumas Volando es una plataforma web creada para apoyar la operación de una empresa avícola salvadoreña dedicada a la venta de huevos frescos, pollo, gallinas e insumos para el sector agropecuario.
