@@ -1,182 +1,452 @@
 <p align="center">
-  <img src="./README-banner.png" alt="Plumas Volando banner" width="100%" />
+  <img src="./docs/plumas-volando-banner.png" alt="Plumas Volando" width="100%" />
 </p>
 
 # Plumas Volando
 
-**Plumas Volando** es una plataforma web desarrollada como proyecto formativo para apoyar la gestión de una empresa avícola salvadoreña. El sistema reúne una **web pública**, un **panel administrativo** y un **backend** para facilitar la venta y administración de productos como huevos, gallinas, pollo e insumos.
+**Plumas Volando** es una plataforma web para una empresa avícola salvadoreña dedicada a la venta y distribución de huevos, gallinas, pollo e insumos.
 
-Su propósito es ayudar a la empresa a llevar un mejor control de productos, pedidos, clientes, empleados, facturación y ventas, además de ofrecer una experiencia más clara para el público.
+El sistema está dividido en tres partes: una **web pública** para los clientes, un **panel administrativo** para la gestión interna y un **backend** encargado de la API, base de datos, autenticación, correos e imágenes.
 
-## Integrantes
+## Equipo de desarrollo
 
-- Joshua Daniel Gonzalez Perez
-- Daniel Alejandro Alvarado Tobar
-- Edwin Geovanny Alfaro Alfaro
-- Diego Josue Rodriguez Alvarado
-
-## ¿Qué incluye este repositorio?
-
-- **Frontend público**: sitio orientado a clientes y visitantes.
-- **Frontend admin**: panel para la gestión interna del negocio.
-- **Backend**: API REST y conexión con la base de datos.
+* Joshua Daniel Gonzalez Perez
+* Daniel Alejandro Alvarado Tobar
+* Edwin Geovanny Alfaro Alfaro
+* Diego Josue Rodriguez Alvarado
 
 ## Tecnologías utilizadas
 
-### Frontend Admin
-- React
-- Vite
-- React Router DOM
-- Axios
-- Lucide React
-- CSS
+* React
+* Vite
+* Node.js
+* Express
+* MongoDB
+* Mongoose
+* Cloudinary
+* Nodemailer
+* JWT
+* CSS
 
-### Frontend Público
-- React
-- Vite
-- React Router
-- EmailJS
-- Leaflet / React Leaflet
-- Lucide React
-- CSS
-
-### Backend
-- Node.js
-- Express
-- MongoDB + Mongoose
-- JWT
-- Bcryptjs
-- Cookie Parser
-- CORS
-- Nodemailer
-- Cloudinary
-- Multer
-- Dotenv
-- Nodemon
-
-## Estructura general
+## Estructura del proyecto
 
 ```bash
 Plumas-Volando/
 ├── backend/
+│   ├── src/
+│   │   ├── controller/
+│   │   │   ├── BillController.js
+│   │   │   ├── ChickensController.js
+│   │   │   ├── CustomerController.js
+│   │   │   ├── EggsController.js
+│   │   │   ├── EmployeesController.js
+│   │   │   ├── LoginCustomerController.js
+│   │   │   ├── LoginEmployeeController.js
+│   │   │   ├── LogoutController.js
+│   │   │   ├── OrdersController.js
+│   │   │   ├── ProductsController.js
+│   │   │   ├── RecoveryCustomerPasswordController.js
+│   │   │   ├── RecoveryPasswordEmployeeController.js
+│   │   │   ├── RegisterCustomerController.js
+│   │   │   ├── RegisterEmployeeController.js
+│   │   │   └── SalesHistoryController.js
+│   │   │
+│   │   ├── model/
+│   │   │   ├── Bill.js
+│   │   │   ├── Chickens.js
+│   │   │   ├── Customer.js
+│   │   │   ├── Eggs.js
+│   │   │   ├── Employees.js
+│   │   │   ├── Orders.js
+│   │   │   ├── Products.js
+│   │   │   └── SalesHistory.js
+│   │   │
+│   │   ├── routes/
+│   │   │   ├── BillRoutes.js
+│   │   │   ├── ChickensRoutes.js
+│   │   │   ├── CustomerRoutes.js
+│   │   │   ├── EggsRoutes.js
+│   │   │   ├── EmployeesRoutes.js
+│   │   │   ├── LoginCustomerRoutes.js
+│   │   │   ├── LoginEmployeeRoutes.js
+│   │   │   ├── OrderRoutes.js
+│   │   │   ├── ProductsRoutes.js
+│   │   │   ├── RecoveryPasswordCustomer.js
+│   │   │   ├── RecoveryPasswordEmployeeRoutes.js
+│   │   │   ├── RegisterCustomerRoutes.js
+│   │   │   ├── RegisterEmployeeRoutes.js
+│   │   │   └── SalesHistoryRoutes.js
+│   │   │
+│   │   └── utils/
+│   │       ├── cloudinaryConfig.js
+│   │       ├── sendMailRecovery.js
+│   │       └── sentMailVerificationCode.js
+│   │
+│   ├── app.js
+│   ├── config.js
+│   ├── database.js
+│   ├── index.js
+│   └── package.json
+│
 ├── frontend/
 │   ├── PlumasVolandoAdmin/
+│   │   ├── public/
+│   │   │   ├── favicon.svg
+│   │   │   └── icons.svg
+│   │   │
+│   │   ├── src/
+│   │   │   ├── assets/
+│   │   │   │   ├── hero.png
+│   │   │   │   ├── react.svg
+│   │   │   │   └── vite.svg
+│   │   │   │
+│   │   │   ├── components/
+│   │   │   │   ├── AuthLayout.jsx
+│   │   │   │   ├── Buttons.jsx
+│   │   │   │   ├── CustomAlert.jsx
+│   │   │   │   ├── DashboardLayout.jsx
+│   │   │   │   ├── DateFilter.jsx
+│   │   │   │   ├── FormField.jsx
+│   │   │   │   ├── Input.jsx
+│   │   │   │   ├── Navbar.jsx
+│   │   │   │   ├── NeumorphisCard.jsx
+│   │   │   │   ├── SearchBar.jsx
+│   │   │   │   ├── Sidebar.jsx
+│   │   │   │   ├── StatCard.jsx
+│   │   │   │   └── Table.jsx
+│   │   │   │
+│   │   │   ├── img/
+│   │   │   │   ├── Plumas.png
+│   │   │   │   ├── PlumasVolandoLogo.png
+│   │   │   │   └── loginimage.png
+│   │   │   │
+│   │   │   ├── pages/
+│   │   │   │   ├── BillPage.jsx
+│   │   │   │   ├── ChickenPage.jsx
+│   │   │   │   ├── CustomerPage.jsx
+│   │   │   │   ├── DashboardPage.jsx
+│   │   │   │   ├── EmployeePage.jsx
+│   │   │   │   ├── LoginPage.jsx
+│   │   │   │   ├── OrdersPage.jsx
+│   │   │   │   ├── ProductsPage.jsx
+│   │   │   │   ├── RecordsPage.jsx
+│   │   │   │   ├── RecoverEmailCodePage.jsx
+│   │   │   │   ├── RecoverEmailPasswordPage.jsx
+│   │   │   │   ├── RecoverNewPasswordPage.jsx
+│   │   │   │   └── RegisterPage.jsx
+│   │   │   │
+│   │   │   ├── services/
+│   │   │   │   └── api.js
+│   │   │   │
+│   │   │   ├── styles/
+│   │   │   │   ├── Bill.css
+│   │   │   │   ├── Chicken.css
+│   │   │   │   ├── CustomAlert.css
+│   │   │   │   ├── Customer.css
+│   │   │   │   ├── Dashboard.css
+│   │   │   │   ├── DateFilter.css
+│   │   │   │   ├── Employee.css
+│   │   │   │   ├── Global.css
+│   │   │   │   ├── Login.css
+│   │   │   │   ├── Navbar.css
+│   │   │   │   ├── NeumorphicCard.css
+│   │   │   │   ├── Orders.css
+│   │   │   │   ├── Products.css
+│   │   │   │   ├── Records.css
+│   │   │   │   ├── RecoverEmailCode.css
+│   │   │   │   ├── RecoverEmailPassword.css
+│   │   │   │   ├── RecoverNewPassword.css
+│   │   │   │   ├── Register.css
+│   │   │   │   ├── SearchBar.css
+│   │   │   │   ├── SideBar.css
+│   │   │   │   ├── StatCard.css
+│   │   │   │   └── Table.css
+│   │   │   │
+│   │   │   ├── App.css
+│   │   │   ├── App.jsx
+│   │   │   ├── index.css
+│   │   │   └── main.jsx
+│   │   │
+│   │   ├── index.html
+│   │   ├── package.json
+│   │   └── vite.config.js
+│   │
 │   └── PlumasVolandoPublic/
+│       ├── public/
+│       │   ├── favicon.svg
+│       │   └── icons.svg
+│       │
+│       ├── src/
+│       │   ├── assets/
+│       │   │   ├── Gallina1.jpg
+│       │   │   ├── Gallina2.webp
+│       │   │   ├── Huevos1.jpg
+│       │   │   ├── Huevos2.jpg
+│       │   │   ├── Insumo1.webp
+│       │   │   ├── Insumo2.jpg
+│       │   │   ├── banner-inicio.png
+│       │   │   ├── logo-plumas.png
+│       │   │   ├── news/
+│       │   │   └── recipes/
+│       │   │
+│       │   ├── components/
+│       │   │   ├── AboutHero.jsx
+│       │   │   ├── BenefitsSection.jsx
+│       │   │   ├── CartItem.jsx
+│       │   │   ├── CartSummary.jsx
+│       │   │   ├── ContactForm.jsx
+│       │   │   ├── DifficultyBadge.jsx
+│       │   │   ├── FAQSection.jsx
+│       │   │   ├── FeatureCard.jsx
+│       │   │   ├── Footer.jsx
+│       │   │   ├── FrequentPoint.jsx
+│       │   │   ├── Header.jsx
+│       │   │   ├── Hero.jsx
+│       │   │   ├── MapContainer.jsx
+│       │   │   ├── NewsCard.jsx
+│       │   │   ├── NewsGrid.jsx
+│       │   │   ├── NewsModal.jsx
+│       │   │   ├── PointCard.jsx
+│       │   │   ├── ProductCard.jsx
+│       │   │   ├── ProductFilters.jsx
+│       │   │   ├── ProductGrid.jsx
+│       │   │   ├── ProductSearchBar.jsx
+│       │   │   ├── RecipeCard.jsx
+│       │   │   ├── RecipeGrid.jsx
+│       │   │   ├── RecipeModal.jsx
+│       │   │   ├── RecipesSection.jsx
+│       │   │   ├── ServicesCard.jsx
+│       │   │   └── Testimonials.jsx
+│       │   │
+│       │   ├── data/
+│       │   │   ├── faqData.js
+│       │   │   ├── newsData.js
+│       │   │   ├── pointsData.js
+│       │   │   ├── productsData.js
+│       │   │   └── recipesData.js
+│       │   │
+│       │   ├── pages/
+│       │   │   ├── AboutUsPage.jsx
+│       │   │   ├── ContactoPage.jsx
+│       │   │   ├── InicioPage.jsx
+│       │   │   ├── NewsPage.jsx
+│       │   │   ├── PointsOfSalePage.jsx
+│       │   │   ├── ProductsPage.jsx
+│       │   │   ├── RecipesPage.jsx
+│       │   │   └── ShoppingCarPage.jsx
+│       │   │
+│       │   ├── styles/
+│       │   │   ├── AboutUs.css
+│       │   │   ├── Contacto.css
+│       │   │   ├── Inicio.css
+│       │   │   ├── News.css
+│       │   │   ├── PointsOfSale.css
+│       │   │   ├── Products.css
+│       │   │   ├── Recipes.css
+│       │   │   └── ShoppingCar.css
+│       │   │
+│       │   ├── utils/
+│       │   │   └── cartStorage.js
+│       │   │
+│       │   ├── App.css
+│       │   ├── App.jsx
+│       │   ├── index.css
+│       │   └── main.jsx
+│       │
+│       ├── index.html
+│       ├── package.json
+│       └── vite.config.js
+│
+├── docs/
+│   └── plumas-volando-banner.png
+│
 └── README.md
 ```
 
 ## Requisitos previos
 
-Antes de ejecutar el proyecto, asegurate de tener instalado:
+* Node.js
+* npm
+* MongoDB Atlas
+* Cuenta de Cloudinary
+* Correo para recuperación y verificación
 
-- **Node.js**
-- **npm**
-- Acceso a **MongoDB Atlas** o una base MongoDB
+## Instalación del backend
 
-## Cómo ejecutar el proyecto
-
-### 1) Backend
+Entrar a la carpeta del backend:
 
 ```bash
 cd backend
-npm install
-npm run dev
 ```
 
-Por defecto corre en:
+Instalar dependencias:
 
 ```bash
-http://localhost:4000
+npm install
 ```
 
-### Variables de entorno del backend
+Dependencias usadas en el backend:
 
-Crear un archivo `.env` dentro de `backend/` con valores similares a estos:
+```bash
+bcryptjs
+cloudinary
+cookie-parser
+cors
+crypto
+dotenv
+express
+jsonwebtoken
+mongoose
+multer
+multer-storage-cloudinary
+nodemailer
+nodemon
+```
+
+Crear archivo `.env` dentro de `backend/`:
 
 ```env
 JWT_Secret_Ket=tu_clave_jwt
 USER_EMAIL=tu_correo
 USER_PASSWORD=tu_clave_de_aplicacion
 MONGO_URI=tu_conexion_mongodb
+
 CLOUDINARY_CLOUD_NAME=tu_cloud_name
 CLOUDINARY_API_KEY=tu_api_key
 CLOUDINARY_API_SECRET=tu_api_secret
 ```
 
-### 2) Frontend Admin
+Ejecutar backend:
 
 ```bash
-cd frontend/PlumasVolandoAdmin
-npm install
 npm run dev
 ```
 
-Generalmente corre en:
+Servidor local:
+
+```bash
+http://localhost:4000
+```
+
+## Instalación del frontend administrativo
+
+Entrar a la carpeta del frontend administrativo:
+
+```bash
+cd frontend/PlumasVolandoAdmin
+```
+
+Instalar dependencias:
+
+```bash
+npm install
+```
+
+Dependencias usadas en el frontend administrativo:
+
+```bash
+axios
+lucide-react
+react
+react-dom
+react-router-dom
+vite
+```
+
+Ejecutar panel administrativo:
+
+```bash
+npm run dev
+```
+
+URL local:
 
 ```bash
 http://localhost:5173
 ```
 
-### 3) Frontend Público
+## Instalación del frontend público
+
+Entrar a la carpeta del frontend público:
 
 ```bash
 cd frontend/PlumasVolandoPublic
+```
+
+Instalar dependencias:
+
+```bash
 npm install
+```
+
+Dependencias usadas en el frontend público:
+
+```bash
+@emailjs/browser
+leaflet
+lucide-react
+react
+react-dom
+react-leaflet
+react-router
+vite
+```
+
+Ejecutar web pública:
+
+```bash
 npm run dev
 ```
 
-Si ya hay otra app Vite abierta, normalmente correrá en:
+URL local:
 
 ```bash
 http://localhost:5174
 ```
 
+## Rutas principales del backend
+
+```bash
+/api/registerEmployee
+/api/loginEmployee
+/api/recoveryPasswordEmployee
+/api/employee
+
+/api/registerCustomer
+/api/loginCustomer
+/api/recoveryPasswordCustomer
+/api/customer
+
+/api/products
+/api/egg
+/api/chicken
+/api/orders
+/api/bill
+/api/salesHistory
+```
+
 ## Funcionalidades principales
 
 ### Panel administrativo
-- Gestión de empleados
-- Gestión de clientes
-- Gestión de productos
-- Gestión de huevos y gallinas
-- Gestión de pedidos
-- Facturación e historial de ventas
-- Recuperación de contraseña y autenticación
 
-### Sitio público
-- Navegación pública de la empresa
-- Visualización de productos
-- Contacto
-- Información general del negocio
-- Interfaz orientada al cliente
+* Gestión de empleados
+* Gestión de clientes
+* Gestión de productos
+* Gestión de huevos
+* Gestión de gallinas
+* Gestión de pedidos
+* Facturación
+* Historial de ventas
+* Inicio de sesión y recuperación de contraseña
 
-## Endpoints principales del backend
+### Web pública
 
-- `/api/registerEmployee`
-- `/api/loginEmployee`
-- `/api/employee`
-- `/api/registerCustomer`
-- `/api/loginCustomer`
-- `/api/customer`
-- `/api/products`
-- `/api/egg`
-- `/api/chicken`
-- `/api/orders`
-- `/api/bill`
-- `/api/salesHistory`
-
-## Estado del proyecto
-
-El proyecto se encuentra **en desarrollo**. Ya cuenta con estructura funcional de frontend y backend, aunque todavía puede seguir mejorando en integración, validaciones y despliegue.
-
-## Nota de mantenimiento
-
-Para mantener el proyecto ordenado se recomienda:
-
-- separar cambios por ramas
-- documentar nuevas rutas o módulos
-- mantener actualizadas las dependencias
-- no subir credenciales reales al repositorio
-
----
-
-Si querés, en el siguiente mensaje también te lo puedo dejar en una **versión todavía más corta**, como si fuera la versión final exacta para pegar directamente en GitHub sin moverle nada.
+* Página principal de la empresa
+* Información del negocio
+* Catálogo visual de productos
+* Recetas
+* Noticias
+* Puntos de venta
+* Carrito de compras
+* Formulario de contacto
+* Ubicación mediante mapa
