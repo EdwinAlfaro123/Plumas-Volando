@@ -1,20 +1,19 @@
-![Plumas Volando](./docs/plumas-volando-banner.png)
+![Plumas Volando](./banner-plumas-volando.png)
 
 # Plumas Volando
 
-Plumas Volando es una plataforma web para una empresa avícola salvadoreña dedicada a la venta y distribución de huevos, gallinas, pollo e insumos.
+Plumas Volando es una plataforma web creada para apoyar la operación de una empresa avícola salvadoreña dedicada a la venta de huevos frescos, pollo, gallinas e insumos para el sector agropecuario.
 
-El sistema integra una web pública para clientes, un panel administrativo para la gestión interna y un backend encargado de la API, autenticación, base de datos, correos e imágenes.
+El proyecto nace de una propuesta de negocio real combinada con el desarrollo de una aplicación web completa. Su propósito es modernizar la forma en que la empresa presenta sus productos, administra pedidos y organiza información clave del negocio, manteniendo una experiencia clara, funcional y profesional para clientes y administradores.
 
 ---
 
 ## Equipo
 
-* Joshua Daniel Gonzalez Perez
-* Daniel Alejandro Alvarado Tobar
-* Edwin Geovanny Alfaro Alfaro
-* Diego Josue Rodriguez Alvarado
-
+* Joshua Daniel Gonzalez Perez  20220432
+* Daniel Alejandro Alvarado Tobar 20210133
+* Edwin Geovanny Alfaro Alfaro   20210300
+* Diego Josue Rodriguez Alvarado 20210032
 ---
 
 ## Stack tecnológico
@@ -256,9 +255,7 @@ Plumas-Volando/
 │       ├── package.json
 │       └── vite.config.js
 │
-├── docs/
-│   └── plumas-volando-banner.png
-│
+├── banner-plumas-volando.png
 └── README.md
 ```
 
