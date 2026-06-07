@@ -1,5 +1,6 @@
-![Plumas Volando](./banner-plumas-volando.png)
-
+<p align="center">
+  <img src="https://res.cloudinary.com/dvbpyufp2/image/upload/v1780870654/banner-plumas-volando.png_k40nfy.png" alt="Plumas Volando" width="100%" />
+</p>
 # Plumas Volando
 
 Plumas Volando es una plataforma web creada para apoyar la operación de una empresa avícola salvadoreña dedicada a la venta de huevos frescos, pollo, gallinas e insumos para el sector agropecuario.
@@ -10,10 +11,10 @@ El proyecto nace de una propuesta de negocio real combinada con el desarrollo de
 
 ## Equipo
 
-* Joshua Daniel Gonzalez Perez  20220432
-* Daniel Alejandro Alvarado Tobar 20210133
-* Edwin Geovanny Alfaro Alfaro   20210300
-* Diego Josue Rodriguez Alvarado 20210032
+* Daniel Alejandro Alvarado Tobar       20210133
+* Joshua Daniel Gonzalez Perez          20220432
+* Edwin Geovanny Alfaro Alfaro          20210300
+* Diego Josue Rodriguez Alvarado        20210032
 ---
 
 ## Stack tecnológico
@@ -93,10 +94,6 @@ Plumas-Volando/
 │   │   │   └── icons.svg
 │   │   │
 │   │   ├── src/
-│   │   │   ├── assets/
-│   │   │   │   ├── hero.png
-│   │   │   │   ├── react.svg
-│   │   │   │   └── vite.svg
 │   │   │   │
 │   │   │   ├── components/
 │   │   │   │   ├── AuthLayout.jsx
@@ -171,9 +168,6 @@ Plumas-Volando/
 │   │
 │   └── PlumasVolandoPublic/
 │       ├── public/
-│       │   ├── favicon.svg
-│       │   └── icons.svg
-│       │
 │       ├── src/
 │       │   ├── assets/
 │       │   │   ├── Gallina1.jpg
@@ -253,9 +247,7 @@ Plumas-Volando/
 │       │
 │       ├── index.html
 │       ├── package.json
-│       └── vite.config.js
 │
-├── banner-plumas-volando.png
 └── README.md
 ```
 
