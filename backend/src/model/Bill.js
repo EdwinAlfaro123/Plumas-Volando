@@ -1,7 +1,7 @@
 import mongoose, { Schema, model } from "mongoose"
 
 const BillSchema = new Schema({
-    OrderId: {type: mongoose.Types.ObjectId, ref: "Order"},
+    OrderId: {type: mongoose.Types.ObjectId, ref: "Orders"},
     date: {type: Date},
     paymentMethod: {type: String}
 },{
@@ -9,4 +9,4 @@ const BillSchema = new Schema({
     strict: false
 })
 
-export default model("Bill", BillSchema, "Bill")
+export default model("Bill", BillSchema, "Bills")
