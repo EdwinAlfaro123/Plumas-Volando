@@ -10,4 +10,4 @@ const SalesHistorySchema = new Schema({
     strict: false
 })
 
-export default model("SalesHistory", SalesHistorySchema, "SalesHistory")
+export default model("SalesHistory", SalesHistorySchema, "salesHistory")
