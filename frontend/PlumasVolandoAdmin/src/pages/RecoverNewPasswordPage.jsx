@@ -12,6 +12,7 @@ const RecoverNewPasswordPage = () => {
     confirmPassword: "",
   });
 
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -22,50 +23,152 @@ const RecoverNewPasswordPage = () => {
     message: "",
   });
 
+  const showAlert = (type, title, message) => {
+    setAlert({
+      isOpen: true,
+      type,
+      title,
+      message,
+    });
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const passwordLimpia = formData.password.trim();
-    const confirmPasswordLimpia = formData.confirmPassword.trim();
+    const newPassword = formData.password;
+    const confirmNewPassword = formData.confirmPassword;
 
-    if (!passwordLimpia || !confirmPasswordLimpia) {
-      setAlert({
-        isOpen: true,
-        type: "error",
-        title: "Campos incompletos",
-        message: "Por favor llena ambos campos",
-      });
+    if (!newPassword.trim() || !confirmNewPassword.trim()) {
+      showAlert(
+        "error",
+        "Campos incompletos",
+        "Por favor llena ambos campos"
+      );
       return;
     }
 
-    if (passwordLimpia !== confirmPasswordLimpia) {
-      setAlert({
-        isOpen: true,
-        type: "error",
-        title: "Contraseñas diferentes",
-        message: "Las contraseñas no coinciden",
-      });
+    if (newPassword.length < 6) {
+      showAlert(
+        "error",
+        "Contraseña débil",
+        "La contraseña debe tener al menos 6 caracteres"
+      );
       return;
     }
 
-    setAlert({
-      isOpen: true,
-      type: "success",
-      title: "Contraseña actualizada",
-      message: "Tu contraseña se cambió correctamente",
-    });
+    if (newPassword !== confirmNewPassword) {
+      showAlert(
+        "error",
+        "Contraseñas diferentes",
+        "Las contraseñas no coinciden"
+      );
+      return;
+    }
 
-    setTimeout(() => {
-      navigate("/login");
-    }, 1400);
+    try {
+      setLoading(true);
+
+      const response = await fetch(
+        "http://localhost:4000/api/recoveryPasswordEmployee/newPassword",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            newPassword,
+            confirmNewPassword,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.message === "Password doesnt match") {
+          showAlert(
+            "error",
+            "Contraseñas diferentes",
+            "Las contraseñas no coinciden"
+          );
+          return;
+        }
+
+        if (data.message === "Code not verified") {
+          showAlert(
+            "error",
+            "Código no verificado",
+            "Primero debes verificar el código enviado a tu correo"
+          );
+
+          setTimeout(() => {
+            navigate("/emailCode");
+          }, 1400);
+
+          return;
+        }
+
+        if (data.message === "Internal server error") {
+          showAlert(
+            "error",
+            "Sesión expirada",
+            "Vuelve a solicitar un código para cambiar tu contraseña"
+          );
+
+          setTimeout(() => {
+            navigate("/recoverEmail");
+          }, 1600);
+
+          return;
+        }
+
+        showAlert(
+          "error",
+          "Error",
+          data.message || "No se pudo actualizar la contraseña"
+        );
+        return;
+      }
+
+      if (data.message !== "Password updated") {
+        showAlert(
+          "error",
+          "Error",
+          "El servidor no confirmó el cambio de contraseña"
+        );
+        return;
+      }
+
+      sessionStorage.removeItem("recoveryEmail");
+
+      showAlert(
+        "success",
+        "Contraseña actualizada",
+        "Tu contraseña se cambió correctamente"
+      );
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1400);
+    } catch (error) {
+      showAlert(
+        "error",
+        "Error de conexión",
+        "No se pudo conectar con el servidor"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -92,11 +195,14 @@ const RecoverNewPasswordPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   className="recover-new-input"
+                  disabled={loading}
                 />
+
                 <button
                   type="button"
                   className="recover-new-toggle"
                   onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
                 >
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
@@ -113,13 +219,16 @@ const RecoverNewPasswordPage = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className="recover-new-input"
+                  disabled={loading}
                 />
+
                 <button
                   type="button"
                   className="recover-new-toggle"
                   onClick={() =>
                     setShowConfirmPassword(!showConfirmPassword)
                   }
+                  disabled={loading}
                 >
                   {showConfirmPassword ? (
                     <EyeOff size={15} />
@@ -129,16 +238,21 @@ const RecoverNewPasswordPage = () => {
                 </button>
               </div>
 
-              <button type="submit" className="recover-new-btn-primary">
-                Cambiar contraseña
+              <button
+                type="submit"
+                className="recover-new-btn-primary"
+                disabled={loading}
+              >
+                {loading ? "Cambiando..." : "Cambiar contraseña"}
               </button>
 
               <button
                 type="button"
                 className="recover-new-btn-secondary"
                 onClick={() => navigate("/login")}
+                disabled={loading}
               >
-                Volver al Inicio de sesion
+                Volver al Inicio de sesión
               </button>
             </form>
           </div>
