@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -13,31 +13,25 @@ import DateFilter from "../components/DateFilter";
 import Table from "../components/Table";
 import CustomAlert from "../components/CustomAlert";
 import "../styles/Chicken.css";
-
-const GALLINAS_DATA = [
-  { id: 1, lote: "75", perdidas: "20", enfermas: "5", fechaInicio: "2024-06-30", fechaFin: "2026-06-30", semanasVida: "17" },
-  { id: 2, lote: "52", perdidas: "38", enfermas: "3", fechaInicio: "2020-11-10", fechaFin: "2022-11-10", semanasVida: "23" },
-  { id: 3, lote: "70", perdidas: "65", enfermas: "4", fechaInicio: "2021-10-23", fechaFin: "2023-10-23", semanasVida: "47" },
-];
-
-const HUEVOS_DATA = [
-  { id: 1, total: "285", jumbo: "20", grande: "207", mediano: "53", pequeno: "1", perdidos: "0", fecha: "2026-02-23" },
-  { id: 2, total: "372", jumbo: "20", grande: "304", mediano: "32", pequeno: "2", perdidos: "5", fecha: "2026-02-24" },
-  { id: 3, total: "511", jumbo: "18", grande: "402", mediano: "63", pequeno: "3", perdidos: "2", fecha: "2026-02-26" },
-];
+import api from "../services/api"
 
 const ChickenPage = () => {
-  const [gallinas, setGallinas] = useState(GALLINAS_DATA);
-  const [huevos, setHuevos] = useState(HUEVOS_DATA);
+  const [gallinas, setGallinas] = useState([]);
+  const [huevos, setHuevos] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateDesde, setDateDesde] = useState("");
   const [dateHasta, setDateHasta] = useState("");
 
-  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
   const [isGallinaModalOpen, setIsGallinaModalOpen] = useState(false);
   const [isHuevoModalOpen, setIsHuevoModalOpen] = useState(false);
+  
+  const [isEditingGallina, setIsEditingGallina] = useState(false);
+  const [isEditingHuevo, setIsEditingHuevo] = useState(false);
+  
+  const [currentPageGallinas, setCurrentPageGallinas] = useState(1);
+  const [currentPageHuevos, setCurrentPageHuevos] = useState(1);
 
   const [gallinaForm, setGallinaForm] = useState({
     id: "", lote: "", perdidas: "", enfermas: "", semanasVida: "", fechaInicio: "", fechaFin: ""
@@ -52,7 +46,92 @@ const ChickenPage = () => {
     confirmText: "Aceptar", cancelText: "Cancelar", onConfirm: null, onCancel: null,
   });
 
+  useEffect(() => {
+    const total =
+      Number(huevoForm.jumbo || 0) +
+      Number(huevoForm.grande || 0) +
+      Number(huevoForm.mediano || 0) +
+      Number(huevoForm.pequeno || 0);
+
+    setHuevoForm((prev) => ({
+      ...prev,
+      total: total.toString(),
+    }));
+  }, [
+    huevoForm.jumbo,
+    huevoForm.grande,
+    huevoForm.mediano,
+    huevoForm.pequeno,
+  ]);
+
   const closeAlert = () => setAlert((prev) => ({ ...prev, isOpen: false, onConfirm: null, onCancel: null }));
+
+  const loadGallinas = async () => {
+    try {
+      const response = await api.get("/chicken");
+
+      const formattedData = response.data.map((item) => ({
+        id: item._id,
+        lote: item.quantityChickens,
+        perdidas: item.chickensLosts,
+        enfermas: item.quantitySick,
+        semanasVida: item.weeksLife,
+        fechaInicio: item.startDate
+          ? item.startDate.split("T")[0]
+          : "",
+        fechaFin: item.endDate
+          ? item.endDate.split("T")[0]
+          : "",
+      }));
+
+      setGallinas(formattedData);
+    } catch (error) {
+      console.error("Error cargando gallinas:", error);
+    }
+  };
+
+  const handleCreateGallina = async (e) => {
+    e.preventDefault();
+
+    try {
+      await api.post("/chicken", {
+        quantityChickens: Number(gallinaForm.lote),
+        chickensLosts: Number(gallinaForm.perdidas),
+        quantitySick: Number(gallinaForm.enfermas),
+        weeksLife: Number(gallinaForm.semanasVida),
+        startDate: gallinaForm.fechaInicio,
+        endDate: gallinaForm.fechaFin,
+      });
+
+      await loadGallinas();
+
+      closeGallinaModal();
+
+      setAlert({
+        isOpen: true,
+        type: "success",
+        title: "Registro creado",
+        message: "El lote de gallinas fue registrado correctamente.",
+        showCancel: false,
+        confirmText: "Aceptar",
+        onConfirm: closeAlert,
+      });
+    } catch (error) {
+      console.error(error);
+
+      setAlert({
+        isOpen: true,
+        type: "error",
+        title: "Error",
+        message:
+          error.response?.data?.message ||
+          "No se pudo registrar el lote.",
+        showCancel: false,
+        confirmText: "Aceptar",
+        onConfirm: closeAlert,
+      });
+    }
+  };
 
   const normalizeText = (value) => String(value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
@@ -72,11 +151,34 @@ const ChickenPage = () => {
     });
   }, [huevos, searchTerm, dateDesde, dateHasta]);
 
-  const paginatedGallinas = filteredGallinas.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-  const paginatedHuevos = filteredHuevos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const paginatedGallinas = filteredGallinas.slice(
+    (currentPageGallinas - 1) * itemsPerPage,
+    currentPageGallinas * itemsPerPage
+  );
+
+  const paginatedHuevos = filteredHuevos.slice(
+    (currentPageHuevos - 1) * itemsPerPage,
+    currentPageHuevos * itemsPerPage
+  );
 
   const openGallinaModal = (gallina = null) => {
-    setGallinaForm(gallina ? { ...gallina } : { id: "", lote: "", perdidas: "", enfermas: "", semanasVida: "", fechaInicio: "", fechaFin: "" });
+    if (gallina) {
+      setGallinaForm(gallina);
+      setIsEditingGallina(true);
+    } else {
+      setGallinaForm({
+        id: "",
+        lote: "",
+        perdidas: "",
+        enfermas: "",
+        semanasVida: "",
+        fechaInicio: "",
+        fechaFin: "",
+      });
+
+      setIsEditingGallina(false);
+    }
+
     setIsGallinaModalOpen(true);
   };
   
@@ -89,64 +191,308 @@ const ChickenPage = () => {
     return "";
   };
 
-  const handleGallinaSubmit = (e) => {
+  const handleGallinaSubmit = async (e) => {
     e.preventDefault();
-    const error = validateGallina(gallinaForm);
-    if (error) {
-      setAlert({ isOpen: true, type: "error", title: "Campos vacíos", message: error, showCancel: false, onConfirm: closeAlert });
-      return;
-    }
 
-    setGallinas((prev) => gallinaForm.id ? prev.map(item => item.id === gallinaForm.id ? gallinaForm : item) : [{...gallinaForm, id: prev.length > 0 ? Math.max(...prev.map(i => i.id)) + 1 : 1}, ...prev]);
-    closeGallinaModal();
-    setAlert({ isOpen: true, type: "success", title: "Éxito", message: "Lote de gallinas guardado correctamente.", showCancel: false, onConfirm: closeAlert });
+    try {
+      await api.put(`/chicken/${gallinaForm.id}`, {
+        quantityChickens: Number(gallinaForm.lote),
+        chickensLosts: Number(gallinaForm.perdidas),
+        quantitySick: Number(gallinaForm.enfermas),
+        weeksLife: Number(gallinaForm.semanasVida),
+        startDate: gallinaForm.fechaInicio,
+        endDate: gallinaForm.fechaFin,
+      });
+
+      await loadGallinas();
+
+      closeGallinaModal();
+
+      setAlert({
+        isOpen: true,
+        type: "success",
+        title: "Cambios guardados",
+        message: "La información de las gallinas se actualizó correctamente.",
+        showCancel: false,
+        confirmText: "Aceptar",
+        cancelText: "Cancelar",
+        onConfirm: closeAlert,
+        onCancel: null,
+      });
+    } catch (error) {
+      console.error(error);
+
+      setAlert({
+        isOpen: true,
+        type: "error",
+        title: "Error",
+        message:
+          error.response?.data?.message ||
+          "No se pudo actualizar el registro.",
+        showCancel: false,
+        confirmText: "Aceptar",
+        cancelText: "Cancelar",
+        onConfirm: closeAlert,
+        onCancel: null,
+      });
+    }
   };
 
   const handleDeleteGallina = (gallina) => {
     setAlert({
-      isOpen: true, type: "warning", title: "Eliminar Registro", message: `¿Estás seguro de eliminar el lote #${gallina.lote}?`, showCancel: true, confirmText: "Eliminar", cancelText: "Cancelar",
-      onConfirm: () => {
-        setGallinas((prev) => prev.filter((item) => item.id !== gallina.id));
-        setAlert({ isOpen: true, type: "success", title: "Eliminado", message: "El lote ha sido eliminado.", showCancel: false, onConfirm: closeAlert });
+      isOpen: true,
+      type: "warning",
+      title: "Eliminar registro",
+      message: "¿Deseas eliminar este registro de gallinas?",
+      showCancel: true,
+      confirmText: "Eliminar",
+      cancelText: "Cancelar",
+
+      onConfirm: async () => {
+        try {
+          await api.delete(`/chicken/${gallina.id}`);
+
+          await loadGallinas();
+
+          setAlert({
+            isOpen: true,
+            type: "success",
+            title: "Registro eliminado",
+            message: "El registro fue eliminado correctamente.",
+            showCancel: false,
+            confirmText: "Aceptar",
+            cancelText: "Cancelar",
+            onConfirm: closeAlert,
+            onCancel: null,
+          });
+        } catch (error) {
+          console.error(error);
+
+          setAlert({
+            isOpen: true,
+            type: "error",
+            title: "Error",
+            message:
+              error.response?.data?.message ||
+              "No se pudo eliminar el registro.",
+            showCancel: false,
+            confirmText: "Aceptar",
+            cancelText: "Cancelar",
+            onConfirm: closeAlert,
+            onCancel: null,
+          });
+        }
       },
+
       onCancel: closeAlert,
     });
   };
 
+  const loadHuevos = async () => {
+    try {
+      const response = await api.get("/egg");
+
+      const formattedData = response.data.map((item) => ({
+        id: item._id,
+
+        fecha: item.date
+          ? item.date.split("T")[0]
+          : "",
+
+        jumbo: item.eggsProduced?.[0]?.jumbo || 0,
+        grande: item.eggsProduced?.[0]?.grande || 0,
+        mediano: item.eggsProduced?.[0]?.mediano || 0,
+        pequeno: item.eggsProduced?.[0]?.pequeno || 0,
+
+        total: item.totalEggs,
+        perdidos: item.eggsLosts,
+      }));
+
+      setHuevos(formattedData);
+    } catch (error) {
+      console.error("Error cargando huevos:", error);
+    }
+  };
+
+  const handleCreateHuevo = async (e) => {
+    e.preventDefault();
+
+    try {
+      await api.post("/egg", {
+        eggsProduced: {
+            jumbo: Number(huevoForm.jumbo),
+            grande: Number(huevoForm.grande),
+            mediano: Number(huevoForm.mediano),
+            pequeno: Number(huevoForm.pequeno),
+        },
+        totalEggs: Number(huevoForm.total),
+        eggsLosts: Number(huevoForm.perdidos),
+        date: huevoForm.fecha,
+      });
+
+      await loadHuevos();
+
+      closeHuevoModal();
+
+      setAlert({
+        isOpen: true,
+        type: "success",
+        title: "Registro creado",
+        message: "La producción de huevos fue registrada correctamente.",
+        showCancel: false,
+        confirmText: "Aceptar",
+        onConfirm: closeAlert,
+      });
+    } catch (error) {
+      console.error(error);
+
+      setAlert({
+        isOpen: true,
+        type: "error",
+        title: "Error",
+        message:
+          error.response?.data?.message ||
+          "No se pudo registrar la producción.",
+        showCancel: false,
+        confirmText: "Aceptar",
+        onConfirm: closeAlert,
+      });
+    }
+  };
+
   const openHuevoModal = (huevo = null) => {
-    setHuevoForm(huevo ? { ...huevo } : { id: "", jumbo: "", grande: "", mediano: "", pequeno: "", total: "", perdidos: "", fecha: "" });
+    if (huevo) {
+      setHuevoForm(huevo);
+      setIsEditingHuevo(true);
+    } else {
+      setHuevoForm({
+        id: "",
+        jumbo: "",
+        grande: "",
+        mediano: "",
+        pequeno: "",
+        total: "",
+        perdidos: "",
+        fecha: "",
+      });
+
+      setIsEditingHuevo(false);
+    }
+
     setIsHuevoModalOpen(true);
   };
+
+  useEffect(() => {
+    loadGallinas();
+    loadHuevos();
+  }, []);
   
   const closeHuevoModal = () => setIsHuevoModalOpen(false);
 
   const validateHuevo = (form) => {
-    if (!form.jumbo || !form.grande || !form.mediano || !form.pequeno || !form.total || !form.perdidos || !form.fecha) {
+    if (!form.jumbo || !form.grande || !form.mediano || !form.pequeno || !form.perdidos || !form.fecha) {
       return "Por favor completa todos los campos del registro de huevos.";
     }
     return "";
   };
 
-  const handleHuevoSubmit = (e) => {
+  const handleHuevoSubmit = async (e) => {
     e.preventDefault();
-    const error = validateHuevo(huevoForm);
-    if (error) {
-      setAlert({ isOpen: true, type: "error", title: "Campos vacíos", message: error, showCancel: false, onConfirm: closeAlert });
-      return;
-    }
 
-    setHuevos((prev) => huevoForm.id ? prev.map(item => item.id === huevoForm.id ? huevoForm : item) : [{...huevoForm, id: prev.length > 0 ? Math.max(...prev.map(i => i.id)) + 1 : 1}, ...prev]);
-    closeHuevoModal();
-    setAlert({ isOpen: true, type: "success", title: "Éxito", message: "Registro de huevos guardado correctamente.", showCancel: false, onConfirm: closeAlert });
+    try {
+      await api.put(`/egg/${huevoForm.id}`, {
+        eggsProduced: {
+          jumbo: Number(huevoForm.jumbo),
+          grande: Number(huevoForm.grande),
+          mediano: Number(huevoForm.mediano),
+          pequeno: Number(huevoForm.pequeno),
+        },
+
+        totalEggs: Number(huevoForm.total),
+        eggsLosts: Number(huevoForm.perdidos),
+        date: huevoForm.fecha,
+      });
+
+      await loadHuevos();
+
+      closeHuevoModal();
+
+      setAlert({
+        isOpen: true,
+        type: "success",
+        title: "Cambios guardados",
+        message: "La producción de huevos fue actualizada.",
+        showCancel: false,
+        confirmText: "Aceptar",
+        cancelText: "Cancelar",
+        onConfirm: closeAlert,
+        onCancel: null,
+      });
+    } catch (error) {
+      console.error(error);
+
+      setAlert({
+        isOpen: true,
+        type: "error",
+        title: "Error",
+        message:
+          error.response?.data?.message ||
+          "No se pudo actualizar el registro.",
+        showCancel: false,
+        confirmText: "Aceptar",
+        cancelText: "Cancelar",
+        onConfirm: closeAlert,
+        onCancel: null,
+      });
+    }
   };
 
   const handleDeleteHuevo = (huevo) => {
     setAlert({
-      isOpen: true, type: "warning", title: "Eliminar Registro", message: `¿Estás seguro de eliminar el registro del día ${huevo.fecha}?`, showCancel: true, confirmText: "Eliminar", cancelText: "Cancelar",
-      onConfirm: () => {
-        setHuevos((prev) => prev.filter((item) => item.id !== huevo.id));
-        setAlert({ isOpen: true, type: "success", title: "Eliminado", message: "El registro ha sido eliminado.", showCancel: false, onConfirm: closeAlert });
+      isOpen: true,
+      type: "warning",
+      title: "Eliminar registro",
+      message: "¿Deseas eliminar este registro de producción?",
+      showCancel: true,
+      confirmText: "Eliminar",
+      cancelText: "Cancelar",
+
+      onConfirm: async () => {
+        try {
+          await api.delete(`/egg/${huevo.id}`);
+
+          await loadHuevos();
+
+          setAlert({
+            isOpen: true,
+            type: "success",
+            title: "Registro eliminado",
+            message: "El registro fue eliminado correctamente.",
+            showCancel: false,
+            confirmText: "Aceptar",
+            cancelText: "Cancelar",
+            onConfirm: closeAlert,
+            onCancel: null,
+          });
+        } catch (error) {
+          console.error(error);
+
+          setAlert({
+            isOpen: true,
+            type: "error",
+            title: "Error",
+            message:
+              error.response?.data?.message ||
+              "No se pudo eliminar el registro.",
+            showCancel: false,
+            confirmText: "Aceptar",
+            cancelText: "Cancelar",
+            onConfirm: closeAlert,
+            onCancel: null,
+          });
+        }
       },
+
       onCancel: closeAlert,
     });
   };
@@ -221,9 +567,29 @@ const ChickenPage = () => {
             </div>
             <div className="chicken-pagination">
               <div className="chicken-pagination-info">Mostrando {paginatedGallinas.length} de {filteredGallinas.length} registros</div>
-              <button className="chicken-page-arrow" disabled><ChevronLeft size={18} /></button>
-              <div className="chicken-page-numbers"><span className="active">1</span></div>
-              <button className="chicken-page-arrow" disabled><ChevronRight size={18} /></button>
+              <button
+                className="chicken-page-arrow"
+                disabled={currentPageGallinas === 1}
+                onClick={() =>
+                  setCurrentPageGallinas((prev) => prev - 1)
+                }
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              <div className="chicken-page-numbers">
+                <span className="active">{currentPageGallinas}</span>
+              </div>
+
+              <button
+                className="chicken-page-arrow"
+                disabled={currentPageGallinas === paginatedGallinas}
+                onClick={() =>
+                  setCurrentPageGallinas((prev) => prev + 1)
+                }
+              >
+                <ChevronRight size={18} />
+              </button>
             </div>
           </div>
 
@@ -243,9 +609,29 @@ const ChickenPage = () => {
             </div>
             <div className="chicken-pagination">
               <div className="chicken-pagination-info">Mostrando {paginatedHuevos.length} de {filteredHuevos.length} registros</div>
-              <button className="chicken-page-arrow" disabled><ChevronLeft size={18} /></button>
-              <div className="chicken-page-numbers"><span className="active">1</span></div>
-              <button className="chicken-page-arrow" disabled><ChevronRight size={18} /></button>
+              <button
+                className="chicken-page-arrow"
+                disabled={currentPageHuevos === 1}
+                onClick={() =>
+                  setCurrentPageHuevos((prev) => prev - 1)
+                }
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              <div className="chicken-page-numbers">
+                <span className="active">{currentPageHuevos}</span>
+              </div>
+
+              <button
+                className="chicken-page-arrow"
+                disabled={currentPageHuevos === paginatedHuevos}
+                onClick={() =>
+                  setCurrentPageHuevos((prev) => prev + 1)
+                }
+              >
+                <ChevronRight size={18} />
+              </button>
             </div>
           </div>
 
@@ -257,13 +643,13 @@ const ChickenPage = () => {
             <div className="chicken-modal chicken-create-modal" onClick={(e) => e.stopPropagation()}>
               <button type="button" className="chicken-modal-close" onClick={closeGallinaModal}><X size={20} /></button>
               <div className="chicken-modal-header">
-                <h2>INGRESAR GALLINAS</h2>
+                <h2>{isEditingGallina ? "EDITAR GALLINAS" : "INGRESAR GALLINAS"}</h2>
               </div>
-              <form className="chicken-modal-form" onSubmit={handleGallinaSubmit}>
-                <div className="chicken-modal-field"><label>Lote de gallinas</label><input name="lote" type="text" value={gallinaForm.lote} onChange={(e) => setGallinaForm({...gallinaForm, lote: e.target.value})} /></div>
-                <div className="chicken-modal-field"><label>Gallinas perdidas</label><input name="perdidas" type="text" value={gallinaForm.perdidas} onChange={(e) => setGallinaForm({...gallinaForm, perdidas: e.target.value})} /></div>
-                <div className="chicken-modal-field"><label>Gallinas enfermas</label><input name="enfermas" type="text" value={gallinaForm.enfermas} onChange={(e) => setGallinaForm({...gallinaForm, enfermas: e.target.value})} /></div>
-                <div className="chicken-modal-field"><label>Semanas de vida</label><input name="semanasVida" type="text" value={gallinaForm.semanasVida} onChange={(e) => setGallinaForm({...gallinaForm, semanasVida: e.target.value})} /></div>
+              <form className="chicken-modal-form" onSubmit={isEditingGallina ? handleGallinaSubmit: handleCreateGallina}>
+                <div className="chicken-modal-field"><label>Lote de gallinas</label><input name="lote" type="number" value={gallinaForm.lote} onChange={(e) => setGallinaForm({...gallinaForm, lote: e.target.value})} /></div>
+                <div className="chicken-modal-field"><label>Gallinas perdidas</label><input name="perdidas" type="number" value={gallinaForm.perdidas} onChange={(e) => setGallinaForm({...gallinaForm, perdidas: e.target.value})} /></div>
+                <div className="chicken-modal-field"><label>Gallinas enfermas</label><input name="enfermas" type="number" value={gallinaForm.enfermas} onChange={(e) => setGallinaForm({...gallinaForm, enfermas: e.target.value})} /></div>
+                <div className="chicken-modal-field"><label>Semanas de vida</label><input name="semanasVida" type="number" value={gallinaForm.semanasVida} onChange={(e) => setGallinaForm({...gallinaForm, semanasVida: e.target.value})} /></div>
                 <div className="chicken-modal-field"><label>Fecha inicio</label><input name="fechaInicio" type="date" value={gallinaForm.fechaInicio} onChange={(e) => setGallinaForm({...gallinaForm, fechaInicio: e.target.value})} /></div>
                 <div className="chicken-modal-field"><label>Fecha fin</label><input name="fechaFin" type="date" value={gallinaForm.fechaFin} onChange={(e) => setGallinaForm({...gallinaForm, fechaFin: e.target.value})} /></div>
                 <div className="chicken-modal-actions chicken-create-actions">
@@ -280,14 +666,14 @@ const ChickenPage = () => {
             <div className="chicken-modal chicken-create-modal" onClick={(e) => e.stopPropagation()}>
               <button type="button" className="chicken-modal-close" onClick={closeHuevoModal}><X size={20} /></button>
               <div className="chicken-modal-header">
-                <h2>INGRESAR HUEVOS</h2>
+                <h2>  {isEditingHuevo ? "EDITAR HUEVOS" : "INGRESAR HUEVOS"}</h2>
               </div>
-              <form className="chicken-modal-form" onSubmit={handleHuevoSubmit}>
+              <form className="chicken-modal-form" onSubmit={isEditingHuevo ? handleHuevoSubmit: handleCreateHuevo}>
                 <div className="chicken-modal-field"><label>Jumbo</label><input name="jumbo" type="number" value={huevoForm.jumbo} onChange={(e) => setHuevoForm({...huevoForm, jumbo: e.target.value})} /></div>
                 <div className="chicken-modal-field"><label>Grande</label><input name="grande" type="number" value={huevoForm.grande} onChange={(e) => setHuevoForm({...huevoForm, grande: e.target.value})} /></div>
                 <div className="chicken-modal-field"><label>Mediano</label><input name="mediano" type="number" value={huevoForm.mediano} onChange={(e) => setHuevoForm({...huevoForm, mediano: e.target.value})} /></div>
                 <div className="chicken-modal-field"><label>Pequeño</label><input name="pequeno" type="number" value={huevoForm.pequeno} onChange={(e) => setHuevoForm({...huevoForm, pequeno: e.target.value})} /></div>
-                <div className="chicken-modal-field"><label>Huevos Total</label><input name="total" type="number" value={huevoForm.total} onChange={(e) => setHuevoForm({...huevoForm, total: e.target.value})} /></div>
+                <div className="chicken-modal-field"><label>Huevos Total</label><input name="total" type="number" value={huevoForm.total} readOnly/></div>
                 <div className="chicken-modal-field"><label>Huevos Perdidos</label><input name="perdidos" type="number" value={huevoForm.perdidos} onChange={(e) => setHuevoForm({...huevoForm, perdidos: e.target.value})} /></div>
                 <div className="chicken-modal-field"><label>Fecha</label><input name="fecha" type="date" value={huevoForm.fecha} onChange={(e) => setHuevoForm({...huevoForm, fecha: e.target.value})} /></div>
                 <div className="chicken-modal-actions chicken-create-actions">
