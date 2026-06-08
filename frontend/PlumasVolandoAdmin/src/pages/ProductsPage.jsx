@@ -30,25 +30,142 @@ const DEFAULT_FORM = {
 const PRODUCT_TYPES = [
   { value: "pollo", label: "Gallinas / Pollo" },
   { value: "Huevos", label: "Huevos" },
+  { value: "huevos", label: "Huevos" },
   { value: "insumos", label: "Insumos" },
 ];
 
 const getTypeLabel = (value) => {
-  const found = PRODUCT_TYPES.find((type) => type.value === value);
+  const normalizedValue = String(value || "").toLowerCase();
+
+  const found = PRODUCT_TYPES.find(
+    (type) => String(type.value).toLowerCase() === normalizedValue
+  );
+
   return found ? found.label : value || "Sin tipo";
+};
+
+const extractArray = (payload) => {
+  if (Array.isArray(payload)) return payload;
+
+  if (payload && typeof payload === "object") {
+    const possibleKeys = [
+      "data",
+      "products",
+      "Products",
+      "productos",
+      "Productos",
+      "result",
+      "results",
+    ];
+
+    for (const key of possibleKeys) {
+      if (Array.isArray(payload[key])) return payload[key];
+    }
+
+    const arrayValue = Object.values(payload).find((value) => Array.isArray(value));
+    return arrayValue || [];
+  }
+
+  return [];
+};
+
+const parseNumber = (value) => {
+  if (value === undefined || value === null || value === "") return 0;
+
+  if (typeof value === "object" && value.$numberDecimal) {
+    return Number(value.$numberDecimal) || 0;
+  }
+
+  return Number(String(value).replace(/[^0-9.-]/g, "")) || 0;
+};
+
+const getImageUrl = (product) => {
+  const directImage =
+    product.image ||
+    product.imagen ||
+    product.picture ||
+    product.photo ||
+    product.url ||
+    product.secure_url;
+
+  if (typeof directImage === "string" && directImage.trim()) {
+    return directImage;
+  }
+
+  if (directImage && typeof directImage === "object") {
+    return (
+      directImage.url ||
+      directImage.secure_url ||
+      directImage.path ||
+      directImage.image ||
+      directImage.imagen ||
+      ""
+    );
+  }
+
+  const imageArrays = [
+    product.images,
+    product.imagenes,
+    product.pictures,
+    product.photos,
+  ];
+
+  for (const array of imageArrays) {
+    if (Array.isArray(array) && array.length > 0) {
+      const firstImage = array[0];
+
+      if (typeof firstImage === "string") {
+        return firstImage;
+      }
+
+      if (firstImage && typeof firstImage === "object") {
+        return (
+          firstImage.url ||
+          firstImage.secure_url ||
+          firstImage.path ||
+          firstImage.image ||
+          firstImage.imagen ||
+          ""
+        );
+      }
+    }
+  }
+
+  return "";
 };
 
 const normalizeProduct = (product) => ({
   id: product._id || product.id || "",
-  tipo: product.TypeProduct || product.typeProducts || product.tipo || "",
-  nombre: product.name || product.nombre || "Producto sin nombre",
-  imagen: product.image || product.imagen || "",
-  stock: product.quantity ?? product.stock ?? 0,
-  descripcion: product.description || product.descripcion || "Sin descripción",
-  precio: product.unitPrice ?? product.price ?? product.precio ?? 0,
+  tipo:
+    product.TypeProduct ||
+    product.typeProducts ||
+    product.tipo ||
+    product.type ||
+    product.category ||
+    "",
+  nombre:
+    product.name ||
+    product.nombre ||
+    product.productName ||
+    product.ProductName ||
+    "Producto sin nombre",
+  imagen: getImageUrl(product),
+  stock: product.quantity ?? product.stock ?? product.cantidad ?? 0,
+  descripcion:
+    product.description ||
+    product.descripcion ||
+    product.descripcionCorta ||
+    "Sin descripción",
+  precio:
+    product.unitPrice ??
+    product.price ??
+    product.precio ??
+    product.Precio ??
+    product.precioUnitario ??
+    0,
   rating: product.review ?? product.rating ?? 0,
-  reviews: product.reviews ?? 0,
-  public_id: product.public_id || "",
+  reviews: product.reviews ?? product.resenas ?? 0,
+  public_id: product.public_id || product.publicId || "",
 });
 
 const ProductsPage = () => {
@@ -121,12 +238,22 @@ const ProductsPage = () => {
     try {
       setLoading(true);
 
-      const response = await api.get("/products");
-      const data = Array.isArray(response.data) ? response.data : [];
+      let response;
 
-      setProducts(data.map(normalizeProduct));
+      try {
+        response = await api.get("/products");
+      } catch {
+        response = await api.get("/product");
+      }
+
+      const data = extractArray(response.data);
+      const normalized = data.map(normalizeProduct);
+
+      console.log("Productos cargados:", normalized);
+
+      setProducts(normalized);
     } catch (error) {
-      console.error(error);
+      console.error("Error cargando productos:", error.response?.data || error.message);
 
       showAlert({
         type: "error",
@@ -145,14 +272,16 @@ const ProductsPage = () => {
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const search = normalizeText(searchTerm);
+      const productType = normalizeText(product.tipo);
+      const selectedType = normalizeText(filterType);
 
       const matchesSearch =
         search === "" ||
         normalizeText(product.nombre).includes(search) ||
         normalizeText(product.descripcion).includes(search) ||
-        normalizeText(product.tipo).includes(search);
+        productType.includes(search);
 
-      const matchesType = filterType === "" || product.tipo === filterType;
+      const matchesType = filterType === "" || productType === selectedType;
 
       return matchesSearch && matchesType;
     });
@@ -226,8 +355,8 @@ const ProductsPage = () => {
       return "Por favor completa todos los campos obligatorios.";
     }
 
-    if (Number.isNaN(Number(form.precio)) || Number(form.precio) <= 0) {
-      return "El precio debe ser un número válido mayor a 0.";
+    if (Number.isNaN(Number(form.precio)) || Number(form.precio) < 0) {
+      return "El precio debe ser un número válido igual o mayor a 0.";
     }
 
     if (Number.isNaN(Number(form.stock)) || Number(form.stock) < 0) {
@@ -241,18 +370,38 @@ const ProductsPage = () => {
     const data = new FormData();
 
     data.append("name", formData.nombre.trim());
+    data.append("nombre", formData.nombre.trim());
+
     data.append("TypeProduct", formData.tipo.trim());
+    data.append("typeProducts", formData.tipo.trim());
+    data.append("tipo", formData.tipo.trim());
+
     data.append("description", formData.descripcion.trim());
+    data.append("descripcion", formData.descripcion.trim());
+
     data.append("quantity", Number(formData.stock));
+    data.append("stock", Number(formData.stock));
+
     data.append("unitPrice", Number(formData.precio));
     data.append("price", Number(formData.precio));
+    data.append("precio", Number(formData.precio));
+
     data.append("review", Number(formData.rating) || 0);
 
     if (formData.file) {
       data.append("image", formData.file);
+      data.append("imagen", formData.file);
     }
 
     return data;
+  };
+
+  const saveProductRequest = async (url, data, method) => {
+    return api[method](url, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -275,17 +424,17 @@ const ProductsPage = () => {
       const data = buildProductFormData();
 
       if (formData.id) {
-        await api.put(`/products/${formData.id}`, data, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        try {
+          await saveProductRequest(`/products/${formData.id}`, data, "put");
+        } catch {
+          await saveProductRequest(`/product/${formData.id}`, data, "put");
+        }
       } else {
-        await api.post("/products", data, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        try {
+          await saveProductRequest("/products", data, "post");
+        } catch {
+          await saveProductRequest("/product", data, "post");
+        }
       }
 
       await loadProducts();
@@ -299,7 +448,7 @@ const ProductsPage = () => {
           : "Producto guardado correctamente.",
       });
     } catch (error) {
-      console.error(error);
+      console.error("Error guardando producto:", error.response?.data || error.message);
 
       showAlert({
         type: "error",
@@ -323,7 +472,12 @@ const ProductsPage = () => {
       cancelText: "Cancelar",
       onConfirm: async () => {
         try {
-          await api.delete(`/products/${product.id}`);
+          try {
+            await api.delete(`/products/${product.id}`);
+          } catch {
+            await api.delete(`/product/${product.id}`);
+          }
+
           await loadProducts();
 
           showAlert({
@@ -332,7 +486,7 @@ const ProductsPage = () => {
             message: "El producto ha sido eliminado correctamente.",
           });
         } catch (error) {
-          console.error(error);
+          console.error("Error eliminando producto:", error.response?.data || error.message);
 
           showAlert({
             type: "error",
@@ -410,12 +564,28 @@ const ProductsPage = () => {
                     src={product.imagen}
                     alt={product.nombre}
                     className="product-image"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      const placeholder =
+                        e.currentTarget.parentElement.querySelector(
+                          ".product-image-placeholder"
+                        );
+                      if (placeholder) placeholder.style.display = "flex";
+                    }}
                   />
-                ) : (
-                  <div className="product-image-placeholder">Sin imagen</div>
-                )}
+                ) : null}
 
-                <span className="product-stock">Stock: {product.stock}</span>
+                <div
+                  className="product-image-placeholder"
+                  style={{ display: product.imagen ? "none" : "flex" }}
+                >
+                  Sin imagen
+                </div>
+              </div>
+
+              <div className="product-stock-row">
+                <span>Stock: {product.stock}</span>
               </div>
 
               <div className="product-details">
