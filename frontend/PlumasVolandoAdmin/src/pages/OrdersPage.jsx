@@ -24,7 +24,7 @@ const ENDPOINTS = {
 };
 
 const PAGE_SIZE_OPTIONS = [5, 10, "Todos"];
-const STATUS_OPTIONS = ["Pendiente", "Entregado", "Cancelado"];
+const STATUS_OPTIONS = ["Pendiente", "En camino", "Entregado", "Cancelado"];
 
 const emptyProduct = {
   productId: "",
@@ -59,6 +59,24 @@ const extractArray = (payload) => {
   if (Array.isArray(payload)) return payload;
 
   if (payload && typeof payload === "object") {
+    const keys = [
+      "data",
+      "orders",
+      "Orders",
+      "products",
+      "Products",
+      "customers",
+      "Customers",
+      "clientes",
+      "Clientes",
+      "result",
+      "results",
+    ];
+
+    for (const key of keys) {
+      if (Array.isArray(payload[key])) return payload[key];
+    }
+
     const arrayValue = Object.values(payload).find((value) => Array.isArray(value));
     return arrayValue || [];
   }
@@ -76,14 +94,74 @@ const parseNumber = (value) => {
   return Number(String(value).replace(/[^0-9.-]/g, "")) || 0;
 };
 
-const getProductId = (product) => product?._id || product?.id || "";
+const getId = (value) => {
+  if (!value) return "";
 
-const getProductName = (product) =>
-  product?.name ||
-  product?.nombre ||
-  product?.productName ||
-  product?.ProductName ||
-  "Producto";
+  if (typeof value === "object") {
+    return String(
+      value._id ||
+        value.id ||
+        value.$oid ||
+        value.productId ||
+        value.customerId ||
+        value.idProduct ||
+        value.idCustomer ||
+        value.idCliente ||
+        ""
+    );
+  }
+
+  return String(value);
+};
+
+const isMongoId = (value) => /^[0-9a-fA-F]{24}$/.test(String(value || ""));
+
+const sameId = (a, b) => {
+  const first = getId(a);
+  const second = getId(b);
+
+  if (!first || !second) return false;
+
+  return first === second;
+};
+
+const normalizeStatus = (status) => {
+  const value = normalizeText(status);
+
+  if (value === "en camino" || value === "encamino" || value === "camino") {
+    return "En camino";
+  }
+
+  if (value === "entregado" || value === "entregada") {
+    return "Entregado";
+  }
+
+  if (value === "cancelado" || value === "cancelada") {
+    return "Cancelado";
+  }
+
+  return "Pendiente";
+};
+
+const getProductId = (product) => getId(product);
+
+const getProductName = (product) => {
+  if (!product) return "";
+
+  if (typeof product === "string") {
+    return isMongoId(product) ? "" : product;
+  }
+
+  return (
+    product.name ||
+    product.nombre ||
+    product.productName ||
+    product.ProductName ||
+    product.title ||
+    product.titulo ||
+    "Producto"
+  );
+};
 
 const getProductPrice = (product) =>
   parseNumber(
@@ -97,20 +175,52 @@ const getProductPrice = (product) =>
       product?.unit_price
   );
 
-const getCustomerId = (customer) => customer?._id || customer?.id || "";
+const getCustomerId = (customer) => getId(customer);
 
 const getCustomerName = (customer) => {
   if (!customer) return "";
-  if (typeof customer === "string") return customer;
+
+  if (typeof customer === "string") {
+    return isMongoId(customer) ? "" : customer;
+  }
+
+  const name =
+    customer.name ||
+    customer.nombre ||
+    customer.firstName ||
+    customer.nombres ||
+    customer.customerName ||
+    customer.clientName ||
+    "";
+
+  const lastName =
+    customer.lastName ||
+    customer.lastname ||
+    customer.apellido ||
+    customer.apellidos ||
+    customer.last_name ||
+    "";
 
   return (
-    `${customer.name || customer.nombre || ""} ${
-      customer.lastName || customer.lastname || customer.apellido || ""
-    }`.trim() ||
+    `${name} ${lastName}`.trim() ||
     customer.email ||
+    customer.correo ||
+    customer.username ||
     "Cliente"
   );
 };
+
+const getOrderProductValue = (item) =>
+  item.productId ?? item.idProduct ?? item.product ?? item.producto ?? "";
+
+const getOrderCustomerValue = (order) =>
+  order.customerId ??
+  order.idCustomer ??
+  order.idCliente ??
+  order.customer ??
+  order.cliente ??
+  order.clientId ??
+  "";
 
 const OrdersPage = () => {
   const [rawOrders, setRawOrders] = useState([]);
@@ -197,11 +307,17 @@ const OrdersPage = () => {
     });
   };
 
-  const findProductById = (productId) =>
-    products.find((product) => String(getProductId(product)) === String(productId));
+  const findProductById = (productId) => {
+    if (!productId) return null;
 
-  const findCustomerById = (customerId) =>
-    customers.find((customer) => String(getCustomerId(customer)) === String(customerId));
+    return products.find((product) => sameId(product, productId));
+  };
+
+  const findCustomerById = (customerId) => {
+    if (!customerId) return null;
+
+    return customers.find((customer) => sameId(customer, customerId));
+  };
 
   const calculateProductsTotal = (formProducts) =>
     formProducts.reduce((total, item) => {
@@ -215,10 +331,8 @@ const OrdersPage = () => {
     const orderProducts = Array.isArray(order.products) ? order.products : [];
 
     const normalizedProducts = orderProducts.map((item) => {
-      const productId =
-        typeof item.productId === "object"
-          ? getProductId(item.productId)
-          : item.productId || "";
+      const rawProduct = getOrderProductValue(item);
+      const productId = getId(rawProduct);
 
       return {
         productId,
@@ -228,11 +342,13 @@ const OrdersPage = () => {
 
     const productNames = orderProducts
       .map((item) => {
-        if (typeof item.productId === "object") {
-          return getProductName(item.productId);
+        const rawProduct = getOrderProductValue(item);
+
+        if (rawProduct && typeof rawProduct === "object") {
+          return getProductName(rawProduct);
         }
 
-        const productFound = findProductById(item.productId);
+        const productFound = findProductById(rawProduct);
         return getProductName(productFound);
       })
       .filter(Boolean)
@@ -248,29 +364,43 @@ const OrdersPage = () => {
       return total + getProductPrice(productFound) * Number(item.quantity || 0);
     }, 0);
 
+    const subtotalTotal = orderProducts.reduce(
+      (total, item) => total + parseNumber(item.subtotal),
+      0
+    );
+
     const dbTotal = parseNumber(order.totalPrice);
-    const customerId =
-      typeof order.customerId === "object"
-        ? getCustomerId(order.customerId)
-        : order.customerId || "";
+
+    const rawCustomer = getOrderCustomerValue(order);
+    const customerId = getId(rawCustomer);
 
     const customerFound =
-      typeof order.customerId === "object"
-        ? order.customerId
+      rawCustomer && typeof rawCustomer === "object"
+        ? rawCustomer
         : findCustomerById(customerId);
 
+    const customerName =
+      getCustomerName(customerFound) ||
+      order.customerName ||
+      order.nombreCliente ||
+      order.clienteNombre ||
+      order.clientName ||
+      getCustomerName(rawCustomer);
+
     return {
-      id: order._id || order.id,
-      codigo: String(order._id || order.id || "").slice(-6).toUpperCase(),
-      products: normalizedProducts.length > 0 ? normalizedProducts : [{ ...emptyProduct }],
+      id: getId(order),
+      codigo: String(getId(order)).slice(-6).toUpperCase(),
+      products:
+        normalizedProducts.length > 0 ? normalizedProducts : [{ ...emptyProduct }],
       producto: productNames || "Sin producto",
-      ubicacion: order.location || "",
+      ubicacion: order.location || order.ubicacion || "",
       cantidad: quantity,
       fecha: formatDate(order.date || order.createdAt),
-      precioFinal: dbTotal > 0 ? dbTotal : calculatedTotal,
+      precioFinal:
+        dbTotal > 0 ? dbTotal : subtotalTotal > 0 ? subtotalTotal : calculatedTotal,
       customerId,
-      cliente: getCustomerName(customerFound),
-      estado: order.state || order.estado || order.status || "Pendiente",
+      cliente: customerName,
+      estado: normalizeStatus(order.state || order.estado || order.status),
     };
   };
 
@@ -283,9 +413,10 @@ const OrdersPage = () => {
     try {
       setLoading(true);
       const res = await apiGetFirst("orders");
-      setRawOrders(extractArray(res.data));
+      const data = extractArray(res.data);
+      setRawOrders(data);
     } catch (error) {
-      console.log(error);
+      console.log("Error cargando pedidos:", error.response?.data || error.message);
       showAlert({
         type: "error",
         title: "Error",
@@ -299,31 +430,46 @@ const OrdersPage = () => {
   const loadProducts = async () => {
     try {
       const res = await apiGetFirst("products");
-      setProducts(extractArray(res.data));
+      const data = extractArray(res.data);
+      setProducts(data);
+      return data;
     } catch (error) {
-      console.log(error);
+      console.log("Error cargando productos:", error.response?.data || error.message);
+      setProducts([]);
       showAlert({
         type: "error",
         title: "Error",
         message: "No se pudieron cargar los productos.",
       });
+      return [];
     }
   };
 
   const loadCustomers = async () => {
     try {
       const res = await apiGetFirst("customers");
-      setCustomers(extractArray(res.data));
+      const data = extractArray(res.data);
+      setCustomers(data);
+      return data;
     } catch (error) {
-      console.log(error);
+      console.log("Error cargando clientes:", error.response?.data || error.message);
       setCustomers([]);
+      showAlert({
+        type: "error",
+        title: "Error",
+        message: "No se pudieron cargar los clientes.",
+      });
+      return [];
     }
   };
 
   useEffect(() => {
-    loadProducts();
-    loadCustomers();
-    loadOrders();
+    const loadData = async () => {
+      await Promise.all([loadProducts(), loadCustomers()]);
+      await loadOrders();
+    };
+
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -359,9 +505,11 @@ const OrdersPage = () => {
         normalizeText(order.producto).includes(normalizedSearch) ||
         normalizeText(order.ubicacion).includes(normalizedSearch) ||
         normalizeText(order.cliente).includes(normalizedSearch) ||
-        normalizeText(order.codigo).includes(normalizedSearch);
+        normalizeText(order.codigo).includes(normalizedSearch) ||
+        normalizeText(order.estado).includes(normalizedSearch);
 
-      const matchesStatus = !statusFilter || order.estado === statusFilter;
+      const matchesStatus =
+        !statusFilter || normalizeText(order.estado) === normalizeText(statusFilter);
 
       return matchesSearch && matchesStatus;
     });
@@ -405,7 +553,8 @@ const OrdersPage = () => {
 
         return {
           ...item,
-          [field]: field === "quantity" ? Math.max(1, Number(value) || 1) : value,
+          [field]:
+            field === "quantity" ? Math.max(1, Number(value) || 1) : String(value),
         };
       });
 
@@ -474,18 +623,35 @@ const OrdersPage = () => {
     return "";
   };
 
-  const buildOrderPayload = (form) => ({
-    products: form.products
+  const buildOrderPayload = (form) => {
+    const payloadProducts = form.products
       .filter((item) => item.productId)
-      .map((item) => ({
-        productId: item.productId,
-        quantity: Number(item.quantity),
-      })),
-    location: form.ubicacion.trim(),
-    date: form.fecha,
-    customerId: form.customerId,
-    state: form.estado || "Pendiente",
-  });
+      .map((item) => {
+        const productFound = findProductById(item.productId);
+        const price = getProductPrice(productFound);
+        const quantity = Number(item.quantity || 1);
+
+        return {
+          productId: item.productId,
+          quantity,
+          subtotal: price * quantity,
+        };
+      });
+
+    const totalPrice = payloadProducts.reduce(
+      (total, item) => total + Number(item.subtotal || 0),
+      0
+    );
+
+    return {
+      products: payloadProducts,
+      location: form.ubicacion.trim(),
+      date: form.fecha,
+      totalPrice,
+      customerId: form.customerId,
+      state: form.estado || "Pendiente",
+    };
+  };
 
   const closeCreateModal = () => {
     setIsCreateModalOpen(false);
@@ -518,11 +684,20 @@ const OrdersPage = () => {
   };
 
   const openEditModal = (order) => {
+    const fixedProducts =
+      order.products?.length > 0
+        ? order.products.map((item) => ({
+            productId: getId(item.productId),
+            quantity: Number(item.quantity || 1),
+          }))
+        : [{ ...emptyProduct }];
+
     setEditForm({
       ...emptyForm,
       ...order,
-      estado: order.estado || "Pendiente",
-      products: order.products?.length ? order.products : [{ ...emptyProduct }],
+      customerId: getId(order.customerId),
+      estado: normalizeStatus(order.estado),
+      products: fixedProducts,
     });
 
     setIsEditModalOpen(true);
@@ -554,7 +729,7 @@ const OrdersPage = () => {
         message: "El pedido fue registrado correctamente.",
       });
     } catch (error) {
-      console.log(error);
+      console.log("Error agregando pedido:", error.response?.data || error.message);
       showAlert({
         type: "error",
         title: "Error",
@@ -589,13 +764,10 @@ const OrdersPage = () => {
       showAlert({
         type: "success",
         title: "Pedido actualizado",
-        message:
-          editForm.estado === "Entregado"
-            ? "El pedido fue marcado como entregado correctamente."
-            : "Los datos del pedido se editaron correctamente.",
+        message: "Los datos del pedido se editaron correctamente.",
       });
     } catch (error) {
-      console.log(error);
+      console.log("Error editando pedido:", error.response?.data || error.message);
       showAlert({
         type: "error",
         title: "Error",
@@ -623,11 +795,12 @@ const OrdersPage = () => {
             message: "El pedido se eliminó correctamente.",
           });
         } catch (error) {
-          console.log(error);
+          console.log("Error eliminando pedido:", error.response?.data || error.message);
           showAlert({
             type: "error",
             title: "Error",
-            message: error.response?.data?.message || "No se pudo eliminar el pedido.",
+            message:
+              error.response?.data?.message || "No se pudo eliminar el pedido.",
           });
         }
       },
@@ -649,18 +822,22 @@ const OrdersPage = () => {
           return (
             <div className="orders-product-row" key={`${mode}-${index}`}>
               <select
-                value={item.productId}
+                value={String(item.productId || "")}
                 onChange={(e) =>
                   updateProductRow(mode, index, "productId", e.target.value)
                 }
               >
                 <option value="">Selecciona un producto</option>
 
-                {products.map((product) => (
-                  <option key={getProductId(product)} value={getProductId(product)}>
-                    {getProductName(product)} - {formatMoney(getProductPrice(product))}
-                  </option>
-                ))}
+                {products.map((product) => {
+                  const productId = getProductId(product);
+
+                  return (
+                    <option key={productId} value={String(productId)}>
+                      {getProductName(product)} - {formatMoney(getProductPrice(product))}
+                    </option>
+                  );
+                })}
               </select>
 
               <input
@@ -816,7 +993,8 @@ const OrdersPage = () => {
                       </p>
 
                       <p>
-                        <strong>Cliente:</strong> {order.cliente || order.customerId}
+                        <strong>Cliente:</strong>{" "}
+                        {order.cliente || "Cliente no encontrado"}
                       </p>
                     </div>
                   </div>
@@ -872,7 +1050,9 @@ const OrdersPage = () => {
                 <button
                   key={page}
                   type="button"
-                  className={`orders-page-number ${currentPage === page ? "active" : ""}`}
+                  className={`orders-page-number ${
+                    currentPage === page ? "active" : ""
+                  }`}
                   onClick={() => setCurrentPage(page)}
                 >
                   {page}
@@ -964,36 +1144,38 @@ const OrdersPage = () => {
                       <select
                         id="customerId"
                         name="customerId"
-                        value={formState.customerId}
+                        value={String(formState.customerId || "")}
                         onChange={onFieldChange}
                       >
                         <option value="">Selecciona un cliente</option>
 
-                        {customers.map((customer) => (
-                          <option key={getCustomerId(customer)} value={getCustomerId(customer)}>
-                            {getCustomerName(customer)}
+                        {customers.map((customer) => {
+                          const customerId = getCustomerId(customer);
+
+                          return (
+                            <option key={customerId} value={String(customerId)}>
+                              {getCustomerName(customer)}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+
+                    <div className="orders-modal-field orders-modal-field-full">
+                      <label htmlFor="estado">Estado</label>
+                      <select
+                        id="estado"
+                        name="estado"
+                        value={formState.estado}
+                        onChange={onFieldChange}
+                      >
+                        {STATUS_OPTIONS.map((status) => (
+                          <option key={status} value={status}>
+                            {status}
                           </option>
                         ))}
                       </select>
                     </div>
-
-                    {!isCreateModalOpen && (
-                      <div className="orders-modal-field orders-modal-field-full">
-                        <label htmlFor="estado">Estado</label>
-                        <select
-                          id="estado"
-                          name="estado"
-                          value={formState.estado}
-                          onChange={onFieldChange}
-                        >
-                          {STATUS_OPTIONS.map((status) => (
-                            <option key={status} value={status}>
-                              {status}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
 
                     <div className="orders-modal-actions">
                       <button type="submit" className="orders-modal-btn confirm">
