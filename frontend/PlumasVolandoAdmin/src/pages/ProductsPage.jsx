@@ -390,7 +390,6 @@ const ProductsPage = () => {
 
     if (formData.file) {
       data.append("image", formData.file);
-      data.append("imagen", formData.file);
     }
 
     return data;
