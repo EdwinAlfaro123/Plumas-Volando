@@ -1,5 +1,6 @@
 import ordersModel from "../model/Orders.js";
 import productsModel from "../model/Products.js";
+import billsModel from "../model/Bill.js";
 import "../model/Customer.js";
 
 const orderController = {};
@@ -48,6 +49,20 @@ const getProductPrice = (product) => {
 
 const getProductName = (product) =>
   product?.name || product?.nombre || product?.productName || product?._id;
+
+const createBillIfDelivered = async (order) => {
+  if (order.state !== "Entregado") return;
+
+  const existingBill = await billsModel.findOne({ OrderId: order._id });
+
+  if (existingBill) return;
+
+  await billsModel.create({
+    OrderId: order._id,
+    date: new Date(),
+    paymentMethod: "No especificado",
+  });
+};
 
 orderController.getOrders = async (req, res) => {
   try {
@@ -126,7 +141,7 @@ orderController.insertOrder = async (req, res) => {
     });
 
     await newOrder.save();
-
+    await createBillIfDelivered(newOrder);
     return res.status(200).json({
       message: "Orden insertada correctamente",
       order: newOrder,
@@ -268,6 +283,8 @@ orderController.updateOrder = async (req, res) => {
     if (!updatedOrder) {
       return res.status(404).json({ message: "Orden no encontrada" });
     }
+
+    await createBillIfDelivered(updatedOrder);
 
     return res.status(200).json({
       message: "Se actualizó la orden correctamente",
