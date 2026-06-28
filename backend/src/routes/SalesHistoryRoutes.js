@@ -1,13 +1,17 @@
-import express from "express"
+import express from "express";
 import SalesHistoryController from "../controller/SalesHistoryController.js";
+import { validateAuthCookie } from "../middlewares/authMiddleware.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.route("/")
-.get(SalesHistoryController.getHistory)
-.post(SalesHistoryController.insertSalesHistory)
+router
+  .route("/")
+  .get(validateAuthCookie(["employee"]), SalesHistoryController.getHistory)
+  .post(validateAuthCookie(["employee"]), SalesHistoryController.insertSalesHistory);
 
-router.route("/:id")
-.put(SalesHistoryController.updateSalesHistory)
-.delete(SalesHistoryController.deleteSalesHistory)
+router
+  .route("/:id")
+  .put(validateAuthCookie(["employee"]), SalesHistoryController.updateSalesHistory)
+  .delete(validateAuthCookie(["employee"]), SalesHistoryController.deleteSalesHistory);
+
 export default router;

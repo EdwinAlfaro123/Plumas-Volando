@@ -1,16 +1,32 @@
-import express from "express"
-import productController from "../controller/ProductsController.js"
-import upload from "../utils/cloudinaryConfig.js"
+import express from "express";
+import productController from "../controller/ProductsController.js";
+import upload from "../utils/cloudinaryConfig.js";
+import { validateAuthCookie } from "../middlewares/authMiddleware.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.route("/")
-.get(productController.getAllProducts)
-.post(upload.single("image"), productController.insertProduct)
+router.get(
+  "/top-selling",
+  validateAuthCookie(["employee", "customer"]),
+  productController.getTopSellingProducts
+);
 
-router.route("/:id")
-.put(upload.single("image"), productController.updateProduct)
-.delete(productController.deleteProduct)
-router.get("/top-selling", productController.getTopSellingProducts)
+router
+  .route("/")
+  .get(validateAuthCookie(["employee", "customer"]), productController.getAllProducts)
+  .post(
+    validateAuthCookie(["employee"]),
+    upload.single("image"),
+    productController.insertProduct
+  );
 
-export default router
+router
+  .route("/:id")
+  .put(
+    validateAuthCookie(["employee"]),
+    upload.single("image"),
+    productController.updateProduct
+  )
+  .delete(validateAuthCookie(["employee"]), productController.deleteProduct);
+
+export default router;

@@ -1,14 +1,17 @@
-import express from "express"
+import express from "express";
 import billController from "../controller/BillController.js";
+import { validateAuthCookie } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.route("/")
-    .get(billController.getBills)
-    .post(billController.insertBills)
+router
+  .route("/")
+  .get(validateAuthCookie(["employee", "customer"]), billController.getBills)
+  .post(validateAuthCookie(["employee"]), billController.insertBills);
 
-router.route("/:id")
-    .put(billController.updateBills)
-    .delete(billController.deleteBills)
+router
+  .route("/:id")
+  .put(validateAuthCookie(["employee"]), billController.updateBills)
+  .delete(validateAuthCookie(["employee"]), billController.deleteBills);
 
 export default router;

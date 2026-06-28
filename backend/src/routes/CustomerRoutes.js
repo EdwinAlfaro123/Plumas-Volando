@@ -1,13 +1,16 @@
-import express from "express"
+import express from "express";
 import customerController from "../controller/CustomerController.js";
+import { validateAuthCookie } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.route("/")
-    .get(customerController.getCustomers)
+router
+  .route("/")
+  .get(validateAuthCookie(["employee"]), customerController.getCustomers);
 
-router.route("/:id")
-    .put(customerController.updateCustomers)
-    .delete(customerController.deleteCustomer)
+router
+  .route("/:id")
+  .put(validateAuthCookie(["employee", "customer"]), customerController.updateCustomers)
+  .delete(validateAuthCookie(["employee"]), customerController.deleteCustomer);
 
 export default router;
