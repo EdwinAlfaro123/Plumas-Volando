@@ -112,7 +112,18 @@ button {
 
 .topbar-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+.user-greeting {
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+  color: #3c3325;
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .icon-btn {
@@ -440,6 +451,139 @@ button {
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.88);
   flex-wrap: wrap;
+}
+
+.profile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+
+.profile-modal {
+  width: 420px;
+  max-width: 90%;
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px;
+  position: relative;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+  animation: modalShow .25s ease;
+}
+
+
+.profile-modal h2 {
+  margin: 0 0 22px;
+  text-align: center;
+  color: #0f4f93;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+
+.profile-modal p {
+  margin: 12px 0;
+  color: #444;
+  font-size: .9rem;
+}
+
+
+.profile-modal strong {
+  color: #222;
+}
+
+
+.close-modal-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: #555;
+}
+
+
+.close-modal-btn:hover {
+  background: #f3e0a9;
+  color: #0f4f93;
+}
+
+
+.profile-modal button:not(.close-modal-btn) {
+  width: 100%;
+  height: 40px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(90deg,#f7b400,#f09a00);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+
+.profile-modal button:not(.close-modal-btn):hover {
+  filter: brightness(1.05);
+}
+
+.profile-modal label {
+  display:block;
+  margin-top:12px;
+  margin-bottom:5px;
+  font-weight:700;
+  color:#444;
+}
+
+
+.profile-modal input {
+  width:100%;
+  height:38px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  padding:0 12px;
+  font-family:"Montserrat",sans-serif;
+}
+
+
+.profile-modal input:disabled {
+  background:#f1f1f1;
+  color:#777;
+}
+
+
+@keyframes modalShow {
+
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+}
+
+
+@media(max-width:600px){
+
+  .profile-modal {
+    width: 95%;
+    padding: 22px;
+  }
+
 }
 
 @media (max-width: 980px) {

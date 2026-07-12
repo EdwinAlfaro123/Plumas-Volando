@@ -6,7 +6,7 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(validateAuthCookie(["employee"]), customerController.getCustomers);
+  .get(validateAuthCookie(["employee", "customer"]), customerController.getCustomers);
 
 router
   .route("/:id")
