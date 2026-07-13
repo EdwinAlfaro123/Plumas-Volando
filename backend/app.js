@@ -24,21 +24,29 @@ app.use(cors({
 }));
 
 app.use(cookieParser());
-
 app.use(express.json());
 
+// Rutas de empleados
 app.use("/api/registerEmployee", registerEmployee);
 app.use("/api/recoveryPasswordEmployee", recoveryPasswordEmployee);
 app.use("/api/employee", employeeRoutes);
 app.use("/api/loginEmployee", loginEmployeeRoutes);
+
+// Rutas de productos
 app.use("/api/products", ProductsRoutes);
 app.use("/api/egg", EggsRoutes);
 app.use("/api/chicken", ChickensRoutes);
-app.use("/api/orders", OrderROutes)
+
+// Rutas de órdenes
+app.use("/api/orders", OrderROutes);
+
+// Rutas de clientes
 app.use("/api/loginCustomer", loginCustomerRoutes);
 app.use("/api/customer", customersRoutes);
 app.use("/api/registerCustomer", registerCustomers);
 app.use("/api/recoveryPasswordCustomer", recoveryPasswordCustomer);
+
+// Rutas de facturación
 app.use("/api/bill", BillRoutes);
 app.use("/api/salesHistory", SalesHistoryRoutes);
 

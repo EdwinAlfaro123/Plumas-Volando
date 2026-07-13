@@ -220,6 +220,7 @@
   }
 }
 
+
 @media (max-width: 1100px) {
   .login-card {
     grid-template-columns: 1fr;

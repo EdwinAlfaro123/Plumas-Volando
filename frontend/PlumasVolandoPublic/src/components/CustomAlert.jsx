@@ -1,5 +1,13 @@
+// frontend/PlumasVolandoPublic/src/components/CustomAlert.jsx
 import React from "react";
-import { AlertTriangle, CheckCircle2, XCircle, Info, X } from "lucide-react";
+import { 
+  AlertTriangle, 
+  CheckCircle2, 
+  XCircle, 
+  Info, 
+  X,
+  AlertCircle
+} from "lucide-react";
 import "../styles/CustomAlert.css";
 
 const CustomAlert = ({
@@ -28,7 +36,6 @@ const CustomAlert = ({
       onConfirm();
       return;
     }
-
     if (onClose) {
       onClose();
     }
@@ -39,7 +46,6 @@ const CustomAlert = ({
       onCancel();
       return;
     }
-
     if (onClose) {
       onClose();
     }
@@ -58,7 +64,7 @@ const CustomAlert = ({
         </button>
 
         <div className="custom-alert-icon">
-          {iconMap[type] || iconMap.info}
+          {iconMap[type] || <Info size={42} />}
         </div>
 
         <h2 className="custom-alert-title">{title}</h2>
