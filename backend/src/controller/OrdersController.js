@@ -7,29 +7,17 @@ const orderController = {};
 
 const parseNumber = (value) => {
   if (value === undefined || value === null || value === "") return 0;
-
   if (typeof value === "object" && value.$numberDecimal) {
     return Number(value.$numberDecimal) || 0;
   }
-
   return Number(String(value).replace(/[^0-9.-]/g, "")) || 0;
 };
 
 const getProductPrice = (product) => {
   const data = product?.toObject ? product.toObject() : product;
-
   const fields = [
-    "unitPrice",
-    "UnitPrice",
-    "price",
-    "Price",
-    "precio",
-    "Precio",
-    "precioUnitario",
-    "PrecioUnitario",
-    "unit_price",
-    "cost",
-    "Cost",
+    "unitPrice", "UnitPrice", "price", "Price", "precio", "Precio",
+    "precioUnitario", "PrecioUnitario", "unit_price", "cost", "Cost"
   ];
 
   for (const field of fields) {
@@ -43,7 +31,6 @@ const getProductPrice = (product) => {
   });
 
   if (dynamicKey) return parseNumber(data[dynamicKey]);
-
   return 0;
 };
 
@@ -52,25 +39,20 @@ const getProductName = (product) =>
 
 const createBillIfDelivered = async (order) => {
   if (order.state !== "Entregado") return;
-
   const existingBill = await billsModel.findOne({ OrderId: order._id });
-
   if (existingBill) return;
-
   await billsModel.create({
     OrderId: order._id,
     date: new Date(),
-    paymentMethod: "No especificado",
+    paymentMethod: order.paymentMethod || "No especificado",
   });
 };
 
+// Obtener todas las órdenes
 orderController.getOrders = async (req, res) => {
   try {
     const orders = await ordersModel.find()
-      .populate(
-        "products.productId",
-        "name nombre productName unitPrice UnitPrice price Price precio Precio precioUnitario PrecioUnitario"
-      )
+      .populate("products.productId", "name nombre productName unitPrice UnitPrice price Price precio Precio")
       .populate("customerId", "name lastName lastname nombre apellido email")
       .sort({ createdAt: -1 });
 
@@ -81,6 +63,103 @@ orderController.getOrders = async (req, res) => {
   }
 };
 
+// Obtener órdenes de un cliente específico (para el historial)
+orderController.getCustomerOrders = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    
+    const orders = await ordersModel.find({ customerId })
+      .populate("products.productId", "name nombre productName unitPrice price")
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    return res.status(200).json({
+      success: true,
+      orders
+    });
+  } catch (error) {
+    console.log("error " + error);
+    return res.status(500).json({ 
+      success: false,
+      message: "Error al obtener el historial de compras" 
+    });
+  }
+};
+
+// Crear una orden desde el carrito (finalizar compra)
+orderController.createOrderFromCart = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { items, subtotal, shipping, total, paymentMethod, customerData } = req.body;
+
+    // Validar stock de todos los productos
+    for (const item of items) {
+      const product = await productsModel.findById(item.productId).session(session);
+      if (!product) {
+        throw new Error(`Producto ${item.productName} no encontrado`);
+      }
+      if (product.quantity < item.quantity) {
+        throw new Error(
+          `Stock insuficiente para ${item.productName}. Disponible: ${product.quantity}`
+        );
+      }
+    }
+
+    // Crear la orden usando la estructura existente
+    const order = new ordersModel({
+      products: items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        subtotal: item.price * item.quantity
+      })),
+      location: customerData.address || "No especificada",
+      date: new Date(),
+      totalPrice: total,
+      customerId: customerData._id,
+      customerEmail: customerData.email,
+      customerName: `${customerData.name} ${customerData.lastname || ""}`.trim(),
+      paymentMethod: paymentMethod,
+      state: "Entregado",
+      status: "completed",
+      orderDate: new Date()
+    });
+
+    await order.save({ session });
+
+    // Actualizar el stock de los productos
+    for (const item of items) {
+      await productsModel.findByIdAndUpdate(
+        item.productId,
+        { $inc: { quantity: -item.quantity } },
+        { session }
+      );
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // Crear la factura automáticamente
+    await createBillIfDelivered(order);
+
+    res.status(201).json({
+      success: true,
+      message: "Compra realizada exitosamente",
+      order
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Error al crear orden:", error);
+    res.status(400).json({
+      success: false,
+      message: error.message || "Error al procesar la compra"
+    });
+  }
+};
+
+// Insertar orden (existente)
 orderController.insertOrder = async (req, res) => {
   try {
     const { products, location, date, customerId, state } = req.body;
@@ -126,7 +205,6 @@ orderController.insertOrder = async (req, res) => {
       newProducts.push({
         productId: products[i].productId,
         quantity,
-        unitPrice: price,
         subtotal,
       });
     }
@@ -152,6 +230,7 @@ orderController.insertOrder = async (req, res) => {
   }
 };
 
+// Obtener órdenes por estado
 orderController.getOrdersByState = async (req, res) => {
   try {
     const states = await ordersModel.aggregate([
@@ -199,13 +278,11 @@ orderController.getOrdersByState = async (req, res) => {
   }
 };
 
+// Obtener órdenes recientes
 orderController.getRecentOrders = async (req, res) => {
   try {
     const recentOrders = await ordersModel.find()
-      .populate(
-        "products.productId",
-        "name nombre productName unitPrice UnitPrice price Price precio Precio precioUnitario PrecioUnitario"
-      )
+      .populate("products.productId", "name nombre productName unitPrice price")
       .populate("customerId", "name lastName lastname nombre apellido email")
       .sort({ createdAt: -1 })
       .limit(5);
@@ -217,6 +294,7 @@ orderController.getRecentOrders = async (req, res) => {
   }
 };
 
+// Actualizar orden
 orderController.updateOrder = async (req, res) => {
   try {
     const { products, location, date, customerId, state } = req.body;
@@ -262,7 +340,6 @@ orderController.updateOrder = async (req, res) => {
       newProducts.push({
         productId: products[i].productId,
         quantity,
-        unitPrice: price,
         subtotal,
       });
     }
@@ -296,6 +373,7 @@ orderController.updateOrder = async (req, res) => {
   }
 };
 
+// Eliminar orden
 orderController.deleteOrder = async (req, res) => {
   try {
     const deletedOrder = await ordersModel.findByIdAndDelete(req.params.id);

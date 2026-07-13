@@ -14,20 +14,26 @@ export const saveCart = (cart) => {
   dispatchCartUpdate();
 };
 
-export const addToCart = (product) => {
+export const addToCart = (product, availableStock) => {
   const cart = getCart();
-
   const existingProduct = cart.find((item) => item.id === product.id);
 
   let updatedCart = [];
 
   if (existingProduct) {
+    const newQuantity = existingProduct.quantity + 1;
+    if (availableStock !== undefined && newQuantity > availableStock) {
+      throw new Error(`Stock insuficiente. Disponible: ${availableStock}`);
+    }
     updatedCart = cart.map((item) =>
       item.id === product.id
-        ? { ...item, quantity: item.quantity + 1 }
+        ? { ...item, quantity: newQuantity }
         : item
     );
   } else {
+    if (availableStock !== undefined && availableStock < 1) {
+      throw new Error("Producto sin stock disponible");
+    }
     updatedCart = [...cart, { ...product, quantity: 1 }];
   }
 
@@ -35,16 +41,26 @@ export const addToCart = (product) => {
   return updatedCart;
 };
 
-export const updateQuantity = (productId, newQuantity) => {
+export const updateQuantity = (productId, newQuantity, availableStock) => {
   const cart = getCart();
 
-  const updatedCart = cart
-    .map((item) =>
-      item.id === productId
-        ? { ...item, quantity: Math.max(1, newQuantity) }
-        : item
-    )
-    .filter((item) => item.quantity > 0);
+  if (newQuantity < 0) {
+    throw new Error("La cantidad no puede ser negativa");
+  }
+
+  if (newQuantity === 0) {
+    return removeFromCart(productId);
+  }
+
+  if (availableStock !== undefined && newQuantity > availableStock) {
+    throw new Error(`Stock insuficiente. Disponible: ${availableStock}`);
+  }
+
+  const updatedCart = cart.map((item) =>
+    item.id === productId
+      ? { ...item, quantity: newQuantity }
+      : item
+  );
 
   saveCart(updatedCart);
   return updatedCart;
@@ -66,13 +82,7 @@ export const getCartTotals = (cart) => {
     (acc, item) => acc + item.price * item.quantity,
     0
   );
-
   const shipping = subtotal > 0 ? 2.5 : 0;
   const total = subtotal + shipping;
-
-  return {
-    subtotal,
-    shipping,
-    total,
-  };
+  return { subtotal, shipping, total };
 };

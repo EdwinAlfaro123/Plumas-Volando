@@ -12,6 +12,12 @@ const OrdersSchema = new Schema({
     date: {type: Date},
     totalPrice: {type: Number},
     customerId: {type: mongoose.Types.ObjectId, ref: "Customers"},
+    customerEmail: {type: String},
+    customerName: {type: String},
+    paymentMethod: {type: String, enum: ["card", "cash", "No especificado"], default: "No especificado"},
+    state: {type: String, enum: ["Pendiente", "Entregado", "Cancelado"], default: "Pendiente"},
+    status: {type: String, enum: ["pending", "completed", "cancelled"], default: "pending"},
+    orderDate: {type: Date, default: Date.now}
 },{
     timestamps: true,
     strict: false
