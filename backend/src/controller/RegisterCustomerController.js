@@ -60,8 +60,8 @@ customerController.insertCustomers = async (req, res) => {
         age--;
       }
 
-      if (age < 18) {
-        return res.status(400).json({message: "Customer must be at least 18 years old"});
+      if (age < 15) {
+        return res.status(400).json({message: "Customer must be at least 15 years old"});
       }
 
       //Validar si existe el DUI

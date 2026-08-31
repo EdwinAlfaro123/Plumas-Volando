@@ -29,4 +29,6 @@ router
   )
   .delete(validateAuthCookie(["employee"]), productController.deleteProduct);
 
+router.post("/:id/rate", validateAuthCookie(["customer"]), productController.rateProduct);
+
 export default router;

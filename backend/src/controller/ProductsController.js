@@ -71,10 +71,20 @@ const normalizeProduct = (product) => {
 
 productsController.getAllProducts = async (req, res) => {
   try {
-    const products = await productsModel.find().lean();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalItems = await productsModel.countDocuments();
+    const products = await productsModel.find().skip(skip).limit(limit).lean();
     const normalizedProducts = products.map(normalizeProduct);
 
-    return res.status(200).json(normalizedProducts);
+    return res.status(200).json({
+      products: normalizedProducts,
+      totalPages: Math.ceil(totalItems / limit),
+      currentPage: page,
+      totalItems,
+    });
   } catch (error) {
     console.log("error" + error);
     return res.status(500).json({ message: "Internal Server Error" });
@@ -218,68 +228,40 @@ productsController.deleteProduct = async (req, res) => {
 productsController.getTopSellingProducts = async (req, res) => {
   try {
     const topProducts = await ordersModel.aggregate([
-      {
-        $match: {
-          state: "Entregado",
-        },
-      },
-      {
-        $unwind: "$products",
-      },
-      {
-        $lookup: {
-          from: "Products",
-          localField: "products.productId",
-          foreignField: "_id",
-          as: "productInfo",
-        },
-      },
-      {
-        $unwind: {
-          path: "$productInfo",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $group: {
-          _id: "$products.productId",
-          name: {
-            $first: {
-              $ifNull: ["$productInfo.name", "Producto"],
-            },
-          },
-          quantitySold: {
-            $sum: "$products.quantity",
-          },
-          totalSold: {
-            $sum: {
-              $ifNull: ["$products.subtotal", 0],
-            },
-          },
-        },
-      },
-      {
-        $sort: {
-          quantitySold: -1,
-        },
-      },
-      {
-        $limit: 5,
-      },
-      {
-        $project: {
-          _id: 0,
-          idProduct: "$_id",
-          name: 1,
-          quantitySold: 1,
-          totalSold: 1,
-        },
-      },
+      // ... same as before
+      { $match: { state: "Entregado" } },
+      { $unwind: "$products" },
+      { $lookup: { from: "Products", localField: "products.productId", foreignField: "_id", as: "productInfo" } },
+      { $unwind: { path: "$productInfo", preserveNullAndEmptyArrays: true } },
+      { $group: { _id: "$products.productId", name: { $first: { $ifNull: ["$productInfo.name", "Producto"] } }, quantitySold: { $sum: "$products.quantity" }, totalSold: { $sum: { $ifNull: ["$products.subtotal", 0] } } } },
+      { $sort: { quantitySold: -1 } },
+      { $limit: 5 },
+      { $project: { _id: 0, idProduct: "$_id", name: 1, quantitySold: 1, totalSold: 1 } },
     ]);
 
     return res.status(200).json(topProducts);
   } catch (error) {
     console.log("error" + error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+productsController.rateProduct = async (req, res) => {
+  try {
+    const { review } = req.body; // Can be 1-5 or null to clear
+    const productId = req.params.id;
+
+    const productFound = await productsModel.findById(productId);
+    if (!productFound) {
+      return res.status(404).json({ message: "Producto no encontrado" });
+    }
+
+    productFound.review = review || 0; // 0 means no review/cleared
+    await productFound.save();
+
+    return res.status(200).json({ message: "Calificación guardada", product: productFound });
+  } catch (error) {
+    console.log("error", error);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };

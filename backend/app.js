@@ -19,7 +19,28 @@ import SalesHistoryRoutes from "./src/routes/SalesHistoryRoutes.js"
 const app = express();
 
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: function (origin, callback) {
+        // Permitir peticiones sin origin (apps móviles nativas, Postman, etc.)
+        if (!origin) return callback(null, true);
+        
+        const allowedOrigins = [
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "https://plumas-volandot.onrender.com",
+        ];
+        
+        // Permitir cualquier origen de red local (Expo Go en dispositivo físico)
+        const isLocalNetwork = /^http:\/\/192\.168\.\d+\.\d+/.test(origin) ||
+                               /^http:\/\/10\.\d+\.\d+\.\d+/.test(origin) ||
+                               /^http:\/\/172\.(1[6-9]|2\d|3[01])\.\d+\.\d+/.test(origin) ||
+                               /^exp:\/\//.test(origin);
+
+        if (allowedOrigins.includes(origin) || isLocalNetwork) {
+            return callback(null, true);
+        }
+        
+        return callback(null, true); // En desarrollo permitir todo; restringir en producción
+    },
     credentials: true
 }));
 
