@@ -14,249 +14,187 @@ import {
 import DashboardLayout from "../components/DashboardLayout";
 import NeumorphicCard from "../components/NeumorphisCard";
 import Logo from "../img/PlumasVolandoLogo.png";
+import api from "../services/api";
 import "../styles/Bill.css";
-
-const invoicesMock = [
-  {
-    id: 1,
-    numeroFactura: "Factura #1",
-    fecha: "2026-06-24",
-    pedido: "Pedido #1",
-    metodoPago: "Tarjeta",
-    cliente: "Daniel Alvarado",
-    ubicacion: "Santa Ana calle al cantón Primavera",
-    entregadoPor: "Daniel Alvarado",
-    items: [
-      {
-        id: 1,
-        producto: "Pollos",
-        cantidad: 2,
-        precio: 40.0,
-      },
-      {
-        id: 2,
-        producto: "Comedores de Gallina",
-        cantidad: 2,
-        precio: 2.5,
-      },
-    ],
-  },
-  {
-    id: 2,
-    numeroFactura: "Factura #2",
-    fecha: "2026-06-25",
-    pedido: "Pedido #2",
-    metodoPago: "Efectivo",
-    cliente: "Edwin Geovanny",
-    ubicacion: "San Salvador, Colonia Centroamérica",
-    entregadoPor: "Joshua Daniel",
-    items: [
-      {
-        id: 1,
-        producto: "Bebederos de Gallinas",
-        cantidad: 1,
-        precio: 3.0,
-      },
-      {
-        id: 2,
-        producto: "Cartón de 30 unidades de huevos Jumbo",
-        cantidad: 1,
-        precio: 10.0,
-      },
-    ],
-  },
-  {
-    id: 3,
-    numeroFactura: "Factura #3",
-    fecha: "2026-06-26",
-    pedido: "Pedido #3",
-    metodoPago: "Tarjeta",
-    cliente: "Joshua Daniel",
-    ubicacion: "Soyapango, Calle Antigua al Matazano",
-    entregadoPor: "Gerardo Andres",
-    items: [
-      {
-        id: 1,
-        producto: "Pollo",
-        cantidad: 1,
-        precio: 20.0,
-      },
-      {
-        id: 2,
-        producto: "Bebederos de Gallinas",
-        cantidad: 2,
-        precio: 3.0,
-      },
-      {
-        id: 3,
-        producto: "Comedores de Gallina",
-        cantidad: 1,
-        precio: 2.5,
-      },
-    ],
-  },
-  {
-    id: 4,
-    numeroFactura: "Factura #4",
-    fecha: "2026-06-27",
-    pedido: "Pedido #4",
-    metodoPago: "Transferencia",
-    cliente: "Andrea Sofia",
-    ubicacion: "Santa Tecla, Residencial Altos del Sol",
-    entregadoPor: "Kevin Andres",
-    items: [
-      {
-        id: 1,
-        producto: "Cartón de 30 unidades de huevos Jumbo",
-        cantidad: 2,
-        precio: 10.0,
-      },
-      {
-        id: 2,
-        producto: "Pollos",
-        cantidad: 1,
-        precio: 20.0,
-      },
-    ],
-  },
-  {
-    id: 5,
-    numeroFactura: "Factura #5",
-    fecha: "2026-06-28",
-    pedido: "Pedido #5",
-    metodoPago: "Efectivo",
-    cliente: "Gerardo Andres",
-    ubicacion: "Apopa, Comunidad Las Delicias",
-    entregadoPor: "Maria Fernanda",
-    items: [
-      {
-        id: 1,
-        producto: "Bebederos de Gallinas",
-        cantidad: 3,
-        precio: 3.0,
-      },
-      {
-        id: 2,
-        producto: "Comedores de Gallina",
-        cantidad: 3,
-        precio: 2.5,
-      },
-      {
-        id: 3,
-        producto: "Cartón de 30 unidades de huevos Jumbo",
-        cantidad: 1,
-        precio: 10.0,
-      },
-    ],
-  },
-  {
-    id: 6,
-    numeroFactura: "Factura #6",
-    fecha: "2026-06-29",
-    pedido: "Pedido #6",
-    metodoPago: "Tarjeta",
-    cliente: "Kevin Andres",
-    ubicacion: "Mejicanos, Urbanización Los Almendros",
-    entregadoPor: "Andrea Sofia",
-    items: [
-      {
-        id: 1,
-        producto: "Pollos",
-        cantidad: 2,
-        precio: 40.0,
-      },
-      {
-        id: 2,
-        producto: "Cartón de 30 unidades de huevos Jumbo",
-        cantidad: 1,
-        precio: 10.0,
-      },
-    ],
-  },
-  {
-    id: 7,
-    numeroFactura: "Factura #7",
-    fecha: "2026-06-30",
-    pedido: "Pedido #7",
-    metodoPago: "Tarjeta",
-    cliente: "Maria Fernanda",
-    ubicacion: "Ilopango, Reparto Valle Nuevo",
-    entregadoPor: "Edwin Geovanny",
-    items: [
-      {
-        id: 1,
-        producto: "Comedores de Gallina",
-        cantidad: 4,
-        precio: 2.5,
-      },
-      {
-        id: 2,
-        producto: "Bebederos de Gallinas",
-        cantidad: 2,
-        precio: 3.0,
-      },
-      {
-        id: 3,
-        producto: "Pollo",
-        cantidad: 1,
-        precio: 20.0,
-      },
-    ],
-  },
-  {
-    id: 8,
-    numeroFactura: "Factura #8",
-    fecha: "2026-07-01",
-    pedido: "Pedido #8",
-    metodoPago: "Efectivo",
-    cliente: "Diego Josue",
-    ubicacion: "San Miguel, Colonia Jardines del Río",
-    entregadoPor: "Daniel Alvarado",
-    items: [
-      {
-        id: 1,
-        producto: "Cartón de 30 unidades de huevos Jumbo",
-        cantidad: 2,
-        precio: 10.0,
-      },
-      {
-        id: 2,
-        producto: "Bebederos de Gallinas",
-        cantidad: 1,
-        precio: 3.0,
-      },
-      {
-        id: 3,
-        producto: "Comedores de Gallina",
-        cantidad: 2,
-        precio: 2.5,
-      },
-    ],
-  },
-];
 
 const PAGE_SIZE_OPTIONS = [3, 5, 10, "Todos"];
 
+const toNumber = (value) => {
+  if (value === undefined || value === null || value === "") return 0;
+  return Number(String(value).replace(/[^0-9.-]/g, "")) || 0;
+};
+
+const getId = (value) => {
+  if (!value) return "";
+  if (typeof value === "object") return value._id || value.id || "";
+  return String(value);
+};
+
+const getDateValue = (dateValue) => {
+  if (!dateValue) return "";
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(dateValue).slice(0, 10);
+  }
+
+  return date.toISOString().slice(0, 10);
+};
+
 const formatDate = (dateString) => {
-  const [year, month, day] = dateString.split("-");
+  if (!dateString) return "Sin fecha";
+
+  const cleanDate = String(dateString).slice(0, 10);
+  const [year, month, day] = cleanDate.split("-");
+
+  if (!year || !month || !day) return cleanDate;
+
   return `${day}/${month}/${year}`;
 };
 
 const formatMoney = (amount) => {
-  return `$${amount.toFixed(2)}`;
+  return `$${toNumber(amount).toFixed(2)}`;
+};
+
+const getCustomerName = (customer) => {
+  if (!customer || typeof customer !== "object") return "Cliente no disponible";
+
+  const name = customer.name || customer.nombre || "";
+  const lastname = customer.lastname || customer.lastName || customer.apellido || "";
+
+  const fullName = `${name} ${lastname}`.trim();
+
+  return fullName || customer.email || "Cliente no disponible";
+};
+
+const getProductName = (product) => {
+  if (!product || typeof product !== "object") return "Producto sin nombre";
+
+  return (
+    product.name ||
+    product.nombre ||
+    product.productName ||
+    "Producto sin nombre"
+  );
+};
+
+const getProductPrice = (item, product) => {
+  const quantity = toNumber(item?.quantity || item?.cantidad);
+
+  const price =
+    item?.unitPrice ??
+    item?.UnitPrice ??
+    item?.price ??
+    item?.Price ??
+    item?.precio ??
+    item?.Precio ??
+    product?.unitPrice ??
+    product?.UnitPrice ??
+    product?.price ??
+    product?.Price ??
+    product?.precio ??
+    product?.Precio;
+
+  const parsedPrice = toNumber(price);
+
+  if (parsedPrice > 0) return parsedPrice;
+
+  if (item?.subtotal && quantity > 0) {
+    return toNumber(item.subtotal) / quantity;
+  }
+
+  return 0;
+};
+
+const normalizeInvoice = (bill, orders, index) => {
+  const orderId = getId(bill.OrderId || bill.orderId || bill.pedidoId);
+
+  const order = orders.find((item) => getId(item._id || item.id) === orderId);
+
+  const rawItems = Array.isArray(order?.products) ? order.products : [];
+
+  const items = rawItems.map((item, itemIndex) => {
+    const product =
+      item?.productId && typeof item.productId === "object"
+        ? item.productId
+        : null;
+
+    const quantity = toNumber(item?.quantity || item?.cantidad);
+    const price = getProductPrice(item, product);
+
+    return {
+      id: item?._id || item?.id || itemIndex + 1,
+      producto: getProductName(product || item),
+      cantidad: quantity,
+      precio: price,
+      subtotal: toNumber(item?.subtotal) || quantity * price,
+    };
+  });
+
+  return {
+    id: bill._id || bill.id || index + 1,
+    numeroFactura: `Factura #${String(bill._id || index + 1)
+      .slice(-6)
+      .toUpperCase()}`,
+    fecha: getDateValue(bill.date || bill.createdAt),
+    pedido: orderId
+      ? `Pedido #${String(orderId).slice(-6).toUpperCase()}`
+      : "Pedido no disponible",
+    metodoPago:
+      bill.paymentMethod ||
+      bill.metodoPago ||
+      bill.methodPayment ||
+      "No especificado",
+    cliente: getCustomerName(order?.customerId),
+    ubicacion: order?.location || "Ubicación no disponible",
+    entregadoPor: bill.deliveredBy || bill.entregadoPor || "Plumas Volando",
+    items,
+  };
 };
 
 const BillPage = () => {
-  const [invoices] = useState(invoicesMock);
+  const [invoices, setInvoices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isPageSizeMenuOpen, setIsPageSizeMenuOpen] = useState(false);
-
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const pageSizeMenuRef = useRef(null);
+
+  const loadInvoices = async () => {
+    try {
+      setLoading(true);
+      setErrorMessage("");
+
+      const [billResponse, ordersResponse] = await Promise.all([
+        api.get("/bill"),
+        api.get("/orders"),
+      ]);
+
+      const bills = Array.isArray(billResponse.data) ? billResponse.data : [];
+      const orders = Array.isArray(ordersResponse.data) ? ordersResponse.data : [];
+
+      const normalizedInvoices = bills.map((bill, index) =>
+        normalizeInvoice(bill, orders, index)
+      );
+
+      setInvoices(normalizedInvoices);
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("No se pudieron cargar las facturas desde el backend.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadInvoices();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -343,14 +281,20 @@ const BillPage = () => {
   };
 
   const getInvoiceTotal = (items) => {
-    return items.reduce(
-      (accumulator, item) => accumulator + item.cantidad * item.precio,
-      0
-    );
+    return items.reduce((accumulator, item) => {
+      const subtotal = toNumber(item.subtotal);
+
+      if (subtotal > 0) return accumulator + subtotal;
+
+      return accumulator + toNumber(item.cantidad) * toNumber(item.precio);
+    }, 0);
   };
 
   const getInvoiceTotalItems = (items) => {
-    return items.reduce((accumulator, item) => accumulator + item.cantidad, 0);
+    return items.reduce(
+      (accumulator, item) => accumulator + toNumber(item.cantidad),
+      0
+    );
   };
 
   return (
@@ -433,7 +377,11 @@ const BillPage = () => {
           </div>
 
           <div className="bill-list">
-            {paginatedInvoices.length > 0 ? (
+            {loading ? (
+              <div className="bill-empty-state">Cargando facturas...</div>
+            ) : errorMessage ? (
+              <div className="bill-empty-state">{errorMessage}</div>
+            ) : paginatedInvoices.length > 0 ? (
               paginatedInvoices.map((invoice) => (
                 <div key={invoice.id} className="bill-item">
                   <div className="bill-item-left">
@@ -481,7 +429,8 @@ const BillPage = () => {
 
           <div className="bill-pagination">
             <div className="bill-pagination-info">
-              Mostrando {paginatedInvoices.length} de {filteredInvoices.length} facturas
+              Mostrando {paginatedInvoices.length} de{" "}
+              {filteredInvoices.length} facturas
             </div>
 
             <button
@@ -523,10 +472,7 @@ const BillPage = () => {
 
         {selectedInvoice && (
           <div className="bill-modal-overlay" onClick={closeInvoiceModal}>
-            <div
-              className="bill-modal"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <div className="bill-modal" onClick={(e) => e.stopPropagation()}>
               <button
                 type="button"
                 className="bill-modal-close"
@@ -567,13 +513,21 @@ const BillPage = () => {
                 </div>
 
                 <div className="bill-modal-table-body">
-                  {selectedInvoice.items.map((item) => (
-                    <div key={item.id} className="bill-modal-table-row">
-                      <span>{item.producto}</span>
-                      <span>{item.cantidad}</span>
-                      <span>{formatMoney(item.precio)}</span>
+                  {selectedInvoice.items.length > 0 ? (
+                    selectedInvoice.items.map((item) => (
+                      <div key={item.id} className="bill-modal-table-row">
+                        <span>{item.producto}</span>
+                        <span>{item.cantidad}</span>
+                        <span>{formatMoney(item.precio)}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="bill-modal-table-row">
+                      <span>Sin productos registrados</span>
+                      <span>0</span>
+                      <span>$0.00</span>
                     </div>
-                  ))}
+                  )}
                 </div>
 
                 <div className="bill-modal-table-total">

@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { Mail, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
 import "../styles/Login.css";
 import CustomAlert from "../components/CustomAlert";
 import LoginImage from "../img/LoginImage.png";
 import Logo from "../img/PlumasVolandoLogo.png";
+import api from "../services/api";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
-    correo: "",
+    email: "",
     password: "",
   });
 
@@ -24,16 +26,39 @@ const LoginPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const getLoggedUser = (data) => {
+    return (
+      data?.employee ||
+      data?.employeeFound ||
+      data?.user ||
+      data?.userFound ||
+      data?.data ||
+      null
+    );
+  };
+
+  const getUserName = (user) => {
+    return (
+      user?.name ||
+      user?.nombre ||
+      user?.firstName ||
+      user?.username ||
+      formData.email.split("@")[0] ||
+      "usuario"
+    );
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.correo || !formData.password) {
+    if (!formData.email || !formData.password) {
       setAlert({
         isOpen: true,
         type: "error",
@@ -43,41 +68,51 @@ const LoginPage = () => {
       return;
     }
 
-    const savedUser = JSON.parse(localStorage.getItem("usuarioRegistrado"));
-
-    if (!savedUser) {
-      setAlert({
-        isOpen: true,
-        type: "error",
-        title: "Sin usuarios",
-        message: "No hay ningún usuario registrado todavía",
+    try {
+      const response = await api.post("/loginEmployee", {
+        email: formData.email,
+        password: formData.password,
       });
-      return;
-    }
 
-    if (
-      formData.correo === savedUser.correo &&
-      formData.password === savedUser.password
-    ) {
-      localStorage.setItem("sesionActiva", "true");
-      localStorage.setItem("usuarioActivo", JSON.stringify(savedUser));
+      const loggedUser = getLoggedUser(response.data);
+
+      localStorage.setItem("loginEmail", formData.email);
+
+      if (loggedUser) {
+        localStorage.setItem("user", JSON.stringify(loggedUser));
+      } else {
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            email: formData.email,
+          })
+        );
+      }
+
+      if (response.data?.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+
+      window.dispatchEvent(new Event("plumas:user-updated"));
 
       setAlert({
         isOpen: true,
         type: "success",
         title: "Bienvenido",
-        message: `Hola ${savedUser.nombre}, sesión iniciada correctamente`,
+        message: `Hola ${getUserName(loggedUser)}, sesión iniciada correctamente`,
       });
 
       setTimeout(() => {
         navigate("/dashboard");
-      }, 1500);
-    } else {
+      }, 1200);
+    } catch (error) {
       setAlert({
         isOpen: true,
         type: "error",
         title: "Error",
-        message: "Correo o contraseña incorrectos",
+        message:
+          error.response?.data?.message ||
+          "Correo o contraseña incorrectos",
       });
     }
   };
@@ -98,24 +133,27 @@ const LoginPage = () => {
             </div>
 
             <form className="login-form" onSubmit={handleSubmit}>
-              <h1 className="login-form-title">Iniciar Sesion</h1>
+              <h1 className="login-form-title">Iniciar Sesión</h1>
 
               <div className="login-field">
-                <label htmlFor="correo">Correo</label>
+                <label htmlFor="email">Correo</label>
+
                 <div className="login-input-wrapper">
                   <input
-                    id="correo"
+                    id="email"
                     type="email"
-                    name="correo"
-                    value={formData.correo}
+                    name="email"
+                    value={formData.email}
                     onChange={handleChange}
                   />
+
                   <Mail size={18} className="login-input-icon" />
                 </div>
               </div>
 
               <div className="login-field">
                 <label htmlFor="password">Contraseña</label>
+
                 <div className="login-input-wrapper">
                   <input
                     id="password"
@@ -124,6 +162,7 @@ const LoginPage = () => {
                     value={formData.password}
                     onChange={handleChange}
                   />
+
                   <button
                     type="button"
                     className="login-icon-btn"

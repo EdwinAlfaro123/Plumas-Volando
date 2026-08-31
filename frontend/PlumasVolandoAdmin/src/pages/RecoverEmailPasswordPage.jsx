@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom";
 import "../styles/RecoverEmailPassword.css";
 import CustomAlert from "../components/CustomAlert";
 
-const RecoverPasswordPage = () => {
+const RecoverEmailPasswordPage = () => {
   const navigate = useNavigate();
+
   const [correo, setCorreo] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [alert, setAlert] = useState({
     isOpen: false,
@@ -15,66 +17,99 @@ const RecoverPasswordPage = () => {
     message: "",
   });
 
-  const handleSubmit = (e) => {
+  const showAlert = (type, title, message) => {
+    setAlert({
+      isOpen: true,
+      type,
+      title,
+      message,
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const correoLimpio = correo.trim();
+    const correoLimpio = correo.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!correoLimpio) {
-      setAlert({
-        isOpen: true,
-        type: "error",
-        title: "Campos incompletos",
-        message: "Por favor llena todos los campos",
-      });
+      showAlert(
+        "error",
+        "Campos incompletos",
+        "Por favor ingresa tu correo electrónico"
+      );
       return;
     }
 
     if (!emailRegex.test(correoLimpio)) {
-      setAlert({
-        isOpen: true,
-        type: "error",
-        title: "Correo inválido",
-        message: "Ingresa un correo válido",
-      });
+      showAlert("error", "Correo inválido", "Ingresa un correo válido");
       return;
     }
 
-    const usuarioGuardado = JSON.parse(
-      localStorage.getItem("usuarioRegistrado")
-    );
+    try {
+      setLoading(true);
 
-    if (!usuarioGuardado) {
-      setAlert({
-        isOpen: true,
-        type: "error",
-        title: "Sin registro",
-        message: "No hay usuarios registrados",
-      });
-      return;
+      const response = await fetch(
+        "http://localhost:4000/api/recoveryPasswordEmployee/requestCode",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            email: correoLimpio,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.message === "Not found") {
+          showAlert(
+            "error",
+            "Correo no encontrado",
+            "Este correo no está registrado"
+          );
+          return;
+        }
+
+        if (data.message === "Error sending mail") {
+          showAlert(
+            "error",
+            "Error al enviar",
+            "No se pudo enviar el código al correo"
+          );
+          return;
+        }
+
+        showAlert(
+          "error",
+          "Error",
+          data.message || "No se pudo procesar la solicitud"
+        );
+        return;
+      }
+
+      showAlert(
+        "success",
+        "Código enviado",
+        "Revisa tu correo para continuar"
+      );
+
+      setTimeout(() => {
+        navigate("/emailCode");
+      }, 1200);
+    } catch (error) {
+      showAlert(
+        "error",
+        "Error de conexión",
+        "No se pudo conectar con el servidor"
+      );
+    } finally {
+      setLoading(false);
     }
-
-    if (correoLimpio !== usuarioGuardado.correo) {
-      setAlert({
-        isOpen: true,
-        type: "error",
-        title: "Correo no encontrado",
-        message: "Este correo no está registrado",
-      });
-      return;
-    }
-
-    setAlert({
-      isOpen: true,
-      type: "success",
-      title: "Código enviado",
-      message: "Revisa tu correo para continuar",
-    });
-
-    setTimeout(() => {
-      navigate("/emailCode");
-    }, 1200);
   };
 
   return (
@@ -90,7 +125,7 @@ const RecoverPasswordPage = () => {
           <div className="recover-card">
             <form onSubmit={handleSubmit} className="recover-form">
               <label className="recover-label">
-                Ingresa tu correo electronico
+                Ingresa tu correo electrónico
               </label>
 
               <div className="recover-input-wrapper">
@@ -99,20 +134,27 @@ const RecoverPasswordPage = () => {
                   value={correo}
                   onChange={(e) => setCorreo(e.target.value)}
                   className="recover-input"
+                  disabled={loading}
+                  placeholder="ejemplo@gmail.com"
                 />
                 <Mail size={14} className="recover-input-icon" />
               </div>
 
-              <button type="submit" className="recover-btn-primary">
-                Enviar
+              <button
+                type="submit"
+                className="recover-btn-primary"
+                disabled={loading}
+              >
+                {loading ? "Enviando..." : "Enviar"}
               </button>
 
               <button
                 type="button"
                 className="recover-btn-secondary"
                 onClick={() => navigate("/login")}
+                disabled={loading}
               >
-                Volver al Inicio de sesion
+                Volver al Inicio de sesión
               </button>
             </form>
           </div>
@@ -135,4 +177,4 @@ const RecoverPasswordPage = () => {
   );
 };
 
-export default RecoverPasswordPage;
+export default RecoverEmailPasswordPage;

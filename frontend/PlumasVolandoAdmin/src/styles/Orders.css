@@ -545,3 +545,190 @@
     width: 100%;
   }
 }
+.orders-modal-field-full {
+  grid-column: 1 / -1;
+}
+
+.orders-products-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.orders-product-row {
+  display: grid;
+  grid-template-columns: 1fr 95px 90px 38px;
+  gap: 10px;
+  align-items: center;
+}
+
+.orders-product-row select,
+.orders-product-row input {
+  width: 100%;
+}
+
+.orders-product-subtotal {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+  color: #2e2e2e;
+}
+
+.orders-remove-product-btn,
+.orders-add-product-row {
+  border: none;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.orders-remove-product-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: #df3333;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orders-add-product-row {
+  width: fit-content;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  background: #f0d66d;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+@media (max-width: 720px) {
+  .orders-product-row {
+    grid-template-columns: 1fr;
+  }
+
+  .orders-remove-product-btn {
+    width: 100%;
+  }
+}
+
+.orders-modal-field-full {
+  grid-column: 1 / -1;
+}
+
+.orders-products-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.orders-product-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 95px 90px 38px;
+  gap: 10px;
+  align-items: center;
+}
+
+.orders-product-row select,
+.orders-product-row input {
+  width: 100%;
+}
+
+.orders-product-subtotal {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+  color: #2e2e2e;
+}
+
+.orders-remove-product-btn,
+.orders-add-product-row {
+  border: none;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.orders-remove-product-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: #df3333;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orders-add-product-row {
+  width: fit-content;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  background: #f0d66d;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.orders-status-badge {
+  background: #9ca3af;
+  color: #fff;
+}
+
+.orders-status-badge.pendiente {
+  background: #e0a22f;
+}
+
+.orders-status-badge.entregado {
+  background: #22a35a;
+}
+
+.orders-status-badge.cancelado {
+  background: #df3333;
+}
+
+.orders-status-badge.sin-estado {
+  background: #6b7280;
+}
+
+.orders-status-badge.en-proceso {
+  background: #3b82f6;
+}
+
+.orders-status-badge.programado {
+  background: #8b5cf6;
+}
+
+.orders-status-badge.preparando {
+  background: #f97316;
+}
+
+.orders-status-badge.en-camino,
+.orders-status-badge.en-transito {
+  background: #06b6d4;
+}
+
+@media (max-width: 720px) {
+  .orders-product-row {
+    grid-template-columns: 1fr;
+  }
+
+  .orders-remove-product-btn {
+    width: 100%;
+  }
+}

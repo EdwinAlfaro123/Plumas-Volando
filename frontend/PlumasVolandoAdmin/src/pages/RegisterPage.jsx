@@ -6,6 +6,7 @@ import CustomButton from "../components/Buttons";
 import CustomInput from "../components/Input";
 import AuthLayout from "../components/AuthLayout";
 import CustomAlert from "../components/CustomAlert";
+import api from "../services/api"
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const RegisterPage = () => {
     correo: "",
     telefono: "",
     dui: "",
+    DateContract: new Date().toISOString().split("T")[0],
     password: "",
     confirmPassword: "",
   });
@@ -57,7 +59,7 @@ const RegisterPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (
@@ -66,7 +68,8 @@ const RegisterPage = () => {
       !formData.telefono ||
       !formData.dui ||
       !formData.password ||
-      !formData.confirmPassword
+      !formData.confirmPassword ||
+      !formData.DateContract
     ) {
       setAlert({
         isOpen: true,
@@ -109,37 +112,38 @@ const RegisterPage = () => {
       return;
     }
 
-    const usuario = {
-      nombre: formData.nombre,
-      correo: formData.correo,
-      telefono: formData.telefono,
-      dui: formData.dui,
-      password: formData.password,
-    };
+    try {
+      await api.post("/Registeremployee", {
+        name: formData.nombre,
+        email: formData.correo,
+        phone: formData.telefono.replace("-", ""),
+        dui: formData.dui,
+        DateContract: formData.DateContract,
+        password: formData.password,
+        Status: "Activo",
+      });
 
-    localStorage.setItem("usuarioRegistrado", JSON.stringify(usuario));
+      setAlert({
+        isOpen: true,
+        type: "success",
+        title: "Registro exitoso",
+        message: "Tu cuenta fue creada correctamente",
+      });
 
-    console.log("Datos de registro:", usuario);
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
 
-    setAlert({
-      isOpen: true,
-      type: "success",
-      title: "Registro exitoso",
-      message: "Tu cuenta fue creada correctamente",
-    });
-
-    setFormData({
-      nombre: "",
-      correo: "",
-      telefono: "",
-      dui: "",
-      password: "",
-      confirmPassword: "",
-    });
-
-    setTimeout(() => {
-      navigate("/login");
-    }, 1500);
+    } catch (error) {
+      setAlert({
+        isOpen: true,
+        type: "error",
+        title: "Error",
+        message:
+          error.response?.data?.message ||
+          "No se pudo registrar el empleado",
+      });
+    }
   };
 
   return (
@@ -190,6 +194,15 @@ const RegisterPage = () => {
           />
 
           <CustomInput
+            label="Fecha de Contratación"
+            type="date"
+            name="DateContract"
+            value={formData.DateContract}
+            onChange={handleChange}
+            required
+          />
+
+          <CustomInput
             label="Contraseña"
             type={showPassword ? "text" : "password"}
             name="password"
@@ -202,7 +215,7 @@ const RegisterPage = () => {
                 className="icon-button"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <EyeOff size={16} /> : <Lock size={16} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             }
           />

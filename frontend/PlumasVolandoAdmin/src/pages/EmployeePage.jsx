@@ -14,58 +14,11 @@ import SearchBar from "../components/SearchBar";
 import DateFilter from "../components/DateFilter";
 import Table from "../components/Table";
 import CustomAlert from "../components/CustomAlert";
+import api from "../services/api"
 import "../styles/Employee.css";
 
-const EMPLOYEES_DATA = [
-  {
-    id: 1,
-    nombre: "Daniel",
-    apellido: "Alvarado",
-    correo: "daniel@gmail.com",
-    telefono: "7104-6518",
-    fechaContrato: "2025-05-20",
-    estado: "Activo",
-  },
-  {
-    id: 2,
-    nombre: "Edwin",
-    apellido: "Alfaro",
-    correo: "alfaro@gmail.com",
-    telefono: "6585-5644",
-    fechaContrato: "2025-05-20",
-    estado: "Activo",
-  },
-  {
-    id: 3,
-    nombre: "Diego",
-    apellido: "Rodriguez",
-    correo: "diego@gmail.com",
-    telefono: "8982-6447",
-    fechaContrato: "2025-05-20",
-    estado: "Inactivo",
-  },
-  {
-    id: 4,
-    nombre: "Juan",
-    apellido: "Guzman",
-    correo: "juan@gmail.com",
-    telefono: "7502-1654",
-    fechaContrato: "2025-05-20",
-    estado: "Inactivo",
-  },
-  {
-    id: 5,
-    nombre: "Gerardo",
-    apellido: "Jovel",
-    correo: "gerardo@gmail.com",
-    telefono: "6318-2659",
-    fechaContrato: "2025-05-20",
-    estado: "Activo",
-  },
-];
-
 const EmployeesPage = () => {
-  const [employees, setEmployees] = useState(EMPLOYEES_DATA);
+  const [employees, setEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -74,15 +27,6 @@ const EmployeesPage = () => {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  const [createForm, setCreateForm] = useState({
-    nombre: "",
-    apellido: "",
-    correo: "",
-    telefono: "",
-    fechaContrato: "",
-    estado: "",
-  });
 
   const [editForm, setEditForm] = useState({
     id: "",
@@ -116,6 +60,32 @@ const EmployeesPage = () => {
       onCancel: null,
     }));
   };
+
+  const loadEmployees = async () => {
+    try {
+      const response = await api.get("/employee");
+
+      const formattedEmployees = response.data.map((employee) => ({
+        id: employee._id,
+        nombre: employee.name,
+        correo: employee.email,
+        telefono: employee.phone,
+        fechaContrato: employee.DateContract
+          ? employee.DateContract.split("T")[0]
+          : "",
+        estado: employee.Status,
+        isActive: employee.isActive,
+      }));
+
+      setEmployees(formattedEmployees);
+    } catch (error) {
+      console.error("Error cargando empleados:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadEmployees()
+  }, []);
 
   const normalizeText = (value) =>
     String(value)
@@ -199,22 +169,6 @@ const EmployeesPage = () => {
     setIsPageSizeMenuOpen(false);
   };
 
-  const openCreateModal = () => {
-    setCreateForm({
-      nombre: "",
-      apellido: "",
-      correo: "",
-      telefono: "",
-      fechaContrato: "",
-      estado: "",
-    });
-    setIsCreateModalOpen(true);
-  };
-
-  const closeCreateModal = () => {
-    setIsCreateModalOpen(false);
-  };
-
   const openEditModal = (employee) => {
     setEditForm({ ...employee });
     setIsEditModalOpen(true);
@@ -225,20 +179,11 @@ const EmployeesPage = () => {
     setEditForm({
       id: "",
       nombre: "",
-      apellido: "",
       correo: "",
       telefono: "",
       fechaContrato: "",
       estado: "",
     });
-  };
-
-  const handleCreateChange = (e) => {
-    const { name, value } = e.target;
-    setCreateForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
   };
 
   const handleEditChange = (e) => {
@@ -252,7 +197,6 @@ const EmployeesPage = () => {
   const validateForm = (form) => {
     if (
       !form.nombre ||
-      !form.apellido ||
       !form.correo ||
       !form.telefono ||
       !form.fechaContrato ||
@@ -269,53 +213,11 @@ const EmployeesPage = () => {
     return "";
   };
 
-  const handleCreateSubmit = (e) => {
-    e.preventDefault();
-
-    const error = validateForm(createForm);
-    if (error) {
-      setAlert({
-        isOpen: true,
-        type: "error",
-        title: "Campos inválidos",
-        message: error,
-        showCancel: false,
-        confirmText: "Aceptar",
-        cancelText: "Cancelar",
-        onConfirm: closeAlert,
-        onCancel: null,
-      });
-      return;
-    }
-
-    const newEmployee = {
-      id:
-        employees.length > 0
-          ? Math.max(...employees.map((item) => item.id)) + 1
-          : 1,
-      ...createForm,
-    };
-
-    setEmployees((prev) => [newEmployee, ...prev]);
-    closeCreateModal();
-
-    setAlert({
-      isOpen: true,
-      type: "success",
-      title: "Empleado registrado",
-      message: "El empleado fue agregado correctamente.",
-      showCancel: false,
-      confirmText: "Aceptar",
-      cancelText: "Cancelar",
-      onConfirm: closeAlert,
-      onCancel: null,
-    });
-  };
-
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
 
     const error = validateForm(editForm);
+
     if (error) {
       setAlert({
         isOpen: true,
@@ -324,30 +226,38 @@ const EmployeesPage = () => {
         message: error,
         showCancel: false,
         confirmText: "Aceptar",
-        cancelText: "Cancelar",
         onConfirm: closeAlert,
-        onCancel: null,
       });
+
       return;
     }
 
-    setEmployees((prev) =>
-      prev.map((item) => (item.id === editForm.id ? { ...editForm } : item))
-    );
+    try {
+      await api.put(`/employee/${editForm.id}`, {
+        name: editForm.nombre,
+        email: editForm.correo,
+        phone: editForm.telefono,
+        DateContract: editForm.fechaContrato,
+        Status: editForm.estado,
+        isActive: editForm.isActive,
+      });
 
-    closeEditModal();
+      await loadEmployees();
 
-    setAlert({
-      isOpen: true,
-      type: "success",
-      title: "Cambios guardados",
-      message: "Los datos del empleado se editaron correctamente.",
-      showCancel: false,
-      confirmText: "Aceptar",
-      cancelText: "Cancelar",
-      onConfirm: closeAlert,
-      onCancel: null,
-    });
+      closeEditModal();
+
+      setAlert({
+        isOpen: true,
+        type: "success",
+        title: "Cambios guardados",
+        message: "Los datos del empleado se editaron correctamente.",
+        showCancel: false,
+        confirmText: "Aceptar",
+        onConfirm: closeAlert,
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleDelete = (employee) => {
@@ -355,32 +265,37 @@ const EmployeesPage = () => {
       isOpen: true,
       type: "warning",
       title: "Eliminar empleado",
-      message: `¿Estás seguro de eliminar a ${employee.nombre} ${employee.apellido}?`,
+      message: `¿Estás seguro de eliminar a ${employee.nombre}?`,
       showCancel: true,
       confirmText: "Eliminar",
       cancelText: "Cancelar",
-      onConfirm: () => {
-        setEmployees((prev) => prev.filter((item) => item.id !== employee.id));
-        setAlert({
-          isOpen: true,
-          type: "success",
-          title: "Registro eliminado",
-          message: "El empleado se eliminó correctamente.",
-          showCancel: false,
-          confirmText: "Aceptar",
-          cancelText: "Cancelar",
-          onConfirm: closeAlert,
-          onCancel: null,
-        });
+
+      onConfirm: async () => {
+        try {
+          await api.delete(`/employee/${employee.id}`);
+
+          await loadEmployees();
+
+          setAlert({
+            isOpen: true,
+            type: "success",
+            title: "Registro eliminado",
+            message: "El empleado se eliminó correctamente.",
+            showCancel: false,
+            confirmText: "Aceptar",
+            onConfirm: closeAlert,
+          });
+        } catch (error) {
+          console.error(error);
+        }
       },
       onCancel: closeAlert,
     });
   };
 
   const tableColumns = [
-    { key: "id", label: "ID" },
+    { key: "id", label: "ID"},
     { key: "nombre", label: "Nombre" },
-    { key: "apellido", label: "Apellido" },
     { key: "correo", label: "Correo" },
     { key: "telefono", label: "Teléfono" },
     { key: "fechaContrato", label: "Fecha Contrato" },
@@ -456,14 +371,7 @@ const EmployeesPage = () => {
         <div className="employee-table-card">
           <div className="employee-table-topbar">
             <div className="employee-left-actions">
-              <button
-                type="button"
-                className="employee-add-btn"
-                onClick={openCreateModal}
-              >
-                <UserPlus size={18} />
-                Agregar
-              </button>
+              
             </div>
 
             <div className="employee-right-actions">
@@ -558,110 +466,6 @@ const EmployeesPage = () => {
           </div>
         </div>
 
-        {isCreateModalOpen && (
-          <div className="employee-modal-overlay" onClick={closeCreateModal}>
-            <div
-              className="employee-modal employee-create-modal"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                type="button"
-                className="employee-modal-close"
-                onClick={closeCreateModal}
-                title="Cerrar"
-              >
-                <X size={20} />
-              </button>
-
-              <div className="employee-modal-header">
-                <h2>INGRESAR EMPLEADO</h2>
-              </div>
-
-              <form className="employee-modal-form" onSubmit={handleCreateSubmit}>
-                <div className="employee-modal-field employee-modal-field-full">
-                  <label>Nombre</label>
-                  <input
-                    name="nombre"
-                    type="text"
-                    value={createForm.nombre}
-                    onChange={handleCreateChange}
-                  />
-                </div>
-
-                <div className="employee-modal-field employee-modal-field-full">
-                  <label>Apellido</label>
-                  <input
-                    name="apellido"
-                    type="text"
-                    value={createForm.apellido}
-                    onChange={handleCreateChange}
-                  />
-                </div>
-
-                <div className="employee-modal-field employee-modal-field-full">
-                  <label>Correo</label>
-                  <input
-                    name="correo"
-                    type="email"
-                    value={createForm.correo}
-                    onChange={handleCreateChange}
-                  />
-                </div>
-
-                <div className="employee-modal-field employee-modal-field-full">
-                  <label>Teléfono</label>
-                  <input
-                    name="telefono"
-                    type="text"
-                    value={createForm.telefono}
-                    onChange={handleCreateChange}
-                  />
-                </div>
-
-                <div className="employee-modal-field employee-modal-field-full">
-                  <label>Fecha de contrato</label>
-                  <input
-                    name="fechaContrato"
-                    type="date"
-                    value={createForm.fechaContrato}
-                    onChange={handleCreateChange}
-                  />
-                </div>
-
-                <div className="employee-modal-field employee-modal-field-full">
-                  <label>Estado</label>
-                  <select
-                    name="estado"
-                    value={createForm.estado}
-                    onChange={handleCreateChange}
-                  >
-                    <option value="">Selecciona un estado</option>
-                    <option value="Activo">Activo</option>
-                    <option value="Inactivo">Inactivo</option>
-                  </select>
-                </div>
-
-                <div className="employee-modal-actions employee-create-actions">
-                  <button
-                    type="submit"
-                    className="employee-modal-btn employee-create-submit"
-                  >
-                    Ingresar
-                  </button>
-
-                  <button
-                    type="button"
-                    className="employee-modal-btn employee-create-cancel"
-                    onClick={closeCreateModal}
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
         {isEditModalOpen && (
           <div className="employee-modal-overlay" onClick={closeEditModal}>
             <div
@@ -688,16 +492,6 @@ const EmployeesPage = () => {
                     name="nombre"
                     type="text"
                     value={editForm.nombre}
-                    onChange={handleEditChange}
-                  />
-                </div>
-
-                <div className="employee-modal-field">
-                  <label>Apellido</label>
-                  <input
-                    name="apellido"
-                    type="text"
-                    value={editForm.apellido}
                     onChange={handleEditChange}
                   />
                 </div>

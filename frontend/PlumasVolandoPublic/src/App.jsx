@@ -7,11 +7,13 @@ import NewsPage from "./pages/NewsPage";
 import PointsOfSalePage from "./pages/PointsOfSalePage";
 import ShoppingCarPage from "./pages/ShoppingCarPage";
 import ContactoPage from "./pages/ContactoPage";
+import LoginPage from "./pages/LoginPage";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<InicioPage />} />
         <Route path="/about" element={<AboutUsPage />} />
         <Route path="/products" element={<ProductsPage />} />
