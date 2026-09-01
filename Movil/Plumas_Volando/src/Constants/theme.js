@@ -1,93 +1,102 @@
 // src/Constants/theme.js
 export const COLORS = {
-  // Fondo principal — clave del neomorfismo
   background: '#EEF0F5',
   surface: '#EEF0F5',
 
-  // Paleta dorada/marrón de Plumas Volando
   primary: '#8A5A00',
   primaryLight: '#C8962A',
   primaryLighter: '#F0D080',
   primaryDark: '#5C3A00',
   primaryGlow: '#E9C46A',
 
-  // Sombras neomórficas (luz desde arriba-izquierda)
-  shadowLight: '#FFFFFF',        // luz alta
-  shadowDark: '#C8CAD6',         // sombra baja
+  shadowLight: '#FFFFFF',
+  shadowDark: '#C8CAD6',
 
-  // Texto
   textPrimary: '#2D2D3F',
   textSecondary: '#7A7B8C',
   textLight: '#FFFFFF',
   textMuted: '#ABABBB',
 
-  // Estados
   success: '#4CAF50',
   error: '#D64545',
   errorLight: '#FFE8E8',
   warning: '#FF9800',
   info: '#2196F3',
 
-  // Alias para compatibilidad
   inputBackground: '#EEF0F5',
   cardBackground: '#EEF0F5',
   lightShadow: '#FFFFFF',
   darkShadow: '#C8CAD6',
+
+  // ============================================
+  // LOGIN
+  // ============================================
+
+  loginBackground: '#EEF0F5',
+  loginSurface: '#EEF0F5',
+  loginCream: '#F5F0DC',
+  loginBrown: '#5C3A00',
+  loginGold: '#C8962A',
+  loginHighlight: '#FFFFFF',
+  loginShadow: '#B9BBC6',
 };
 
 export const NEUROMORPHIC = {
-  // Wrapper principal (sombra clara arriba-izquierda)
+  // Sombra superior-izquierda (luz)
   topShadow: {
     shadowColor: '#FFFFFF',
-    shadowOffset: { width: -6, height: -6 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 4, // Android (limitado, solo sombra oscura)
+    shadowOffset: { width: -8, height: -8 },
+    shadowOpacity: 0.9,
+    shadowRadius: 14,
+    elevation: 10,
   },
-  // Wrapper secundario (sombra oscura abajo-derecha)
+  
+  // Sombra inferior-derecha (oscuridad)
   bottomShadow: {
-    shadowColor: '#D1D9E6', // Un gris azulado más acorde a UIverse
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowColor: '#D1D9E6',
+    shadowOffset: { width: 8, height: 8 },
+    shadowOpacity: 0.8,
+    shadowRadius: 14,
+    elevation: 10,
   },
-  // Hundido — inputs activos/focused
+  
+  // EFECTO HUNDIDO (para inputs)
   inset: {
     shadowColor: '#D1D9E6',
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 0.8,
-    shadowRadius: 5,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.7,
+    shadowRadius: 8,
     elevation: 0,
   },
-  // Estilo antiguo por compatibilidad
-  raised: {
+  
+  // EFECTO PLANO (para badges)
+  flat: {
     shadowColor: '#D1D9E6',
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 0.7,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-  outerShadow: {
-    shadowColor: '#D1D9E6',
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 0.6,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-  innerShadow: {
-    shadowColor: '#FFFFFF',
-    shadowOffset: { width: -4, height: -4 },
-    shadowOpacity: 0.9,
-    shadowRadius: 8,
-  },
-  combinedShadow: {
-    shadowColor: '#D1D9E6',
-    shadowOffset: { width: 4, height: 4 },
+    shadowOffset: { width: 3, height: 3 },
     shadowOpacity: 0.5,
-    shadowRadius: 8,
+    shadowRadius: 6,
     elevation: 4,
   },
+  
+  // EFECTO FLOTANTE (para el logo)
+  floating: {
+    shadowColor: '#D1D9E6',
+    shadowOffset: { width: 8, height: 8 },
+    shadowOpacity: 0.7,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  
+  // EFECTO COMBINADO
+  combinedShadow: {
+    shadowColor: '#D1D9E6',
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  
+  // EFECTO PRESIONADO
   pressedShadow: {
     shadowColor: '#D1D9E6',
     shadowOffset: { width: 2, height: 2 },
@@ -113,4 +122,3 @@ export const RADIUS = {
 };
 
 export default { NEUROMORPHIC, TYPOGRAPHY, COLORS, SPACING, RADIUS };
-
