@@ -84,10 +84,12 @@ customerController.insertCustomers = async (req, res) => {
       }
   
       // Teléfono
-      const phoneRegex = /^[0-9]{8}$/;
-  
+      const phoneRegex = /^[0-9]{4}-[0-9]{4}$/;
+
       if (!phoneRegex.test(phone)) {
-        return res.status(400).json({message: "Phone must contain exactly 8 digits"});
+        return res.status(400).json({
+          message: "Phone must have the format 0000-0000"
+        });
       }
   
       // Verificar email repetido
