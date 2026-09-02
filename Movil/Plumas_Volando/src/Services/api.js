@@ -1,46 +1,166 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Lee la URL del backend desde la variable de entorno del .env
-// Fallback al servidor en Render en caso de que la variable no esté disponible
-const BASE_URL = process.env.PLUMAS_VOLANDO_PUBLIC_URL || 'https://plumas-volandot.onrender.com';
-const API_URL = `${BASE_URL}/api`;
+
+// ============================================================
+// URL DEL BACKEND
+// ============================================================
+
+const BASE_URL =
+  'https://plumas-volandot.onrender.com';
+
+const API_URL =
+  `${BASE_URL}/api`;
+
+
+// ============================================================
+// AXIOS
+// ============================================================
 
 const api = axios.create({
+
   baseURL: API_URL,
+
   headers: {
     'Content-Type': 'application/json',
+    Accept: 'application/json',
   },
-  timeout: 15000, // 15s — Render puede tardar en despertar si estaba en reposo
+
+  timeout: 30000,
+
 });
 
+
+// ============================================================
+// REQUEST
+// ============================================================
+
 api.interceptors.request.use(
+
   async (config) => {
-    const token = await AsyncStorage.getItem('authToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+
+    try {
+
+      const token =
+        await AsyncStorage.getItem(
+          'authToken'
+        );
+
+      if (token) {
+
+        config.headers.Authorization =
+          `Bearer ${token}`;
+
+      }
+
+    } catch (error) {
+
+      console.warn(
+        '[API] Error obteniendo token:',
+        error.message
+      );
+
     }
+
+
+    console.log(
+      '[API] Request:',
+      config.method?.toUpperCase(),
+      `${config.baseURL}${config.url}`
+    );
+
+
     return config;
+
   },
+
   (error) => {
+
+    console.error(
+      '[API] Request error:',
+      error
+    );
+
     return Promise.reject(error);
+
   }
+
 );
+
+
+// ============================================================
+// RESPONSE
+// ============================================================
 
 api.interceptors.response.use(
-  (response) => response,
+
+  (response) => {
+
+    console.log(
+      '[API] Response:',
+      response.status,
+      response.config?.url
+    );
+
+    return response;
+
+  },
+
   async (error) => {
-    if (error.code === 'ECONNABORTED') {
-      console.error('[API] Timeout — el servidor tardó demasiado en responder');
-    } else if (!error.response) {
-      console.error('[API] Error de red — verifica tu conexión o que el servidor esté activo:', error.message);
-    } else if (error.response?.status === 401) {
-      await AsyncStorage.removeItem('authToken');
-      await AsyncStorage.removeItem('userData');
+
+    if (!error.response) {
+
+      console.error(
+        '[API] Network Error'
+      );
+
+      console.error(
+        '[API] URL:',
+        `${error.config?.baseURL || ''}${error.config?.url || ''}`
+      );
+
+      console.error(
+        '[API] Mensaje:',
+        error.message
+      );
+
     }
+
+    else {
+
+      console.error(
+        '[API] HTTP Error:',
+        error.response.status
+      );
+
+      console.error(
+        '[API] Data:',
+        error.response.data
+      );
+
+    }
+
+
+    if (
+      error.response?.status === 401
+    ) {
+
+      await AsyncStorage.removeItem(
+        'authToken'
+      );
+
+      await AsyncStorage.removeItem(
+        'userData'
+      );
+
+    }
+
+
     return Promise.reject(error);
+
   }
+
 );
 
+
 export default api;
-
