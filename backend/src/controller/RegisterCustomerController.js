@@ -60,8 +60,8 @@ customerController.insertCustomers = async (req, res) => {
         age--;
       }
 
-      if (age < 18) {
-        return res.status(400).json({message: "Customer must be at least 18 years old"});
+      if (age < 15) {
+        return res.status(400).json({message: "Customer must be at least 15 years old"});
       }
 
       //Validar si existe el DUI
@@ -84,10 +84,12 @@ customerController.insertCustomers = async (req, res) => {
       }
   
       // Teléfono
-      const phoneRegex = /^[0-9]{8}$/;
-  
+      const phoneRegex = /^[0-9]{4}-[0-9]{4}$/;
+
       if (!phoneRegex.test(phone)) {
-        return res.status(400).json({message: "Phone must contain exactly 8 digits"});
+        return res.status(400).json({
+          message: "Phone must have the format 0000-0000"
+        });
       }
   
       // Verificar email repetido

@@ -72,7 +72,7 @@ recoveryPasswordCustomerController.requestCode = async (req,res) => {
                 console.log("error"+error);
                 return res.status(500).json({message: "Error sending mail"})
             }
-            return res.status(200).json({message: "email sent"})
+            return res.status(200).json({message: "email sent", token});
         });
     } catch (error) {
          console.log("error" + error);
@@ -87,7 +87,10 @@ recoveryPasswordCustomerController.verifyCode = async (req,res) => {
 
         //Obtenemos la informacion dentro del token
         //Accedemos a la cookie
-        const token = req.cookies.recoveryCookie;
+        const token = req.cookies?.recoveryCookie || req.headers['recovery-token'] || req.body.token;
+        if (!token) {
+            return res.status(401).json({message: "Token is required"});
+        }
         const decoded = jsonwebtoken.verify(token,config.JWT.secret);
 
         //Comparamos lo que el administrador escribio con el que esta en el token
@@ -112,7 +115,7 @@ recoveryPasswordCustomerController.verifyCode = async (req,res) => {
 
          res.cookie("recoveryCookie", newToken, { maxAge: 15 * 60 * 1000 });
 
-    return res.status(200).json({ message: "Code verified successfully" });
+    return res.status(200).json({ message: "Code verified successfully", token: newToken });
 
 
     } catch (error) {
@@ -132,7 +135,10 @@ recoveryPasswordCustomerController.newPassword = async (req, res) => {
     
     //Vamos a comprobar que la constante verified que está en el token
     //ya esté en true (O sea qu haya pasado por el paso 2)
-    const token = req.cookies.recoveryCookie;
+    const token = req.cookies?.recoveryCookie || req.headers['recovery-token'] || req.body.token;
+    if (!token) {
+      return res.status(401).json({message: "Token is required"});
+    }
     const decoded = jsonwebtoken.verify(token, config.JWT.secret);
 
     if (!decoded.verified) {

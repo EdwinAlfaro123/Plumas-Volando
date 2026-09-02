@@ -15,4 +15,7 @@ export const config = {
     cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
     cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
   },
+   mongo: {
+    uri: process.env.MONGO_URI,
+  },
 };
