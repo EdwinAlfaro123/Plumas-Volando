@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Image,
@@ -17,24 +17,8 @@ import { useCart } from '../../Context/CartContext';
 import { COLORS, NEUROMORPHIC } from '../../Constants/theme';
 import api from '../../Services/api';
 import { formatCurrency } from '../../Utils/formatters';
-import { HomeStyles as styles } from '../../Styles/HomeStyle.js';
+import { HomeStyles as styles } from '../../Styles/HomeStyle';
 import FloatingCartButton from '../../Components/Navigation/FloatingCartButton';
-
-const getUserId = (user) => user?._id || user?.id || user?.idCustomer || user?.customerId;
-const getOrderTotal = (order) => Number(order?.totalPrice ?? order?.total ?? 0) || 0;
-const getOrderState = (order) => String(order?.state ?? order?.status ?? '').toLowerCase();
-const isPending = (order) => ['pendiente', 'pending'].includes(getOrderState(order));
-const isCompleted = (order) => ['entregado', 'completed', 'completado'].includes(getOrderState(order));
-
-const getMonthTotal = (orders) => {
-  const now = new Date();
-  return orders
-    .filter((order) => {
-      const date = new Date(order?.orderDate || order?.date || order?.createdAt);
-      return isCompleted(order) && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-    })
-    .reduce((total, order) => total + getOrderTotal(order), 0);
-};
 
 const PressableNeumorphic = ({ children, onPress, style, accessibilityLabel }) => {
   const scale = useRef(new Animated.Value(1)).current;
@@ -66,8 +50,11 @@ const SummaryCard = ({ compact, icon, label, value, onPress }) => (
           <Ionicons color={COLORS.primary} name={icon} size={17} />
         </View>
       </View>
-      <Text adjustsFontSizeToFit minimumFontScale={0.66} numberOfLines={1} style={[styles.summaryValue, compact && styles.summaryValueCompact]}>{value}</Text>
-      <Text numberOfLines={2} style={styles.summaryLabel}>{label}</Text>
+      <View style={styles.summaryCopy}>
+        <Text numberOfLines={1} style={styles.summaryLabel}>{label}</Text>
+        <Text adjustsFontSizeToFit minimumFontScale={0.66} numberOfLines={1} style={[styles.summaryValue, compact && styles.summaryValueCompact]}>{value}</Text>
+      </View>
+      <Ionicons color={COLORS.primaryDark} name="chevron-forward" size={20} />
     </View>
   </PressableNeumorphic>
 );
@@ -107,7 +94,8 @@ const HomeScreen = ({ navigation }) => {
   const { user } = useContext(AuthContext);
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
-  const [orders, setOrders] = useState([]);
+  const [summary, setSummary] = useState({ pending: 0, spent: 0 });
+  const [summaryError, setSummaryError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const fade = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(12)).current;
@@ -116,12 +104,11 @@ const HomeScreen = ({ navigation }) => {
   const firstName = (user?.name || user?.nombre || 'Usuario').trim().split(' ')[0];
 
   const loadHome = useCallback(async () => {
-    const customerId = getUserId(user);
-    const requests = [api.get('/products?page=1&limit=3')];
-    // La ruta del backend se monta en /orders y su subruta es /orders/customer/:id.
-    if (customerId) requests.push(api.get(`/orders/orders/customer/${customerId}`));
-
-    const results = await Promise.allSettled(requests);
+    setSummaryError('');
+    const results = await Promise.allSettled([
+      api.get('/products?page=1&limit=3'),
+      api.get('/home-summary'),
+    ]);
     const productsResult = results[0];
     const ordersResult = results[1];
 
@@ -130,10 +117,17 @@ const HomeScreen = ({ navigation }) => {
       setProducts(Array.isArray(data) ? data.slice(0, 3) : (data?.products || []).slice(0, 3));
     }
     if (ordersResult?.status === 'fulfilled') {
-      const data = ordersResult.value.data;
-      setOrders(Array.isArray(data) ? data : (data?.orders || []));
+      const data = ordersResult.value.data?.summary || {};
+      setSummary({
+        pending: Number(data.pendingOrders) || 0,
+        spent: Number(data.monthlySpent) || 0,
+      });
+    } else {
+      // Conserva los valores seguros por defecto cuando no haya datos o falle la consulta.
+      setSummary({ pending: 0, spent: 0 });
+      setSummaryError('No pudimos actualizar tu resumen. Desliza para reintentar.');
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     loadHome();
@@ -148,11 +142,6 @@ const HomeScreen = ({ navigation }) => {
     await loadHome();
     setRefreshing(false);
   }, [loadHome]);
-
-  const summary = useMemo(() => ({
-    pending: orders.filter(isPending).length,
-    spent: getMonthTotal(orders),
-  }), [orders]);
 
   return (
     <SafeAreaView edges={['top']} style={styles.screen}>
@@ -196,8 +185,9 @@ const HomeScreen = ({ navigation }) => {
           </View>
           <View style={styles.summaryGrid}>
             <SummaryCard compact icon="time-outline" label="Pedidos pendientes" value={String(summary.pending)} onPress={() => navigation.navigate('Orders')} />
-            <SummaryCard compact icon="wallet-outline" label="Gastado este mes" value={formatCurrency(summary.spent)} onPress={() => navigation.navigate('Invoices')} />
+            <SummaryCard compact icon="wallet-outline" label="Gastado este mes" value={formatCurrency(summary.spent)} onPress={() => navigation.navigate('Orders')} />
           </View>
+          {!!summaryError && <Text style={styles.summaryError}>{summaryError}</Text>}
 
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Productos para ti</Text>
@@ -224,19 +214,46 @@ const HomeScreen = ({ navigation }) => {
           )}
 
           <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Accesos rápidos</Text></View>
-          <View style={styles.quickActions}>
-            {[
-              { icon: 'grid-outline', label: 'Productos', screen: 'Products' },
-              { icon: 'receipt-outline', label: 'Pedidos', screen: 'Orders' },
-              { icon: 'settings-outline', label: 'Perfil', screen: 'Settings' },
-            ].map((action) => (
-              <PressableNeumorphic key={action.screen} onPress={() => navigation.navigate(action.screen)} style={[styles.quickActionOuter, NEUROMORPHIC.topShadow]} accessibilityLabel={action.label}>
-                <View style={[styles.quickAction, NEUROMORPHIC.bottomShadow]}>
-                  <Ionicons color={COLORS.primary} name={action.icon} size={22} />
-                  <Text style={styles.quickActionText}>{action.label}</Text>
+          <View style={styles.actionList}>
+            <TouchableOpacity
+              accessibilityLabel="Ir a productos"
+              activeOpacity={0.82}
+              onPress={() => navigation.navigate('Products')}
+              style={[styles.primaryActionOuter, NEUROMORPHIC.topShadow]}
+            >
+              <View style={[styles.primaryAction, NEUROMORPHIC.bottomShadow]}>
+                <View style={[styles.primaryActionIconOuter, NEUROMORPHIC.topShadow]}>
+                  <View style={[styles.primaryActionIcon, NEUROMORPHIC.bottomShadow]}>
+                    <Ionicons color={COLORS.primary} name="grid-outline" size={21} />
+                  </View>
                 </View>
-              </PressableNeumorphic>
-            ))}
+                <View style={styles.primaryActionCopy}>
+                  <Text style={styles.primaryActionTitle}>Productos</Text>
+                  <Text numberOfLines={1} style={styles.primaryActionSubtitle}>Explora el catálogo disponible</Text>
+                </View>
+                <Ionicons color={COLORS.primaryDark} name="chevron-forward" size={20} />
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              accessibilityLabel="Ir a pedidos"
+              activeOpacity={0.82}
+              onPress={() => navigation.navigate('Orders')}
+              style={[styles.primaryActionOuter, NEUROMORPHIC.topShadow]}
+            >
+              <View style={[styles.primaryAction, NEUROMORPHIC.bottomShadow]}>
+                <View style={[styles.primaryActionIconOuter, NEUROMORPHIC.topShadow]}>
+                  <View style={[styles.primaryActionIcon, NEUROMORPHIC.bottomShadow]}>
+                    <Ionicons color={COLORS.primary} name="receipt-outline" size={21} />
+                  </View>
+                </View>
+                <View style={styles.primaryActionCopy}>
+                  <Text style={styles.primaryActionTitle}>Mis pedidos</Text>
+                  <Text numberOfLines={1} style={styles.primaryActionSubtitle}>Consulta el estado de tus compras</Text>
+                </View>
+                <Ionicons color={COLORS.primaryDark} name="chevron-forward" size={20} />
+              </View>
+            </TouchableOpacity>
           </View>
         </Animated.View>
       </ScrollView>

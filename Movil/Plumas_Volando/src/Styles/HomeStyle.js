@@ -148,22 +148,32 @@ export const HomeStyles = StyleSheet.create({
     fontWeight: '800',
   },
   summaryGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 28,
+    marginBottom: 16,
+  },
+  summaryError: {
+    color: COLORS.error,
+    fontSize: 11.5,
+    fontWeight: '700',
+    lineHeight: 16,
+    marginBottom: 14,
+    marginTop: -8,
+    textAlign: 'center',
   },
   summaryOuter: {
     backgroundColor: COLORS.background,
     borderRadius: 21,
-    width: '47.5%',
+    marginBottom: 14,
+    width: '100%',
   },
   summaryCard: {
-    alignItems: 'flex-start',
+    alignItems: 'center',
     backgroundColor: COLORS.background,
     borderRadius: 21,
-    minHeight: 143,
+    flexDirection: 'row',
+    minHeight: 92,
     overflow: 'hidden',
-    padding: 16,
+    paddingHorizontal: 17,
+    paddingVertical: 14,
   },
   summaryLight: {
     borderColor: 'rgba(255,255,255,0.72)',
@@ -179,7 +189,7 @@ export const HomeStyles = StyleSheet.create({
   summaryIconOuter: {
     backgroundColor: COLORS.background,
     borderRadius: 15,
-    marginBottom: 13,
+    marginRight: 14,
   },
   summaryIcon: {
     alignItems: 'center',
@@ -191,9 +201,9 @@ export const HomeStyles = StyleSheet.create({
   },
   summaryValue: {
     color: COLORS.textPrimary,
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: '800',
-    marginBottom: 3,
+    marginTop: 3,
   },
   summaryValueCompact: {
     fontSize: 18,
@@ -201,9 +211,12 @@ export const HomeStyles = StyleSheet.create({
   },
   summaryLabel: {
     color: COLORS.textSecondary,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    lineHeight: 15,
+  },
+  summaryCopy: {
+    flex: 1,
+    paddingRight: 10,
   },
   productList: {
     backgroundColor: COLORS.background,
@@ -288,30 +301,50 @@ export const HomeStyles = StyleSheet.create({
     marginTop: 4,
     textAlign: 'center',
   },
-  quickActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  actionList: {
+    paddingBottom: 2,
   },
-  quickActionOuter: {
+  primaryActionOuter: {
     backgroundColor: COLORS.background,
-    borderRadius: 18,
-    width: '31%',
+    borderRadius: 20,
+    marginBottom: 14,
   },
-  quickAction: {
+  primaryAction: {
     alignItems: 'center',
     backgroundColor: COLORS.background,
-    borderRadius: 18,
-    minHeight: 92,
-    justifyContent: 'center',
-    paddingHorizontal: 6,
-    paddingVertical: 12,
+    borderRadius: 20,
+    flexDirection: 'row',
+    minHeight: 70,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
   },
-  quickActionText: {
-    color: COLORS.textSecondary,
-    fontSize: 11,
+  primaryActionIconOuter: {
+    backgroundColor: COLORS.background,
+    borderRadius: 15,
+    marginRight: 13,
+  },
+  primaryActionIcon: {
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+    borderRadius: 15,
+    height: 42,
+    justifyContent: 'center',
+    width: 42,
+  },
+  primaryActionCopy: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  primaryActionTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
     fontWeight: '800',
-    marginTop: 8,
-    textAlign: 'center',
+    marginBottom: 3,
+  },
+  primaryActionSubtitle: {
+    color: COLORS.textSecondary,
+    fontSize: 11.5,
+    fontWeight: '600',
   },
 });
 
