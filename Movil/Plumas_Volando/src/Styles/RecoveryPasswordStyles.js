@@ -1,458 +1,504 @@
-import { StyleSheet } from 'react-native';
+import {
+  StyleSheet,
+} from 'react-native';
 
 import {
   COLORS,
-  NEUROMORPHIC,
 } from '../Constants/theme';
 
-export const RecoveryPasswordStyles = StyleSheet.create({
 
-  // ==================================================
-  // PANTALLA
-  // ==================================================
-
-  screen: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-
-  keyboardContainer: {
-    flex: 1,
-  },
-
-  scrollContent: {
-    flexGrow: 1,
-  },
+export const RecoveryPasswordStyles =
+  StyleSheet.create({
 
 
-  // ==================================================
-  // HERO
-  // ==================================================
+    // ==================================================
+    // CONTENEDOR
+    // ==================================================
 
-  hero: {
-    height: 275,
-    width: '100%',
-    overflow: 'hidden',
-  },
+    screenContainer: {
+      flex: 1,
 
-  heroBackground: {
-    flex: 1,
+      width: '100%',
 
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+      justifyContent: 'center',
 
-  heroOverlay: {
-    ...StyleSheet.absoluteFillObject,
-
-    backgroundColor:
-      'rgba(52, 35, 20, 0.28)',
-  },
-
-
-  // ==================================================
-  // BOTÓN ATRÁS
-  // ==================================================
-
-  backButton: {
-    position: 'absolute',
-
-    top: 20,
-    left: 20,
-
-    zIndex: 5,
-  },
-
-  backButtonInner: {
-    width: 45,
-    height: 45,
-
-    borderRadius: 15,
-
-    backgroundColor:
-      COLORS.background,
-
-    justifyContent: 'center',
-    alignItems: 'center',
-
-    shadowColor: '#5B4024',
-
-    shadowOffset: {
-      width: 4,
-      height: 5,
+      paddingTop: 15,
+      paddingBottom: 15,
     },
 
-    shadowOpacity: 0.38,
-    shadowRadius: 7,
 
-    elevation: 7,
-  },
+    // ==================================================
+    // BOTÓN VOLVER SUPERIOR
+    // ==================================================
 
+    backButton: {
+      width: 44,
+      height: 44,
 
-  // ==================================================
-  // LOGO
-  // ==================================================
+      borderRadius: 15,
 
-  logoOuter: {
-    width: 155,
-    height: 155,
+      alignItems: 'center',
+      justifyContent: 'center',
 
-    borderRadius: 78,
+      backgroundColor:
+        COLORS.background,
 
-    backgroundColor:
-      COLORS.background,
+      marginBottom: 10,
 
-    justifyContent: 'center',
-    alignItems: 'center',
+      shadowColor:
+        COLORS.shadowDark,
 
-    shadowColor: '#4A3017',
+      shadowOffset: {
+        width: 4,
+        height: 5,
+      },
 
-    shadowOffset: {
-      width: 8,
-      height: 9,
+      shadowOpacity: 0.5,
+      shadowRadius: 7,
+
+      elevation: 6,
     },
 
-    shadowOpacity: 0.35,
-    shadowRadius: 13,
 
-    elevation: 12,
-  },
+    // ==================================================
+    // LOGO
+    // ==================================================
 
-  logoHighlight: {
-    position: 'absolute',
+    logoContainer: {
+      alignItems: 'center',
 
-    top: 5,
-    left: 5,
-
-    width: 145,
-    height: 145,
-
-    borderRadius: 73,
-
-    borderTopWidth: 3,
-    borderLeftWidth: 3,
-
-    borderColor:
-      'rgba(255,255,255,0.85)',
-  },
-
-  logoInner: {
-    width: 135,
-    height: 135,
-
-    borderRadius: 68,
-
-    backgroundColor: '#F5F0DC',
-
-    justifyContent: 'center',
-    alignItems: 'center',
-
-    overflow: 'hidden',
-
-    shadowColor: '#C1C2C9',
-
-    shadowOffset: {
-      width: 3,
-      height: 4,
+      marginBottom: 18,
     },
 
-    shadowOpacity: 0.35,
-    shadowRadius: 6,
 
-    elevation: 4,
-  },
+    // ==================================================
+    // TARJETA NEUMÓRFICA
+    // ==================================================
 
-  logoImage: {
-    width: 126,
-    height: 126,
-  },
+    card: {
+      width: '100%',
 
+      backgroundColor:
+        COLORS.background,
 
-  // ==================================================
-  // PANEL
-  // ==================================================
+      borderRadius: 30,
 
-  panel: {
-    marginTop: -20,
+      paddingHorizontal: 22,
+      paddingTop: 28,
+      paddingBottom: 25,
 
-    backgroundColor:
-      COLORS.background,
+      borderWidth: 1,
 
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
+      borderColor:
+        'rgba(255,255,255,0.65)',
 
-    paddingHorizontal: 25,
-    paddingTop: 27,
-    paddingBottom: 28,
+      shadowColor:
+        '#B5B7C2',
 
-    minHeight: 480,
+      shadowOffset: {
+        width: 8,
+        height: 10,
+      },
 
-    shadowColor: '#B7B9C4',
+      shadowOpacity: 0.52,
 
-    shadowOffset: {
-      width: 0,
-      height: -4,
+      shadowRadius: 14,
+
+      elevation: 10,
     },
 
-    shadowOpacity: 0.20,
-    shadowRadius: 12,
 
-    elevation: 8,
-  },
+    // ==================================================
+    // HEADER
+    // ==================================================
 
+    header: {
+      width: '100%',
 
-  // ==================================================
-  // HEADER
-  // ==================================================
+      alignItems: 'center',
 
-  header: {
-    alignItems: 'center',
-
-    marginBottom: 20,
-  },
-
-  stepBadge: {
-    width: 43,
-    height: 43,
-
-    borderRadius: 14,
-
-    justifyContent: 'center',
-    alignItems: 'center',
-
-    backgroundColor:
-      COLORS.background,
-
-    marginBottom: 10,
-
-    shadowColor: '#B9BBC6',
-
-    shadowOffset: {
-      width: 3,
-      height: 4,
+      marginBottom: 26,
     },
 
-    shadowOpacity: 0.45,
-    shadowRadius: 6,
 
-    elevation: 4,
-  },
+    titleRow: {
+      flexDirection: 'row',
 
-  title: {
-    fontSize: 23,
+      justifyContent: 'center',
+      alignItems: 'center',
 
-    color:
-      COLORS.primaryDark,
-
-    fontWeight: '800',
-
-    textAlign: 'center',
-
-    letterSpacing: 0.2,
-
-    marginBottom: 5,
-  },
-
-  subtitle: {
-    fontSize: 13,
-
-    color:
-      COLORS.textSecondary,
-
-    textAlign: 'center',
-
-    lineHeight: 19,
-
-    paddingHorizontal: 15,
-  },
-
-
-  // ==================================================
-  // PASOS
-  // ==================================================
-
-  stepsContainer: {
-    flexDirection: 'row',
-
-    alignItems: 'center',
-
-    justifyContent: 'center',
-
-    marginBottom: 23,
-  },
-
-  stepDot: {
-    width: 29,
-    height: 29,
-
-    borderRadius: 15,
-
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  stepActive: {
-    backgroundColor:
-      COLORS.primary,
-
-    shadowColor: '#B5B7C0',
-
-    shadowOffset: {
-      width: 2,
-      height: 3,
+      marginBottom: 12,
     },
 
-    shadowOpacity: 0.35,
 
-    shadowRadius: 4,
+    title: {
+      fontSize: 24,
 
-    elevation: 3,
-  },
+      lineHeight: 25,
 
-  stepCompleted: {
-    backgroundColor:
-      COLORS.primaryLight,
-  },
+      fontWeight: '800',
 
-  stepInactive: {
-    backgroundColor:
-      COLORS.background,
+      color:
+        COLORS.textPrimary,
 
-    borderWidth: 1,
+      textAlign: 'center',
 
-    borderColor:
-      COLORS.shadowDark,
-  },
-
-  stepNumber: {
-    fontSize: 13,
-
-    fontWeight: '800',
-
-    color:
-      COLORS.textLight,
-  },
-
-  stepNumberInactive: {
-    color:
-      COLORS.textSecondary,
-  },
-
-  stepLine: {
-    width: 38,
-    height: 2,
-
-    backgroundColor:
-      COLORS.shadowDark,
-
-    marginHorizontal: 5,
-
-    opacity: 0.5,
-  },
-
-  stepLineActive: {
-    backgroundColor:
-      COLORS.primaryLight,
-
-    opacity: 1,
-  },
-
-
-  // ==================================================
-  // FORMULARIO
-  // ==================================================
-
-  form: {
-    width: '100%',
-
-    marginBottom: 24,
-  },
-
-
-  // ==================================================
-  // ACCIONES
-  // ==================================================
-
-  actions: {
-    width: '100%',
-  },
-
-
-  // ==================================================
-  // LINK LOGIN
-  // ==================================================
-
-  loginLink: {
-    marginTop: 18,
-
-    flexDirection: 'row',
-
-    alignItems: 'center',
-
-    justifyContent: 'center',
-
-    paddingVertical: 5,
-  },
-
-  loginLinkText: {
-    fontSize: 13.5,
-
-    color:
-      COLORS.primaryLight,
-
-    fontWeight: '600',
-
-    marginLeft: 5,
-  },
-
-
-  // ==================================================
-  // FOOTER
-  // ==================================================
-
-  footer: {
-    alignItems: 'center',
-
-    marginTop: 23,
-
-    paddingHorizontal: 10,
-  },
-
-  footerIcon: {
-    width: 31,
-    height: 31,
-
-    borderRadius: 16,
-
-    justifyContent: 'center',
-    alignItems: 'center',
-
-    backgroundColor:
-      COLORS.background,
-
-    marginBottom: 6,
-
-    shadowColor: '#B9BBC5',
-
-    shadowOffset: {
-      width: 2,
-      height: 2,
+      letterSpacing: 0.1,
     },
 
-    shadowOpacity: 0.3,
 
-    shadowRadius: 4,
+    titleIcon: {
+      width: 40,
+      height: 40,
 
-    elevation: 2,
-  },
+      marginLeft: 10,
 
-  footerText: {
-    fontSize: 11,
+      borderRadius: 14,
 
-    color:
-      COLORS.textSecondary,
+      justifyContent: 'center',
+      alignItems: 'center',
 
-    textAlign: 'center',
-  },
+      backgroundColor:
+        COLORS.background,
 
-});
+      borderWidth: 1,
+
+      borderColor:
+        'rgba(255,255,255,0.55)',
+
+      shadowColor:
+        COLORS.shadowDark,
+
+      shadowOffset: {
+        width: 3,
+        height: 4,
+      },
+
+      shadowOpacity: 0.45,
+
+      shadowRadius: 6,
+
+      elevation: 4,
+    },
+
+
+    subtitle: {
+      maxWidth: 290,
+
+      paddingHorizontal: 8,
+
+      fontSize: 13,
+
+      lineHeight: 19,
+
+      fontWeight: '500',
+
+      color:
+        COLORS.textSecondary,
+
+      textAlign: 'center',
+    },
+
+
+    // ==================================================
+    // FORM
+    // ==================================================
+
+    form: {
+      width: '100%',
+
+      marginBottom: 18,
+    },
+
+
+    fieldLabel: {
+      marginLeft: 5,
+      marginBottom: 12,
+
+      fontSize: 12.5,
+
+      fontWeight: '700',
+
+      color:
+        COLORS.textSecondary,
+
+      letterSpacing: 0.2,
+    },
+
+
+    // ==================================================
+    // CÓDIGO DE 6 CARACTERES
+    // ==================================================
+
+    codeSection: {
+      width: '100%',
+
+      marginBottom: 26,
+    },
+
+
+    codeContainer: {
+      width: '100%',
+
+      flexDirection: 'row',
+
+      justifyContent:
+        'space-between',
+
+      alignItems: 'center',
+    },
+
+
+    codeInputOuter: {
+      position: 'relative',
+
+      width: 43,
+      height: 54,
+
+      borderRadius: 15,
+
+      justifyContent: 'center',
+      alignItems: 'center',
+
+      backgroundColor:
+        COLORS.background,
+
+      borderWidth: 1,
+
+      borderColor:
+        'rgba(255,255,255,0.5)',
+
+      shadowColor:
+        '#B9BBC6',
+
+      shadowOffset: {
+        width: 4,
+        height: 5,
+      },
+
+      shadowOpacity: 0.55,
+
+      shadowRadius: 6,
+
+      elevation: 5,
+
+      overflow: 'hidden',
+    },
+
+
+    codeInputFilled: {
+      borderColor:
+        'rgba(138,90,0,0.32)',
+
+      shadowColor:
+        '#AEB0BA',
+
+      shadowOffset: {
+        width: 2,
+        height: 2,
+      },
+
+      shadowOpacity: 0.35,
+
+      shadowRadius: 4,
+
+      elevation: 2,
+    },
+
+
+    codeInputError: {
+      borderColor:
+        COLORS.error,
+    },
+
+
+    codeInputHighlight: {
+      position: 'absolute',
+
+      top: 1,
+      left: 5,
+      right: 5,
+
+      height: 1,
+
+      borderRadius: 2,
+
+      backgroundColor:
+        'rgba(255,255,255,0.8)',
+    },
+
+
+    codeInput: {
+      width: '100%',
+      height: '100%',
+
+      padding: 0,
+
+      textAlign: 'center',
+
+      fontSize: 18,
+
+      fontWeight: '800',
+
+      color:
+        COLORS.textPrimary,
+
+      textTransform:
+        'lowercase',
+    },
+
+
+    // ==================================================
+    // ERROR
+    // ==================================================
+
+    errorRow: {
+      flexDirection: 'row',
+
+      alignItems: 'center',
+      justifyContent: 'center',
+
+      marginTop: 11,
+
+      paddingHorizontal: 4,
+    },
+
+
+    errorText: {
+      marginLeft: 5,
+
+      flexShrink: 1,
+
+      fontSize: 12,
+
+      lineHeight: 16,
+
+      fontWeight: '600',
+
+      color:
+        COLORS.error,
+
+      textAlign: 'center',
+    },
+
+
+    // ==================================================
+    // REENVIAR
+    // ==================================================
+
+    resendContainer: {
+      alignItems: 'center',
+
+      marginTop: 20,
+    },
+
+
+    resendQuestion: {
+      fontSize: 12,
+
+      color:
+        COLORS.textSecondary,
+
+      fontWeight: '500',
+
+      marginBottom: 3,
+    },
+
+
+    resendLink: {
+      fontSize: 12.5,
+
+      color:
+        COLORS.primary,
+
+      fontWeight: '800',
+
+      textDecorationLine:
+        'underline',
+    },
+
+
+    // ==================================================
+    // AYUDA DE CONTRASEÑA
+    // ==================================================
+
+    passwordHint: {
+      marginTop: -4,
+      marginLeft: 7,
+
+      fontSize: 11.5,
+
+      lineHeight: 16,
+
+      color:
+        COLORS.textSecondary,
+
+      fontWeight: '500',
+    },
+
+
+    // ==================================================
+    // ACCIONES
+    // ==================================================
+
+    actions: {
+      width: '100%',
+
+      alignItems: 'center',
+    },
+
+
+    // ==================================================
+    // VOLVER AL LOGIN
+    // ==================================================
+
+    loginButton: {
+      minHeight: 42,
+
+      marginTop: 17,
+
+      paddingHorizontal: 17,
+
+      flexDirection: 'row',
+
+      alignItems: 'center',
+      justifyContent: 'center',
+
+      borderRadius: 15,
+
+      backgroundColor:
+        COLORS.background,
+
+      borderWidth: 1,
+
+      borderColor:
+        'rgba(255,255,255,0.55)',
+
+      shadowColor:
+        '#B9BBC6',
+
+      shadowOffset: {
+        width: 3,
+        height: 4,
+      },
+
+      shadowOpacity: 0.4,
+
+      shadowRadius: 5,
+
+      elevation: 4,
+    },
+
+
+    loginButtonText: {
+      marginLeft: 6,
+
+      fontSize: 12.5,
+
+      fontWeight: '700',
+
+      color:
+        COLORS.primaryDark,
+    },
+
+  });

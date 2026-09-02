@@ -16,21 +16,18 @@ import FormInput from '../../Components/Common/FormInput';
 import Button from '../../Components/Common/Button';
 
 import { COLORS } from '../../Constants/theme';
-import api from '../../Services/api';
+import { authService } from '../../Services/authService';
 
-import { RecoveryPasswordStyles as styles } from '../../Styles';
+import {
+  RecoveryPasswordStyles as styles,
+} from '../../Styles';
 
 
 const RecoveryPasswordScreen = ({ navigation }) => {
 
-  const [step, setStep] = useState('email');
   const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [recoveryToken, setRecoveryToken] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
 
   // ==================================================
@@ -39,379 +36,244 @@ const RecoveryPasswordScreen = ({ navigation }) => {
 
   const handleSendCode = async () => {
 
-    if (!email) {
-      setError('El correo electronico es requerido');
-      return;
-    }
+    const cleanEmail = email.trim().toLowerCase();
 
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setError('Correo electronico invalido');
-      return;
-    }
+    if (!cleanEmail) {
 
-    setError('');
-    setLoading(true);
-
-    try {
-
-      const response = await api.post(
-        '/recoveryPasswordCustomer/requestCode',
-        { email }
-      );
-
-      setRecoveryToken(response.data.token);
-      setStep('code');
-
-    } catch (error) {
-
-      const message =
-        error.response?.data?.message ||
-        'Error al procesar la solicitud';
-
-      Alert.alert('Error', message);
-
-    } finally {
-
-      setLoading(false);
-
-    }
-  };
-
-
-  // ==================================================
-  // VERIFICAR CÓDIGO
-  // ==================================================
-
-  const handleVerifyCode = async () => {
-
-    if (!code || code.length < 6) {
-      setError('Código inválido');
-      return;
-    }
-
-    setError('');
-    setLoading(true);
-
-    try {
-
-      const response = await api.post(
-        '/recoveryPasswordCustomer/verifyCode',
-        {
-          code,
-          token: recoveryToken,
-        }
-      );
-
-      setRecoveryToken(response.data.token);
-      setStep('newPassword');
-
-    } catch (error) {
-
-      const message =
-        error.response?.data?.message ||
-        'Código incorrecto';
-
-      Alert.alert('Error', message);
-
-    } finally {
-
-      setLoading(false);
-
-    }
-  };
-
-
-  // ==================================================
-  // ACTUALIZAR CONTRASEÑA
-  // ==================================================
-
-  const handleUpdatePassword = async () => {
-
-    if (!newPassword || newPassword.length < 8) {
       setError(
-        'La contraseña debe tener al menos 8 caracteres'
+        'El correo electrónico es requerido'
       );
 
       return;
+
     }
 
-    if (newPassword !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
+
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+    if (!emailRegex.test(cleanEmail)) {
+
+      setError(
+        'Ingresa un correo electrónico válido'
+      );
+
       return;
+
     }
+
 
     setError('');
     setLoading(true);
 
+
     try {
 
-      await api.post(
-        '/recoveryPasswordCustomer/newPassword',
+      const response =
+        await authService.requestPasswordReset(
+          cleanEmail
+        );
+
+
+      if (!response.success) {
+
+        Alert.alert(
+          'No se pudo enviar el código',
+          response.message
+        );
+
+        return;
+
+      }
+
+
+      const recoveryToken =
+        response.data?.token;
+
+
+      if (!recoveryToken) {
+
+        Alert.alert(
+          'Error',
+          'El servidor no devolvió el token de recuperación.'
+        );
+
+        return;
+
+      }
+
+
+      navigation.navigate(
+        'RecoveryCode',
         {
-          newPassword,
-          confirmNewPassword: confirmPassword,
-          token: recoveryToken,
+          email: cleanEmail,
+          recoveryToken,
         }
       );
+
+    } catch (error) {
+
+      console.error(
+        '[RecoveryPassword] Error:',
+        error
+      );
+
 
       Alert.alert(
-        'Éxito',
-        'Tu contraseña ha sido actualizada correctamente.',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('Login'),
-          },
-        ]
+        'Error',
+        'No fue posible enviar el código. Intenta nuevamente.'
       );
-
-    } catch (error) {
-
-      const message =
-        error.response?.data?.message ||
-        'Error al actualizar la contraseña';
-
-      Alert.alert('Error', message);
 
     } finally {
 
       setLoading(false);
 
     }
+
   };
 
-
-  // ==================================================
-  // VOLVER
-  // ==================================================
-
-  const handleBack = () => {
-
-    if (step === 'email') {
-      navigation.goBack();
-      return;
-    }
-
-    if (step === 'code') {
-      setStep('email');
-      return;
-    }
-
-    setStep('code');
-  };
-
-
-  // ==================================================
-  // RENDER
-  // ==================================================
 
   return (
 
-    <AuthLayout>
+    <AuthLayout compact>
 
       <StatusBar style="dark" />
 
 
-      {/* ============================================
-          HEADER
-      ============================================ */}
+      <View style={styles.screenContainer}>
 
-      <View style={styles.header}>
+
+        {/* BOTÓN VOLVER */}
 
         <TouchableOpacity
           style={styles.backButton}
-          onPress={handleBack}
+          onPress={() => navigation.goBack()}
           activeOpacity={0.8}
         >
 
-          <View style={styles.backButtonInner}>
+          <Ionicons
+            name="arrow-back-outline"
+            size={20}
+            color={COLORS.primaryDark}
+          />
 
-            <Ionicons
-              name="arrow-back-outline"
-              size={20}
-              color={COLORS.primary}
+        </TouchableOpacity>
+
+
+        {/* LOGO */}
+
+        <View style={styles.logoContainer}>
+
+          <AppLogo
+            size={70}
+            showShadow
+          />
+
+        </View>
+
+
+        {/* TARJETA */}
+
+        <View style={styles.card}>
+
+          <View style={styles.header}>
+
+            <View style={styles.titleRow}>
+
+              <Text style={styles.title}>
+                Recuperar{'\n'}Contraseña
+              </Text>
+
+
+              <View style={styles.titleIcon}>
+
+                <Ionicons
+                  name="lock-open-outline"
+                  size={22}
+                  color={COLORS.primary}
+                />
+
+              </View>
+
+            </View>
+
+
+            <Text style={styles.subtitle}>
+              Ingresa tu correo electrónico y
+              te enviaremos un código de
+              verificación.
+            </Text>
+
+          </View>
+
+
+          <View style={styles.form}>
+
+            <FormInput
+              label="Ingresa tu correo electrónico"
+              value={email}
+              onChangeText={(value) => {
+
+                setEmail(value);
+
+                if (error) {
+                  setError('');
+                }
+
+              }}
+              placeholder="correo@ejemplo.com"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              icon="mail-outline"
+              error={error}
             />
 
           </View>
 
-        </TouchableOpacity>
 
+          <View style={styles.actions}>
 
-        <AppLogo
-          size={72}
-          showShadow
-        />
-
-
-        <Text style={styles.title}>
-
-          {step === 'email'
-            ? 'Recuperar contraseña'
-            : step === 'code'
-            ? 'Verificar código'
-            : 'Nueva contraseña'}
-
-        </Text>
-
-
-        <Text style={styles.subtitle}>
-
-          {step === 'email'
-            ? 'Ingresa tu correo y te ayudaremos a restablecer tu contraseña'
-            : step === 'code'
-            ? 'Ingresa el código que hemos enviado a tu correo'
-            : 'Crea una nueva contraseña segura para tu cuenta'}
-
-        </Text>
-
-      </View>
-
-
-      {/* ============================================
-          FORMULARIO
-      ============================================ */}
-
-      <View style={styles.form}>
-
-        {/* CORREO */}
-
-        {step === 'email' && (
-
-          <FormInput
-            label="Correo electrónico"
-            value={email}
-            onChangeText={setEmail}
-            placeholder="ejemplo@correo.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            error={error}
-            icon="mail-outline"
-          />
-
-        )}
-
-
-        {/* CÓDIGO */}
-
-        {step === 'code' && (
-
-          <FormInput
-            label="Código de verificación"
-            value={code}
-            onChangeText={setCode}
-            placeholder="Ingresa el código"
-            keyboardType="default"
-            autoCapitalize="none"
-            error={error}
-            icon="key-outline"
-          />
-
-        )}
-
-
-        {/* NUEVA CONTRASEÑA */}
-
-        {step === 'newPassword' && (
-
-          <>
-
-            <FormInput
-              label="Nueva contraseña"
-              value={newPassword}
-              onChangeText={setNewPassword}
-              placeholder="••••••••"
-              secureTextEntry
-              error={error}
-              icon="lock-closed-outline"
+            <Button
+              title="Enviar"
+              onPress={handleSendCode}
+              loading={loading}
+              disabled={loading}
+              size="medium"
             />
 
 
-            <FormInput
-              label="Confirmar nueva contraseña"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              placeholder="••••••••"
-              secureTextEntry
-              error={error}
-              icon="lock-closed-outline"
-            />
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={() =>
+                navigation.navigate('Login')
+              }
+              activeOpacity={0.75}
+            >
 
-          </>
+              <Ionicons
+                name="arrow-back-outline"
+                size={15}
+                color={COLORS.primaryDark}
+              />
 
-        )}
+              <Text style={styles.loginButtonText}>
+                Volver al inicio de sesión
+              </Text>
 
-      </View>
+            </TouchableOpacity>
 
+          </View>
 
-      {/* ============================================
-          ACCIONES
-      ============================================ */}
-
-      <View style={styles.actions}>
-
-        {step === 'email' && (
-
-          <Button
-            title="Enviar código"
-            onPress={handleSendCode}
-            loading={loading}
-            disabled={loading}
-          />
-
-        )}
-
-
-        {step === 'code' && (
-
-          <Button
-            title="Verificar código"
-            onPress={handleVerifyCode}
-            loading={loading}
-            disabled={loading}
-          />
-
-        )}
-
-
-        {step === 'newPassword' && (
-
-          <Button
-            title="Actualizar contraseña"
-            onPress={handleUpdatePassword}
-            loading={loading}
-            disabled={loading}
-          />
-
-        )}
-
-
-        {/* VOLVER AL LOGIN */}
-
-        <TouchableOpacity
-          style={styles.loginLink}
-          onPress={() => navigation.navigate('Login')}
-          activeOpacity={0.7}
-        >
-
-          <Text style={styles.loginLinkText}>
-
-            <Ionicons
-              name="arrow-back-outline"
-              size={16}
-              color={COLORS.primary}
-            />
-
-            {' '}Volver al inicio de sesión
-
-          </Text>
-
-        </TouchableOpacity>
+        </View>
 
       </View>
 
     </AuthLayout>
 
   );
+
 };
 
 
