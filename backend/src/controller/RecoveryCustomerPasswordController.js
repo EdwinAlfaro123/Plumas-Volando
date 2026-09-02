@@ -1,127 +1,194 @@
 import jsonwebtoken from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { OAuth2Client } from "google-auth-library";
+import { google } from "googleapis";
 
 import HTMLRecoveryEmail from "../utils/sentMailVerificationCode.js";
-
 import { config } from "../../config.js";
 import customerModel from "../model/Customer.js";
 
 const recoveryPasswordCustomerController = {};
 
 // =====================================================
-// CLIENTE OAUTH2 DE GOOGLE
+// CONFIGURACIÓN OAUTH2
 // =====================================================
 
-const oAuth2Client = new OAuth2Client(
-  config.email.client_id,
-  config.email.client_secret
-);
+const createOAuthClient = () => {
+  const {
+    client_id,
+    client_secret,
+    refresh_token,
+  } = config.email;
 
-oAuth2Client.setCredentials({
-  refresh_token: config.email.refresh_token,
+  if (!client_id) {
+    throw new Error(
+      "Falta la variable de entorno GOOGLE_CLIENT_ID"
+    );
+  }
+
+  if (!client_secret) {
+    throw new Error(
+      "Falta la variable de entorno GOOGLE_CLIENT_SECRET"
+    );
+  }
+
+  if (!refresh_token) {
+    throw new Error(
+      "Falta la variable de entorno GOOGLE_REFRESH_TOKEN"
+    );
+  }
+
+  const oAuth2Client = new google.auth.OAuth2(
+    client_id,
+    client_secret
+  );
+
+  oAuth2Client.setCredentials({
+    refresh_token,
+  });
+
+  return oAuth2Client;
+};
+
+// =====================================================
+// CONVERTIR MENSAJE A BASE64 URL-SAFE
+// =====================================================
+
+const encodeMessage = (message) => {
+  return Buffer.from(message)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+};
+
+// =====================================================
+// ENVIAR CORREO CON GMAIL API
+// =====================================================
+
+const sendRecoveryEmail = async ({
+  to,
+  subject,
+  html,
+}) => {
+  if (!config.email.user_email) {
+    throw new Error(
+      "Falta la variable de entorno USER_EMAIL"
+    );
+  }
+
+  // ===============================================
+  // CREAR CLIENTE OAUTH
+  // ===============================================
+
+  const auth = createOAuthClient();
+
+  // ===============================================
+  // OBTENER ACCESS TOKEN
+  // ===============================================
+
+  console.log(
+    "[GMAIL] Obteniendo access token..."
+  );
+
+  const accessTokenResponse =
+    await auth.getAccessToken();
+
+  if (!accessTokenResponse?.token) {
+    throw new Error(
+      "Google no devolvió un access token"
+    );
+  }
+
+  console.log(
+    "[GMAIL] Access token obtenido correctamente"
+  );
+
+  // ===============================================
+  // CREAR CLIENTE GMAIL
+  // ===============================================
+
+  const gmail = google.gmail({
+    version: "v1",
+    auth,
+  });
+
+  // ===============================================
+  // CODIFICAR ASUNTO UTF-8
+  // ===============================================
+
+  const encodedSubject =
+    `=?UTF-8?B?${Buffer.from(subject).toString(
+      "base64"
+    )}?=`;
+
+  // ===============================================
+  // CONSTRUIR CORREO MIME
+  // ===============================================
+
+  const message = [
+    `From: Plumas Volando <${config.email.user_email}>`,
+    `To: ${to}`,
+    `Subject: ${encodedSubject}`,
+    "MIME-Version: 1.0",
+    'Content-Type: text/html; charset="UTF-8"',
+    "Content-Transfer-Encoding: 8bit",
+    "",
+    html,
+  ].join("\r\n");
+
+  const raw = encodeMessage(message);
+
+  // ===============================================
+  // ENVIAR
+  // ===============================================
+
+  console.log(
+    `[GMAIL] Enviando correo a ${to}...`
+  );
+
+  const result =
+    await gmail.users.messages.send({
+      userId: "me",
+
+      requestBody: {
+        raw,
+      },
+    });
+
+  console.log(
+    "[GMAIL] Correo enviado correctamente"
+  );
+
+  console.log(
+    "[GMAIL] Message ID:",
+    result.data.id
+  );
+
+  return result.data;
+};
+
+// =====================================================
+// OPCIONES DE COOKIE
+// =====================================================
+
+const getCookieOptions = () => ({
+  maxAge: 15 * 60 * 1000,
+
+  httpOnly: true,
+
+  secure:
+    process.env.NODE_ENV === "production",
+
+  sameSite:
+    process.env.NODE_ENV === "production"
+      ? "none"
+      : "lax",
 });
 
 // =====================================================
-// ENVIAR CORREO USANDO GMAIL API
-// HTTPS - PUERTO 443
-// =====================================================
-
-async function sendGmailApi({
-  to,
-  subject,
-  htmlContent,
-}) {
-  try {
-    const accessTokenResponse =
-      await oAuth2Client.getAccessToken();
-
-    const accessToken =
-      accessTokenResponse?.token;
-
-    if (!accessToken) {
-      throw new Error(
-        "No se pudo obtener el access token de Google"
-      );
-    }
-
-    // Gmail necesita el asunto codificado correctamente
-    // para soportar tildes y caracteres especiales.
-    const utf8Subject =
-      `=?utf-8?B?${Buffer.from(subject).toString("base64")}?=`;
-
-    const messageParts = [
-      `From: Plumas Volando <${config.email.user_email}>`,
-      `To: ${to}`,
-      "Content-Type: text/html; charset=utf-8",
-      "MIME-Version: 1.0",
-      `Subject: ${utf8Subject}`,
-      "",
-      htmlContent,
-    ];
-
-    const message =
-      messageParts.join("\n");
-
-    // Gmail API requiere base64 URL-safe.
-    const encodedMessage =
-      Buffer.from(message)
-        .toString("base64")
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_")
-        .replace(/=+$/, "");
-
-    const response = await fetch(
-      "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
-      {
-        method: "POST",
-
-        headers: {
-          Authorization:
-            `Bearer ${accessToken}`,
-
-          "Content-Type":
-            "application/json",
-        },
-
-        body: JSON.stringify({
-          raw: encodedMessage,
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorData =
-        await response.json();
-
-      console.error(
-        "Error Gmail API:",
-        errorData
-      );
-
-      throw new Error(
-        JSON.stringify(errorData)
-      );
-    }
-
-    const responseData =
-      await response.json();
-
-    return responseData;
-  } catch (error) {
-    console.error(
-      "Error al enviar correo con Gmail API:",
-      error
-    );
-
-    throw error;
-  }
-}
-
-// =====================================================
 // PASO 1
-// ENVIAR CÓDIGO DE RECUPERACIÓN
+// SOLICITAR CÓDIGO DE RECUPERACIÓN
 // =====================================================
 
 recoveryPasswordCustomerController.requestCode =
@@ -129,23 +196,33 @@ recoveryPasswordCustomerController.requestCode =
     try {
       let { email } = req.body;
 
-      // ===============================================
-      // VALIDAR EMAIL
-      // ===============================================
+      // =============================================
+      // VALIDAR CORREO
+      // =============================================
 
       if (!email) {
         return res.status(400).json({
           message:
-            "Email is required",
+            "El correo electrónico es requerido",
         });
       }
 
       email =
         email.trim().toLowerCase();
 
-      // ===============================================
+      const emailRegex =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          message:
+            "El correo electrónico no es válido",
+        });
+      }
+
+      // =============================================
       // BUSCAR CLIENTE
-      // ===============================================
+      // =============================================
 
       const customerFound =
         await customerModel.findOne({
@@ -155,33 +232,50 @@ recoveryPasswordCustomerController.requestCode =
       if (!customerFound) {
         return res.status(404).json({
           message:
-            "Customer not found",
+            "No existe un cliente registrado con ese correo",
         });
       }
 
-      // ===============================================
+      // =============================================
       // GENERAR CÓDIGO
-      // ===============================================
+      // =============================================
 
       const randomCode =
         crypto
           .randomBytes(3)
           .toString("hex");
 
+      // El código es hexadecimal:
+      // ejemplo: a2f914
+      //
+      // Tiene exactamente 6 caracteres.
+
       console.log(
-        "Código de recuperación generado para:",
-        email
+        `[RECOVERY] Código generado para ${email}`
       );
 
-      // ===============================================
-      // CREAR TOKEN TEMPORAL
-      // ===============================================
+      // No imprimimos el código en producción.
+
+      if (
+        process.env.NODE_ENV !==
+        "production"
+      ) {
+        console.log(
+          "[RECOVERY] Código:",
+          randomCode
+        );
+      }
+
+      // =============================================
+      // GENERAR TOKEN DE RECUPERACIÓN
+      // =============================================
 
       const token =
         jsonwebtoken.sign(
           {
             email,
             randomCode,
+
             userType:
               "customer",
 
@@ -197,66 +291,61 @@ recoveryPasswordCustomerController.requestCode =
           }
         );
 
-      // ===============================================
-      // GUARDAR COOKIE
-      // ===============================================
-
-      res.cookie(
-        "recoveryCookie",
-        token,
-        {
-          maxAge:
-            15 * 60 * 1000,
-
-          httpOnly:
-            true,
-
-          secure:
-            process.env.NODE_ENV ===
-            "production",
-
-          sameSite:
-            process.env.NODE_ENV ===
-            "production"
-              ? "none"
-              : "lax",
-        }
-      );
-
-      // ===============================================
+      // =============================================
       // ENVIAR CORREO
-      // ===============================================
+      // =============================================
 
       try {
-        await sendGmailApi({
+        await sendRecoveryEmail({
           to: email,
 
           subject:
             "Recuperación de contraseña - Plumas Volando",
 
-          htmlContent:
+          html:
             HTMLRecoveryEmail(
               randomCode
             ),
         });
+      } catch (emailError) {
+        // Aquí quedará el error REAL
+        // visible en Render.
 
-        console.log(
-          "Correo de recuperación enviado correctamente a:",
-          email
+        console.error(
+          "========================================"
         );
 
-        // El token se devuelve porque la app móvil
-        // lo necesita manualmente.
-        return res.status(200).json({
-          message:
-            "Email sent",
-
-          token,
-        });
-      } catch (error) {
         console.error(
-          "Error enviando correo:",
-          error
+          "[GMAIL] ERROR AL ENVIAR CORREO"
+        );
+
+        console.error(
+          "Mensaje:",
+          emailError.message
+        );
+
+        console.error(
+          "Código:",
+          emailError.code
+        );
+
+        console.error(
+          "Status:",
+          emailError.response?.status
+        );
+
+        console.error(
+          "Data:",
+          emailError.response?.data
+        );
+
+        console.error(
+          "Stack:",
+          emailError.stack
+        );
+
+        console.error(
+          "========================================"
         );
 
         return res.status(500).json({
@@ -264,9 +353,32 @@ recoveryPasswordCustomerController.requestCode =
             "Error sending email",
         });
       }
+
+      // =============================================
+      // GUARDAR COOKIE PARA WEB
+      // =============================================
+
+      res.cookie(
+        "recoveryCookie",
+        token,
+        getCookieOptions()
+      );
+
+      // =============================================
+      // RESPUESTA
+      // =============================================
+
+      return res.status(200).json({
+        message:
+          "Código enviado correctamente",
+
+        // Necesario para la app móvil.
+        // La móvil no debe depender de cookies.
+        token,
+      });
     } catch (error) {
       console.error(
-        "Error requestCode:",
+        "[RECOVERY] Error requestCode:",
         error
       );
 
@@ -289,25 +401,44 @@ recoveryPasswordCustomerController.verifyCode =
         code,
       } = req.body;
 
-      // ===============================================
+      // =============================================
       // VALIDAR CÓDIGO
-      // ===============================================
+      // =============================================
 
       if (!code) {
         return res.status(400).json({
           message:
-            "Code is required",
+            "El código es requerido",
         });
       }
 
-      // ===============================================
+      const cleanCode =
+        String(code)
+          .trim()
+          .toLowerCase();
+
+      if (
+        cleanCode.length !== 6
+      ) {
+        return res.status(400).json({
+          message:
+            "El código debe contener 6 caracteres",
+        });
+      }
+
+      // =============================================
       // OBTENER TOKEN
-      // WEB: cookie
-      // MÓVIL: header o body
-      // ===============================================
+      //
+      // WEB:
+      // recoveryCookie
+      //
+      // MÓVIL:
+      // body.token
+      // =============================================
 
       const token =
-        req.cookies?.recoveryCookie ||
+        req.cookies
+          ?.recoveryCookie ||
         req.headers[
           "recovery-token"
         ] ||
@@ -316,13 +447,13 @@ recoveryPasswordCustomerController.verifyCode =
       if (!token) {
         return res.status(401).json({
           message:
-            "Recovery token is required",
+            "El token de recuperación es requerido",
         });
       }
 
-      // ===============================================
-      // DECODIFICAR TOKEN
-      // ===============================================
+      // =============================================
+      // VERIFICAR JWT
+      // =============================================
 
       let decoded;
 
@@ -337,23 +468,21 @@ recoveryPasswordCustomerController.verifyCode =
           error.name ===
           "TokenExpiredError"
         ) {
-          return res
-            .status(401)
-            .json({
-              message:
-                "Recovery token expired",
-            });
+          return res.status(401).json({
+            message:
+              "El código de recuperación ha expirado",
+          });
         }
 
         return res.status(401).json({
           message:
-            "Invalid recovery token",
+            "Token de recuperación inválido",
         });
       }
 
-      // ===============================================
-      // COMPROBAR TIPO DE USUARIO
-      // ===============================================
+      // =============================================
+      // VALIDAR USUARIO
+      // =============================================
 
       if (
         decoded.userType !==
@@ -361,33 +490,31 @@ recoveryPasswordCustomerController.verifyCode =
       ) {
         return res.status(403).json({
           message:
-            "Invalid user type",
+            "Tipo de usuario inválido",
         });
       }
 
-      // ===============================================
-      // COMPARAR CÓDIGO
-      // ===============================================
+      // =============================================
+      // VALIDAR CÓDIGO
+      // =============================================
 
       if (
-        code
-          .trim()
-          .toLowerCase() !==
-        decoded.randomCode
-          .trim()
-          .toLowerCase()
+        cleanCode !==
+        String(
+          decoded.randomCode
+        ).toLowerCase()
       ) {
         return res.status(400).json({
           message:
-            "Invalid code",
+            "Código incorrecto",
         });
       }
 
-      // ===============================================
+      // =============================================
       // CREAR TOKEN VERIFICADO
-      // ===============================================
+      // =============================================
 
-      const newToken =
+      const verifiedToken =
         jsonwebtoken.sign(
           {
             email:
@@ -408,46 +535,30 @@ recoveryPasswordCustomerController.verifyCode =
           }
         );
 
-      // ===============================================
-      // ACTUALIZAR COOKIE
-      // ===============================================
+      // =============================================
+      // ACTUALIZAR COOKIE WEB
+      // =============================================
 
       res.cookie(
         "recoveryCookie",
-        newToken,
-        {
-          maxAge:
-            15 * 60 * 1000,
-
-          httpOnly:
-            true,
-
-          secure:
-            process.env.NODE_ENV ===
-            "production",
-
-          sameSite:
-            process.env.NODE_ENV ===
-            "production"
-              ? "none"
-              : "lax",
-        }
+        verifiedToken,
+        getCookieOptions()
       );
 
-      // ===============================================
-      // RESPUESTA
-      // ===============================================
+      // =============================================
+      // DEVOLVER TOKEN PARA MÓVIL
+      // =============================================
 
       return res.status(200).json({
         message:
-          "Code verified successfully",
+          "Código verificado correctamente",
 
         token:
-          newToken,
+          verifiedToken,
       });
     } catch (error) {
       console.error(
-        "Error verifyCode:",
+        "[RECOVERY] Error verifyCode:",
         error
       );
 
@@ -471,9 +582,9 @@ recoveryPasswordCustomerController.newPassword =
         confirmNewPassword,
       } = req.body;
 
-      // ===============================================
-      // CAMPOS OBLIGATORIOS
-      // ===============================================
+      // =============================================
+      // VALIDAR CAMPOS
+      // =============================================
 
       if (
         !newPassword ||
@@ -481,26 +592,26 @@ recoveryPasswordCustomerController.newPassword =
       ) {
         return res.status(400).json({
           message:
-            "Both password fields are required",
+            "Debes ingresar y confirmar la nueva contraseña",
         });
       }
 
-      // ===============================================
+      // =============================================
       // VALIDAR LONGITUD
-      // ===============================================
+      // =============================================
 
       if (
         newPassword.length < 8
       ) {
         return res.status(400).json({
           message:
-            "Password must contain at least 8 characters",
+            "La contraseña debe contener al menos 8 caracteres",
         });
       }
 
-      // ===============================================
-      // COMPARAR CONTRASEÑAS
-      // ===============================================
+      // =============================================
+      // VALIDAR COINCIDENCIA
+      // =============================================
 
       if (
         newPassword !==
@@ -508,16 +619,17 @@ recoveryPasswordCustomerController.newPassword =
       ) {
         return res.status(400).json({
           message:
-            "Passwords do not match",
+            "Las contraseñas no coinciden",
         });
       }
 
-      // ===============================================
+      // =============================================
       // OBTENER TOKEN
-      // ===============================================
+      // =============================================
 
       const token =
-        req.cookies?.recoveryCookie ||
+        req.cookies
+          ?.recoveryCookie ||
         req.headers[
           "recovery-token"
         ] ||
@@ -526,13 +638,13 @@ recoveryPasswordCustomerController.newPassword =
       if (!token) {
         return res.status(401).json({
           message:
-            "Recovery token is required",
+            "El token de recuperación es requerido",
         });
       }
 
-      // ===============================================
-      // DECODIFICAR TOKEN
-      // ===============================================
+      // =============================================
+      // VERIFICAR TOKEN
+      // =============================================
 
       let decoded;
 
@@ -547,23 +659,21 @@ recoveryPasswordCustomerController.newPassword =
           error.name ===
           "TokenExpiredError"
         ) {
-          return res
-            .status(401)
-            .json({
-              message:
-                "Recovery token expired",
-            });
+          return res.status(401).json({
+            message:
+              "La sesión de recuperación ha expirado",
+          });
         }
 
         return res.status(401).json({
           message:
-            "Invalid recovery token",
+            "Token de recuperación inválido",
         });
       }
 
-      // ===============================================
-      // VALIDAR TIPO DE USUARIO
-      // ===============================================
+      // =============================================
+      // VALIDAR CLIENTE
+      // =============================================
 
       if (
         decoded.userType !==
@@ -571,24 +681,43 @@ recoveryPasswordCustomerController.newPassword =
       ) {
         return res.status(403).json({
           message:
-            "Invalid user type",
+            "Tipo de usuario inválido",
         });
       }
 
-      // ===============================================
-      // COMPROBAR QUE PASÓ POR PASO 2
-      // ===============================================
+      // =============================================
+      // DEBE HABER VERIFICADO EL CÓDIGO
+      // =============================================
 
-      if (!decoded.verified) {
-        return res.status(400).json({
+      if (
+        decoded.verified !== true
+      ) {
+        return res.status(403).json({
           message:
-            "Code not verified",
+            "Debes verificar el código antes de cambiar la contraseña",
         });
       }
 
-      // ===============================================
-      // ENCRIPTAR NUEVA CONTRASEÑA
-      // ===============================================
+      // =============================================
+      // VERIFICAR QUE EL CLIENTE EXISTA
+      // =============================================
+
+      const customerFound =
+        await customerModel.findOne({
+          email:
+            decoded.email,
+        });
+
+      if (!customerFound) {
+        return res.status(404).json({
+          message:
+            "Cliente no encontrado",
+        });
+      }
+
+      // =============================================
+      // CIFRAR CONTRASEÑA
+      // =============================================
 
       const passwordHash =
         await bcrypt.hash(
@@ -596,37 +725,18 @@ recoveryPasswordCustomerController.newPassword =
           10
         );
 
-      // ===============================================
-      // ACTUALIZAR CLIENTE
-      // ===============================================
+      // =============================================
+      // ACTUALIZAR
+      // =============================================
 
-      const customerUpdated =
-        await customerModel.findOneAndUpdate(
-          {
-            email:
-              decoded.email,
-          },
+      customerFound.password =
+        passwordHash;
 
-          {
-            password:
-              passwordHash,
-          },
+      await customerFound.save();
 
-          {
-            new: true,
-          }
-        );
-
-      if (!customerUpdated) {
-        return res.status(404).json({
-          message:
-            "Customer not found",
-        });
-      }
-
-      // ===============================================
-      // ELIMINAR COOKIE
-      // ===============================================
+      // =============================================
+      // ELIMINAR COOKIE WEB
+      // =============================================
 
       res.clearCookie(
         "recoveryCookie",
@@ -646,17 +756,17 @@ recoveryPasswordCustomerController.newPassword =
         }
       );
 
-      // ===============================================
+      // =============================================
       // RESPUESTA
-      // ===============================================
+      // =============================================
 
       return res.status(200).json({
         message:
-          "Password updated successfully",
+          "Contraseña actualizada correctamente",
       });
     } catch (error) {
       console.error(
-        "Error newPassword:",
+        "[RECOVERY] Error newPassword:",
         error
       );
 
