@@ -1,20 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Alert, FlatList, ActivityIndicator, Modal, TouchableOpacity, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
-import { COLORS, TYPOGRAPHY, NEUROMORPHIC } from '../../Constants/theme';
+import { COLORS, TYPOGRAPHY } from '../../Constants/theme';
 import ProductCard from '../../Components/Data/ProductCard';
 import DataState from '../../Components/Data/DataSate';
-import Button from '../../Components/Common/Button';
+import FloatingCartButton from '../../Components/Navigation/FloatingCartButton';
 import { productService } from '../../Services/productService';
 import { useCart } from '../../Context/CartContext';
-import { formatCurrency } from '../../Utils/formatters';
 
-const ProductsScreen = () => {
+const ProductsScreen = ({ navigation }) => {
   const [products, setProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [rating, setRating] = useState(0);
-  const [ratingLoading, setRatingLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
@@ -22,77 +18,53 @@ const ProductsScreen = () => {
   const [totalPages, setTotalPages] = useState(1);
   const { addToCart } = useCart();
 
-  useEffect(() => {
-    loadProducts(1);
-  }, []);
+  useEffect(() => { loadProducts(1); }, []);
 
   const loadProducts = async (pageNumber = 1) => {
-    if (pageNumber === 1) setLoading(true);
-    else setLoadingMore(true);
-    
+    pageNumber === 1 ? setLoading(true) : setLoadingMore(true);
     setError('');
     const response = await productService.getProducts(pageNumber, 10);
-    
     if (response.success) {
-      if (pageNumber === 1) {
-        setProducts(response.products);
-      } else {
-        setProducts(prev => [...prev, ...response.products]);
-      }
+      setProducts((current) => pageNumber === 1 ? response.products : [...current, ...response.products]);
+      setPage(response.currentPage);
       setTotalPages(response.totalPages);
-      setPage(pageNumber);
-    } else {
-      if (pageNumber === 1) setError(response.message);
-    }
-    
+    } else if (pageNumber === 1) setError(response.message);
     setLoading(false);
     setLoadingMore(false);
   };
 
-  const handleLoadMore = () => {
-    if (!loadingMore && page < totalPages) {
-      loadProducts(page + 1);
-    }
-  };
-
   const handleAddToCart = (product) => {
     addToCart(product);
-    Alert.alert('Éxito', `${product.name} agregado al carrito`);
-  };
-
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <Text style={styles.title}>Productos</Text>
-      <Text style={styles.subtitle}>Encuentra los mejores insumos</Text>
-      {(loading || error || (!loading && products.length === 0)) && (
-        <DataState loading={loading} error={error} onRetry={() => loadProducts(1)} emptyText="No hay productos disponibles" />
-      )}
-    </View>
-  );
-
-  const renderFooter = () => {
-    if (!loadingMore) return null;
-    return (
-      <View style={styles.footer}>
-        <ActivityIndicator size="small" color={COLORS.primary} />
-      </View>
-    );
+    Alert.alert('Producto agregado', `${product.name} se añadió a tu carrito.`);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={['top']} style={styles.container}>
       <StatusBar style="dark" />
       <FlatList
+        columnWrapperStyle={products.length ? styles.columnWrapper : undefined}
+        contentContainerStyle={styles.content}
         data={products}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => <ProductCard product={item} onAddToCart={handleAddToCart} />}
+        keyExtractor={(item, index) => item._id || item.id || String(index)}
+        ListFooterComponent={loadingMore ? <View style={styles.footer}><ActivityIndicator color={COLORS.primary} /></View> : null}
+        ListHeaderComponent={(
+          <View style={styles.header}>
+            <View style={styles.headerTop}>
+              <View style={styles.headerCopy}>
+                <Text numberOfLines={1} style={styles.title}>Productos frescos</Text>
+                <Text numberOfLines={1} style={styles.subtitle}>Elige lo que necesitas para tu hogar.</Text>
+              </View>
+              <FloatingCartButton navigation={navigation} />
+            </View>
+            {(loading || error || (!loading && products.length === 0)) && (
+              <DataState emptyText="No hay productos disponibles" error={error} loading={loading} onRetry={() => loadProducts(1)} />
+            )}
+          </View>
+        )}
         numColumns={2}
-        columnWrapperStyle={styles.columnWrapper}
-        contentContainerStyle={styles.scrollContent}
-        ListHeaderComponent={renderHeader}
-        ListFooterComponent={renderFooter}
-        onEndReached={handleLoadMore}
+        onEndReached={() => !loadingMore && page < totalPages && loadProducts(page + 1)}
         onEndReachedThreshold={0.5}
+        renderItem={({ item }) => <ProductCard onAddToCart={handleAddToCart} product={item} />}
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
@@ -101,12 +73,14 @@ const ProductsScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 30, paddingBottom: 80 },
-  header: { marginBottom: 20 },
-  title: { ...TYPOGRAPHY.heading, fontSize: 28, color: COLORS.textPrimary },
-  subtitle: { ...TYPOGRAPHY.caption, fontSize: 14, color: COLORS.textSecondary, marginBottom: 10 },
+  content: { paddingBottom: 96, paddingHorizontal: 20, paddingTop: 14 },
+  header: { marginBottom: 22 },
+  headerTop: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
+  headerCopy: { flex: 1, paddingRight: 14 },
+  title: { ...TYPOGRAPHY.heading, color: COLORS.textPrimary, flex: 1, fontSize: 24, letterSpacing: -0.35, paddingRight: 12 },
+  subtitle: { ...TYPOGRAPHY.body, color: COLORS.textSecondary, fontSize: 13, marginTop: 5 },
   columnWrapper: { justifyContent: 'space-between' },
-  footer: { paddingVertical: 20, alignItems: 'center' }
+  footer: { alignItems: 'center', paddingVertical: 22 },
 });
 
 export default ProductsScreen;

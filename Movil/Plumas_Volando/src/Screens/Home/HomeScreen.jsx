@@ -1,154 +1,247 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Image } from 'react-native';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Animated,
+  Image,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../../Context/AuthContext';
-import { COLORS, TYPOGRAPHY, NEUROMORPHIC } from '../../Constants/theme';
+import { useCart } from '../../Context/CartContext';
+import { COLORS, NEUROMORPHIC } from '../../Constants/theme';
 import api from '../../Services/api';
 import { formatCurrency } from '../../Utils/formatters';
+import { HomeStyles as styles } from '../../Styles/HomeStyle.js';
+import FloatingCartButton from '../../Components/Navigation/FloatingCartButton';
 
-const AnimatedCard = ({ title, subtitle, icon, color, onPress, delay }) => {
-  const scaleAnim = useRef(new Animated.Value(0.9)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
+const getUserId = (user) => user?._id || user?.id || user?.idCustomer || user?.customerId;
+const getOrderTotal = (order) => Number(order?.totalPrice ?? order?.total ?? 0) || 0;
+const getOrderState = (order) => String(order?.state ?? order?.status ?? '').toLowerCase();
+const isPending = (order) => ['pendiente', 'pending'].includes(getOrderState(order));
+const isCompleted = (order) => ['entregado', 'completed', 'completado'].includes(getOrderState(order));
 
-  useEffect(() => {
-    Animated.timing(opacityAnim, { toValue: 1, duration: 500, delay, useNativeDriver: true }).start();
-    Animated.spring(scaleAnim, { toValue: 1, tension: 50, friction: 7, delay, useNativeDriver: true }).start();
-  }, []);
+const getMonthTotal = (orders) => {
+  const now = new Date();
+  return orders
+    .filter((order) => {
+      const date = new Date(order?.orderDate || order?.date || order?.createdAt);
+      return isCompleted(order) && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+    })
+    .reduce((total, order) => total + getOrderTotal(order), 0);
+};
 
-  const handlePressIn = () => Animated.spring(scaleAnim, { toValue: 0.95, useNativeDriver: true }).start();
-  const handlePressOut = () => Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true }).start();
+const PressableNeumorphic = ({ children, onPress, style, accessibilityLabel }) => {
+  const scale = useRef(new Animated.Value(1)).current;
+  const pressIn = () => Animated.spring(scale, { toValue: 0.96, speed: 40, bounciness: 0, useNativeDriver: true }).start();
+  const pressOut = () => Animated.spring(scale, { toValue: 1, speed: 30, bounciness: 8, useNativeDriver: true }).start();
 
   return (
-    <Animated.View style={[styles.cardWrapperWrapper, { opacity: opacityAnim, transform: [{ scale: scaleAnim }] }]}>
-      <TouchableOpacity activeOpacity={0.9} onPress={onPress} onPressIn={handlePressIn} onPressOut={handlePressOut}>
-        <View style={[styles.cardWrapper, NEUROMORPHIC.topShadow]}>
-          <View style={[styles.card, NEUROMORPHIC.bottomShadow]}>
-            <View style={[styles.cardIconWrapper, NEUROMORPHIC.topShadow]}>
-              <View style={[styles.cardIcon, NEUROMORPHIC.bottomShadow]}>
-                <Ionicons name={icon} size={28} color={color} />
-              </View>
-            </View>
-            <Text style={[styles.cardTitle, color === COLORS.error && { color: COLORS.error }]}>{title}</Text>
-            <Text style={styles.cardSubtitle}>{subtitle}</Text>
-          </View>
-        </View>
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <TouchableOpacity
+        accessibilityLabel={accessibilityLabel}
+        activeOpacity={1}
+        onPress={onPress}
+        onPressIn={pressIn}
+        onPressOut={pressOut}
+        style={style}
+      >
+        {children}
       </TouchableOpacity>
     </Animated.View>
   );
 };
 
-const HomeScreen = ({ navigation }) => {
-  const { user, logout } = useContext(AuthContext);
-  const [featuredProducts, setFeaturedProducts] = useState([]);
+const SummaryCard = ({ compact, icon, label, value, onPress }) => (
+  <PressableNeumorphic onPress={onPress} style={[styles.summaryOuter, NEUROMORPHIC.topShadow]} accessibilityLabel={label}>
+    <View style={[styles.summaryCard, NEUROMORPHIC.bottomShadow]}>
+      <View style={styles.summaryLight} />
+      <View style={[styles.summaryIconOuter, NEUROMORPHIC.topShadow]}>
+        <View style={[styles.summaryIcon, NEUROMORPHIC.bottomShadow]}>
+          <Ionicons color={COLORS.primary} name={icon} size={17} />
+        </View>
+      </View>
+      <Text adjustsFontSizeToFit minimumFontScale={0.66} numberOfLines={1} style={[styles.summaryValue, compact && styles.summaryValueCompact]}>{value}</Text>
+      <Text numberOfLines={2} style={styles.summaryLabel}>{label}</Text>
+    </View>
+  </PressableNeumorphic>
+);
 
-  useEffect(() => {
-    loadFeatured();
-  }, []);
-
-  const loadFeatured = async () => {
-    try {
-      const res = await api.get('/products');
-      // If the backend is paginated, res.data.products might be available
-      const items = res.data.products || res.data;
-      if (Array.isArray(items)) {
-        setFeaturedProducts(items.slice(0, 3));
-      }
-    } catch (e) {
-      console.log('Error loading featured', e);
-    }
-  };
-
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: true }).start();
-  }, []);
+const ProductRow = ({ product, isLast, onAdd, onOpen }) => {
+  const [imageFailed, setImageFailed] = useState(false);
+  const imageUri = product?.image || product?.imageUrl || product?.imageURL;
+  const name = product?.name || product?.nombre || product?.productName || 'Producto Plumas';
+  const price = Number(product?.price ?? product?.unitPrice ?? product?.precio ?? 0) || 0;
+  const stock = Number(product?.quantity ?? product?.stock ?? 0);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Animated.View style={[styles.header, { opacity: fadeAnim }]}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.welcomeText}>¡Hola, {user?.name || 'Usuario'}!</Text>
-            <Text style={styles.dateText}>Bienvenido a Plumas Volando 🌿</Text>
+    <PressableNeumorphic onPress={onOpen} style={[styles.productRow, NEUROMORPHIC.bottomShadow, isLast && styles.productRowLast]} accessibilityLabel={`Ver ${name}`}>
+      <View style={[styles.productImageShell, NEUROMORPHIC.topShadow]}>
+        {imageUri && !imageFailed ? (
+          <Image source={{ uri: imageUri }} style={styles.productImage} onError={() => setImageFailed(true)} />
+        ) : (
+          <View style={styles.productInitial}>
+            <Ionicons color={COLORS.primaryDark} name="nutrition-outline" size={25} />
           </View>
-          <View style={[styles.logoWrapperOuter, NEUROMORPHIC.topShadow]}>
-            <View style={[styles.logoWrapper, NEUROMORPHIC.bottomShadow]}>
-              <Ionicons name="egg-outline" size={24} color={COLORS.primary} />
+        )}
+      </View>
+      <View style={styles.productInfo}>
+        <Text numberOfLines={1} style={styles.productName}>{name}</Text>
+        <Text style={styles.productMeta}>{formatCurrency(price)} · {stock > 0 ? `${stock} disponibles` : 'Consultar stock'}</Text>
+      </View>
+      <PressableNeumorphic onPress={onAdd} style={[styles.addOuter, NEUROMORPHIC.topShadow]} accessibilityLabel={`Añadir ${name} al carrito`}>
+        <View style={[styles.addButton, NEUROMORPHIC.bottomShadow]}>
+          <Ionicons color={COLORS.primaryDark} name="add" size={20} />
+        </View>
+      </PressableNeumorphic>
+    </PressableNeumorphic>
+  );
+};
+
+const HomeScreen = ({ navigation }) => {
+  const { user } = useContext(AuthContext);
+  const { addToCart } = useCart();
+  const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const fade = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(12)).current;
+  const { width } = useWindowDimensions();
+  const isCompact = width < 360;
+  const firstName = (user?.name || user?.nombre || 'Usuario').trim().split(' ')[0];
+
+  const loadHome = useCallback(async () => {
+    const customerId = getUserId(user);
+    const requests = [api.get('/products?page=1&limit=3')];
+    // La ruta del backend se monta en /orders y su subruta es /orders/customer/:id.
+    if (customerId) requests.push(api.get(`/orders/orders/customer/${customerId}`));
+
+    const results = await Promise.allSettled(requests);
+    const productsResult = results[0];
+    const ordersResult = results[1];
+
+    if (productsResult?.status === 'fulfilled') {
+      const data = productsResult.value.data;
+      setProducts(Array.isArray(data) ? data.slice(0, 3) : (data?.products || []).slice(0, 3));
+    }
+    if (ordersResult?.status === 'fulfilled') {
+      const data = ordersResult.value.data;
+      setOrders(Array.isArray(data) ? data : (data?.orders || []));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    loadHome();
+    Animated.parallel([
+      Animated.timing(fade, { toValue: 1, duration: 450, useNativeDriver: true }),
+      Animated.spring(translateY, { toValue: 0, speed: 11, bounciness: 5, useNativeDriver: true }),
+    ]).start();
+  }, [fade, loadHome, translateY]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadHome();
+    setRefreshing(false);
+  }, [loadHome]);
+
+  const summary = useMemo(() => ({
+    pending: orders.filter(isPending).length,
+    spent: getMonthTotal(orders),
+  }), [orders]);
+
+  return (
+    <SafeAreaView edges={['top']} style={styles.screen}>
+      <StatusBar style="dark" />
+      <ScrollView
+        contentContainerStyle={[styles.content, isCompact && styles.contentCompact]}
+        refreshControl={<RefreshControl colors={[COLORS.primary]} refreshing={refreshing} tintColor={COLORS.primary} onRefresh={onRefresh} />}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View style={{ opacity: fade, transform: [{ translateY }] }}>
+          <View style={styles.header}>
+            <View style={styles.headerCopy}>
+              <Text style={styles.eyebrow}>Inicio</Text>
+              <Text adjustsFontSizeToFit minimumFontScale={0.74} numberOfLines={1} style={[styles.greeting, isCompact && styles.greetingCompact]}>Hola, {firstName}</Text>
             </View>
+            <FloatingCartButton navigation={navigation} />
+          </View>
+
+          <View style={[styles.hero, isCompact && styles.heroCompact, NEUROMORPHIC.bottomShadow]}>
+            <View style={styles.heroLight} />
+            <View style={styles.heroTop}>
+              <View>
+                <Text style={styles.heroKicker}>PLUMAS VOLANDO</Text>
+                <Text adjustsFontSizeToFit minimumFontScale={0.75} numberOfLines={1} style={[styles.heroTitle, isCompact && styles.heroTitleCompact]}>Tu granja, más cerca.</Text>
+              </View>
+              <View style={[styles.eggOuter, NEUROMORPHIC.topShadow]}>
+                <View style={[styles.eggInner, NEUROMORPHIC.bottomShadow]}>
+                  <Ionicons color={COLORS.primary} name="egg-outline" size={28} />
+                </View>
+              </View>
+            </View>
+            <Text style={styles.heroDescription}>Productos frescos y el seguimiento de tus compras en un solo lugar.</Text>
+            <PressableNeumorphic onPress={() => navigation.navigate('Products')} style={[styles.heroAction, NEUROMORPHIC.topShadow]} accessibilityLabel="Explorar productos">
+              <Text style={styles.heroActionText}>Explorar catálogo</Text>
+              <Ionicons color={COLORS.primaryDark} name="arrow-forward" size={15} />
+            </PressableNeumorphic>
+          </View>
+
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Mi resumen</Text>
+          </View>
+          <View style={styles.summaryGrid}>
+            <SummaryCard compact icon="time-outline" label="Pedidos pendientes" value={String(summary.pending)} onPress={() => navigation.navigate('Orders')} />
+            <SummaryCard compact icon="wallet-outline" label="Gastado este mes" value={formatCurrency(summary.spent)} onPress={() => navigation.navigate('Invoices')} />
+          </View>
+
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Productos para ti</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Products')}><Text style={styles.sectionLink}>Ver todos</Text></TouchableOpacity>
+          </View>
+          {products.length > 0 ? (
+            <View style={[styles.productList, NEUROMORPHIC.topShadow]}>
+              {products.map((product, index) => (
+                <ProductRow
+                  isLast={index === products.length - 1}
+                  key={product?._id || product?.id || `${product?.name}-${index}`}
+                  onAdd={() => addToCart(product)}
+                  onOpen={() => navigation.navigate('Products')}
+                  product={product}
+                />
+              ))}
+            </View>
+          ) : (
+            <View style={[styles.emptyState, NEUROMORPHIC.topShadow]}>
+              <Ionicons color={COLORS.textSecondary} name="leaf-outline" size={28} />
+              <Text style={styles.emptyTitle}>Aún no hay productos destacados</Text>
+              <Text style={styles.emptySubtitle}>Desliza para actualizar o visita el catálogo.</Text>
+            </View>
+          )}
+
+          <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Accesos rápidos</Text></View>
+          <View style={styles.quickActions}>
+            {[
+              { icon: 'grid-outline', label: 'Productos', screen: 'Products' },
+              { icon: 'receipt-outline', label: 'Pedidos', screen: 'Orders' },
+              { icon: 'settings-outline', label: 'Perfil', screen: 'Settings' },
+            ].map((action) => (
+              <PressableNeumorphic key={action.screen} onPress={() => navigation.navigate(action.screen)} style={[styles.quickActionOuter, NEUROMORPHIC.topShadow]} accessibilityLabel={action.label}>
+                <View style={[styles.quickAction, NEUROMORPHIC.bottomShadow]}>
+                  <Ionicons color={COLORS.primary} name={action.icon} size={22} />
+                  <Text style={styles.quickActionText}>{action.label}</Text>
+                </View>
+              </PressableNeumorphic>
+            ))}
           </View>
         </Animated.View>
-
-        {featuredProducts.length > 0 && (
-          <Animated.View style={{ opacity: fadeAnim, marginBottom: 24 }}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Destacados</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Products')}>
-                <Text style={styles.seeAll}>Ver todo</Text>
-              </TouchableOpacity>
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carouselContainer}>
-              {featuredProducts.map((prod) => (
-                <TouchableOpacity key={prod._id} activeOpacity={0.8} style={styles.carouselItemWrapper} onPress={() => navigation.navigate('Products')}>
-                  <View style={[styles.carouselItem, NEUROMORPHIC.topShadow]}>
-                    <View style={[styles.carouselInner, NEUROMORPHIC.bottomShadow]}>
-                      <Image source={{ uri: prod.imageUrl || 'https://via.placeholder.com/150' }} style={styles.carouselImage} />
-                      <View style={styles.carouselInfo}>
-                        <Text style={styles.carouselName} numberOfLines={1}>{prod.name}</Text>
-                        <Text style={styles.carouselPrice}>{formatCurrency(prod.price)}</Text>
-                      </View>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </Animated.View>
-        )}
-
-        <Text style={[styles.sectionTitle, { marginBottom: 16 }]}>Servicios</Text>
-        <View style={styles.cardGrid}>
-          <AnimatedCard title="Productos" subtitle="Explora el catálogo" icon="basket-outline" color={COLORS.primary} onPress={() => navigation.navigate('Products')} delay={100} />
-          <AnimatedCard title="Carrito" subtitle="Tus compras" icon="cart-outline" color={COLORS.primary} onPress={() => navigation.navigate('Cart')} delay={200} />
-          <AnimatedCard title="Pedidos" subtitle="Historial de compras" icon="receipt-outline" color={COLORS.primary} onPress={() => navigation.navigate('Orders')} delay={300} />
-          <AnimatedCard title="Facturas" subtitle="Tus recibos" icon="document-text-outline" color={COLORS.primary} onPress={() => navigation.navigate('Invoices')} delay={400} />
-          <AnimatedCard title="Ajustes" subtitle="Tu perfil" icon="settings-outline" color={COLORS.primary} onPress={() => navigation.navigate('Settings')} delay={500} />
-          <AnimatedCard title="Salir" subtitle="Cerrar sesión" icon="log-out-outline" color={COLORS.error} onPress={logout} delay={600} />
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  scrollContent: { padding: 20, paddingTop: 30 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
-  headerLeft: { flex: 1 },
-  welcomeText: { ...TYPOGRAPHY.heading, fontSize: 24, color: COLORS.textPrimary, marginBottom: 4 },
-  dateText: { ...TYPOGRAPHY.body, fontSize: 14, color: COLORS.textSecondary },
-  logoWrapperOuter: { borderRadius: 24, backgroundColor: COLORS.background },
-  logoWrapper: { width: 48, height: 48, borderRadius: 24, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center' },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sectionTitle: { ...TYPOGRAPHY.heading, fontSize: 18, color: COLORS.textPrimary },
-  seeAll: { ...TYPOGRAPHY.subheading, fontSize: 14, color: COLORS.primary },
-  carouselContainer: { paddingVertical: 10, paddingRight: 20 },
-  carouselItemWrapper: { marginRight: 16, width: 140 },
-  carouselItem: { borderRadius: 16, backgroundColor: COLORS.background },
-  carouselInner: { borderRadius: 16, overflow: 'hidden', backgroundColor: COLORS.background },
-  carouselImage: { width: '100%', height: 100, backgroundColor: COLORS.primaryLighter },
-  carouselInfo: { padding: 10 },
-  carouselName: { ...TYPOGRAPHY.subheading, fontSize: 14, color: COLORS.textPrimary, marginBottom: 4 },
-  carouselPrice: { ...TYPOGRAPHY.heading, fontSize: 14, color: COLORS.primary },
-  cardGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  cardWrapperWrapper: { width: '47%', marginBottom: 16 },
-  cardWrapper: { borderRadius: 20, backgroundColor: COLORS.background },
-  card: { borderRadius: 20, backgroundColor: COLORS.background, padding: 16, alignItems: 'center' },
-  cardIconWrapper: { borderRadius: 24, backgroundColor: COLORS.background, marginBottom: 12 },
-  cardIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center' },
-  cardTitle: { ...TYPOGRAPHY.subheading, fontSize: 15, color: COLORS.textPrimary, marginBottom: 4 },
-  cardSubtitle: { ...TYPOGRAPHY.caption, fontSize: 12, color: COLORS.textSecondary, textAlign: 'center' },
-});
 
 export default HomeScreen;
