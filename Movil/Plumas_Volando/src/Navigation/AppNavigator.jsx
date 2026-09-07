@@ -1,138 +1,40 @@
-import React, {
-  useContext,
-} from 'react';
+import React, { useContext } from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { AuthContext } from '../Context/AuthContext';
+import LoginScreen from '../Screens/Auth/LoginScreen';
+import RegisterScreen from '../Screens/Auth/RegisterScreen';
+import RecoveryPasswordScreen from '../Screens/Auth/RecoveryPasswordScreen';
+import RecoveryCodeScreen from '../Screens/Auth/RecoveryCodeScreen';
+import NewPasswordScreen from '../Screens/Auth/NewPasswordScreen';
+import AppLoadingScreen from '../Screens/AppLoadingScreen';
+import TabNavigator from './TabNavigator';
+import InvoiceDetailScreen from '../Screens/Invoices/InvoiceDetailScreen';
 
-import {
-  createNativeStackNavigator,
-} from '@react-navigation/native-stack';
-
-import {
-  AuthContext,
-} from '../Context/AuthContext';
-
-import LoginScreen
-  from '../Screens/Auth/LoginScreen';
-
-import RegisterScreen
-  from '../Screens/Auth/RegisterScreen';
-
-import RecoveryPasswordScreen
-  from '../Screens/Auth/RecoveryPasswordScreen';
-
-import RecoveryCodeScreen
-  from '../Screens/Auth/RecoveryCodeScreen';
-
-import NewPasswordScreen
-  from '../Screens/Auth/NewPasswordScreen';
-
-import TabNavigator
-  from './TabNavigator';
-
-import InvoiceDetailScreen
-  from '../Screens/Invoices/InvoiceDetailScreen';
-
-
-const Stack =
-  createNativeStackNavigator();
-
+const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
+  const { isAuthenticated, loading } = useContext(AuthContext);
 
-  const {
-    isAuthenticated,
-    loading,
-  } = useContext(AuthContext);
-
-
-  if (loading) {
-
-    return null;
-
-  }
-
+  if (loading) return <AppLoadingScreen />;
 
   return (
-
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-        animation: 'fade',
-      }}
-    >
-
+    <Stack.Navigator screenOptions={{ animation: 'fade', headerShown: false }}>
       {isAuthenticated ? (
-
         <>
-
-          <Stack.Screen
-            name="Main"
-            component={TabNavigator}
-          />
-
-
-          <Stack.Screen
-            name="InvoiceDetail"
-            component={
-              InvoiceDetailScreen
-            }
-          />
-
+          <Stack.Screen component={TabNavigator} name="Main" />
+          <Stack.Screen component={InvoiceDetailScreen} name="InvoiceDetail" />
         </>
-
       ) : (
-
         <>
-
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-          />
-
-
-          <Stack.Screen
-            name="Register"
-            component={RegisterScreen}
-          />
-
-
-          {/* PASO 1 - CORREO */}
-
-          <Stack.Screen
-            name="RecoveryPassword"
-            component={
-              RecoveryPasswordScreen
-            }
-          />
-
-
-          {/* PASO 2 - CÓDIGO */}
-
-          <Stack.Screen
-            name="RecoveryCode"
-            component={
-              RecoveryCodeScreen
-            }
-          />
-
-
-          {/* PASO 3 - NUEVA CONTRASEÑA */}
-
-          <Stack.Screen
-            name="NewPassword"
-            component={
-              NewPasswordScreen
-            }
-          />
-
+          <Stack.Screen component={LoginScreen} name="Login" />
+          <Stack.Screen component={RegisterScreen} name="Register" />
+          <Stack.Screen component={RecoveryPasswordScreen} name="RecoveryPassword" />
+          <Stack.Screen component={RecoveryCodeScreen} name="RecoveryCode" />
+          <Stack.Screen component={NewPasswordScreen} name="NewPassword" />
         </>
-
       )}
-
     </Stack.Navigator>
-
   );
-
 };
-
 
 export default AppNavigator;

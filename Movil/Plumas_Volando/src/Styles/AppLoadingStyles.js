@@ -1,0 +1,105 @@
+import { StyleSheet } from 'react-native';
+import { COLORS } from '../Constants/theme';
+
+export const AppLoadingStyles = StyleSheet.create({
+  screen: {
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+    flex: 1,
+    justifyContent: 'center',
+    overflow: 'hidden',
+    paddingHorizontal: 32,
+  },
+  glowTop: {
+    backgroundColor: 'rgba(255, 255, 255, 0.55)',
+    borderRadius: 150,
+    height: 300,
+    left: -90,
+    position: 'absolute',
+    top: -115,
+    width: 300,
+  },
+  glowBottom: {
+    backgroundColor: 'rgba(200, 150, 42, 0.08)',
+    borderRadius: 150,
+    bottom: -125,
+    height: 280,
+    position: 'absolute',
+    right: -95,
+    width: 280,
+  },
+  brandOuter: {
+    backgroundColor: COLORS.background,
+    borderRadius: 82,
+  },
+  brandInner: {
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+    borderRadius: 82,
+    height: 164,
+    justifyContent: 'center',
+    overflow: 'hidden',
+    width: 164,
+  },
+  brandHighlight: {
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    borderLeftWidth: 2,
+    borderRadius: 77,
+    borderTopWidth: 2,
+    bottom: 5,
+    left: 5,
+    position: 'absolute',
+    right: 5,
+    top: 5,
+  },
+  logo: {
+    height: 126,
+    resizeMode: 'contain',
+    width: 126,
+  },
+  title: {
+    color: COLORS.primaryDark,
+    fontSize: 25,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+    marginTop: 28,
+    textAlign: 'center',
+  },
+  subtitle: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 7,
+    textAlign: 'center',
+  },
+  loaderOuter: {
+    backgroundColor: COLORS.background,
+    borderRadius: 20,
+    marginTop: 38,
+  },
+  loaderInner: {
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+    borderRadius: 20,
+    flexDirection: 'row',
+    minHeight: 54,
+    paddingHorizontal: 18,
+  },
+  loaderText: {
+    color: COLORS.primaryDark,
+    fontSize: 12,
+    fontWeight: '800',
+    marginLeft: 11,
+  },
+  footer: {
+    bottom: 42,
+    color: COLORS.textMuted,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    position: 'absolute',
+    textTransform: 'uppercase',
+  },
+});
+
+export default AppLoadingStyles;

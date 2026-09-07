@@ -1,26 +1,19 @@
 import React from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { COLORS } from '../../Constants/theme';
+import { ActivityIndicator, Text, View } from 'react-native';
+import { COLORS, NEUROMORPHIC } from '../../Constants/theme';
+import { AppLoadingStyles as styles } from '../../Styles/AppLoadingStyles';
 
-const Loader = ({ size = 'large', color = COLORS.primary, fullScreen = false }) => {
-  if (fullScreen) {
-    return (
-      <View style={styles.fullScreen}>
-        <ActivityIndicator size={size} color={color} />
+const Loader = ({ color = COLORS.primary, fullScreen = false, label = 'Cargando...', size = 'small' }) => {
+  const content = (
+    <View style={[styles.loaderOuter, NEUROMORPHIC.topShadow]}>
+      <View style={[styles.loaderInner, NEUROMORPHIC.bottomShadow]}>
+        <ActivityIndicator color={color} size={size} />
+        <Text style={styles.loaderText}>{label}</Text>
       </View>
-    );
-  }
+    </View>
+  );
 
-  return <ActivityIndicator size={size} color={color} />;
+  return fullScreen ? <View style={styles.screen}>{content}</View> : content;
 };
-
-const styles = StyleSheet.create({
-  fullScreen: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.background,
-  },
-});
 
 export default Loader;
