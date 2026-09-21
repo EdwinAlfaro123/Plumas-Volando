@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
+  // ✅ CORREGIDO: Agregar '/api' al final de la URL
   baseURL: "https://plumas-volandot.onrender.com/api",
   withCredentials: true,
   headers: {
@@ -8,7 +9,7 @@ const api = axios.create({
   },
 });
 
-// Request interceptor
+// Interceptor de solicitud
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -22,7 +23,7 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor
+// Interceptor de respuesta
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -30,7 +31,13 @@ api.interceptors.response.use(
       // Token expirado o inválido
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      window.location.href = "/login";
+      localStorage.removeItem("loginEmail");
+      
+      // Solo redirigir si no estamos ya en login
+      const currentPath = window.location.pathname;
+      if (currentPath !== "/login" && currentPath !== "/register") {
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }

@@ -12,26 +12,28 @@ loginEmployeeController.login = async (req, res) => {
     // Buscar el empleado por email
     const employeeFound = await employeeModel.findOne({ email });
     if (!employeeFound) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: "Empleado no encontrado" 
+        message: "Empleado no encontrado",
       });
     }
 
     // Verificar si el usuario está activo
     if (employeeFound.isActive === false) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         success: false,
-        message: "Cuenta desactivada" 
+        message: "Cuenta desactivada",
       });
     }
 
     // Verificar bloqueo por intentos fallidos
     if (employeeFound.timeOut && employeeFound.timeOut > Date.now()) {
-      const tiempoRestante = Math.ceil((employeeFound.timeOut - Date.now()) / 60000);
-      return res.status(403).json({ 
+      const tiempoRestante = Math.ceil(
+        (employeeFound.timeOut - Date.now()) / 60000
+      );
+      return res.status(403).json({
         success: false,
-        message: `Cuenta bloqueada por 5 minutos. Intenta nuevamente en ${tiempoRestante} minuto(s)` 
+        message: `Cuenta bloqueada por 5 minutos. Intenta nuevamente en ${tiempoRestante} minuto(s)`,
       });
     }
 
@@ -44,15 +46,15 @@ loginEmployeeController.login = async (req, res) => {
         employeeFound.timeOut = Date.now() + 5 * 60 * 1000;
         employeeFound.loginAttemps = 0;
         await employeeFound.save();
-        return res.status(403).json({ 
+        return res.status(403).json({
           success: false,
-          message: "Demasiados intentos fallidos. Cuenta bloqueada por 5 minutos." 
+          message: "Demasiados intentos fallidos. Cuenta bloqueada por 5 minutos.",
         });
       }
       await employeeFound.save();
-      return res.status(401).json({ 
+      return res.status(401).json({
         success: false,
-        message: "Contraseña incorrecta" 
+        message: "Contraseña incorrecta",
       });
     }
 
@@ -82,7 +84,7 @@ loginEmployeeController.login = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 
-    // ✅ DEVOLVER TOKEN Y DATOS DEL EMPLEADO
+    // ✅ CORREGIDO: Devolver token y datos del empleado
     return res.status(200).json({
       success: true,
       message: "Inicio de sesión exitoso",
@@ -90,7 +92,7 @@ loginEmployeeController.login = async (req, res) => {
       employee: {
         _id: employeeFound._id,
         name: employeeFound.name,
-        lastname: employeeFound.lastName || "",
+        lastName: employeeFound.lastName || "",
         email: employeeFound.email,
         phone: employeeFound.phone,
         Status: employeeFound.Status,
@@ -99,9 +101,9 @@ loginEmployeeController.login = async (req, res) => {
     });
   } catch (error) {
     console.log("error ", error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       success: false,
-      message: "Error interno del servidor" 
+      message: "Error interno del servidor",
     });
   }
 };
