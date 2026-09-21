@@ -5,265 +5,229 @@ import { v2 as cloudinary } from "cloudinary";
 const productsController = {};
 
 const parseNumber = (value) => {
-  if (value === undefined || value === null || value === "") return 0;
-
-  if (typeof value === "object" && value.$numberDecimal) {
-    return Number(value.$numberDecimal) || 0;
-  }
-
-  return Number(String(value).replace(/[^0-9.-]/g, "")) || 0;
+    if (value === undefined || value === null || value === "") return 0;
+    if (typeof value === "object" && value.$numberDecimal) {
+        return Number(value.$numberDecimal) || 0;
+    }
+    return Number(String(value).replace(/[^0-9.-]/g, "")) || 0;
 };
 
 const getProductPrice = (product) => {
-  const data = product?.toObject ? product.toObject() : product;
-
-  const fields = [
-    "unitPrice",
-    "UnitPrice",
-    "price",
-    "Price",
-    "precio",
-    "Precio",
-    "precioUnitario",
-    "PrecioUnitario",
-    "unit_price",
-    "productPrice",
-    "ProductPrice",
-    "precioProducto",
-    "PrecioProducto",
-    "cost",
-    "Cost",
-    "costo",
-    "Costo",
-  ];
-
-  for (const field of fields) {
-    const price = parseNumber(data?.[field]);
-    if (price > 0) return price;
-  }
-
-  const dynamicKey = Object.keys(data || {}).find((key) => {
-    const lowerKey = key.toLowerCase();
-    return (
-      lowerKey.includes("price") ||
-      lowerKey.includes("precio") ||
-      lowerKey.includes("costo") ||
-      lowerKey.includes("cost")
-    );
-  });
-
-  if (dynamicKey) return parseNumber(data[dynamicKey]);
-
-  return 0;
+    const data = product?.toObject ? product.toObject() : product;
+    const fields = [
+        "unitPrice", "UnitPrice", "price", "Price", "precio", "Precio",
+        "precioUnitario", "PrecioUnitario", "unit_price", "productPrice",
+        "ProductPrice", "precioProducto", "PrecioProducto", "cost", "Cost", "costo", "Costo",
+    ];
+    for (const field of fields) {
+        const price = parseNumber(data?.[field]);
+        if (price > 0) return price;
+    }
+    const dynamicKey = Object.keys(data || {}).find((key) => {
+        const lowerKey = key.toLowerCase();
+        return (
+            lowerKey.includes("price") ||
+            lowerKey.includes("precio") ||
+            lowerKey.includes("costo") ||
+            lowerKey.includes("cost")
+        );
+    });
+    if (dynamicKey) return parseNumber(data[dynamicKey]);
+    return 0;
 };
 
 const normalizeProduct = (product) => {
-  const data = product?.toObject ? product.toObject() : product;
-  const price = getProductPrice(data);
-
-  return {
-    ...data,
-    name: data.name || data.nombre || data.productName || "Producto",
-    unitPrice: price,
-    price,
-  };
+    const data = product?.toObject ? product.toObject() : product;
+    const price = getProductPrice(data);
+    return {
+        ...data,
+        name: data.name || data.nombre || data.productName || "Producto",
+        unitPrice: price,
+        price,
+        imageUrl: data.image || data.imageUrl || "", // Mapeo para el frontend
+    };
 };
 
+// ==========================================================
+// [MODIFICADO] OBTENER PRODUCTOS CON BÚSQUEDA Y FILTROS
+// ==========================================================
 productsController.getAllProducts = async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
 
-    const totalItems = await productsModel.countDocuments();
-    const products = await productsModel.find().skip(skip).limit(limit).lean();
-    const normalizedProducts = products.map(normalizeProduct);
+        // 1. Extraer parámetros de búsqueda y filtros
+        const { search, category, minPrice, maxPrice, sort } = req.query;
+        const mongoFilter = {};
 
-    return res.status(200).json({
-      products: normalizedProducts,
-      totalPages: Math.ceil(totalItems / limit),
-      currentPage: page,
-      totalItems,
-    });
-  } catch (error) {
-    console.log("error" + error);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
+        // 2. Filtro por Búsqueda (Texto en nombre o descripción)
+        if (search && search.trim() !== "") {
+            mongoFilter.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+            ];
+        }
+
+        // 3. Filtro por Categoría (TypeProduct)
+        if (category && category.toLowerCase() !== "todos") {
+            mongoFilter.TypeProduct = { $regex: `^${category}$`, $options: "i" };
+        }
+
+        // 4. Filtro por Rango de Precios
+        if (minPrice || maxPrice) {
+            mongoFilter.unitPrice = {};
+            if (minPrice && !isNaN(minPrice)) mongoFilter.unitPrice.$gte = Number(minPrice);
+            if (maxPrice && !isNaN(maxPrice)) mongoFilter.unitPrice.$lte = Number(maxPrice);
+        }
+
+        // 5. Ordenamiento
+        let sortOption = { createdAt: -1 }; // Por defecto: más recientes
+        if (sort === "price_asc") sortOption = { unitPrice: 1 };
+        else if (sort === "price_desc") sortOption = { unitPrice: -1 };
+        else if (sort === "name_asc") sortOption = { name: 1 };
+        else if (sort === "name_desc") sortOption = { name: -1 };
+
+        // 6. Ejecutar Consultas
+        const totalItems = await productsModel.countDocuments(mongoFilter);
+        const products = await productsModel
+            .find(mongoFilter)
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limit)
+            .lean();
+
+        const normalizedProducts = products.map(normalizeProduct);
+
+        return res.status(200).json({
+            products: normalizedProducts,
+            totalPages: Math.ceil(totalItems / limit),
+            currentPage: page,
+            totalItems,
+        });
+    } catch (error) {
+        console.log("error" + error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
 };
 
 productsController.insertProduct = async (req, res) => {
-  try {
-    const {
-      name,
-      TypeProduct,
-      description,
-      quantity,
-      review,
-      unitPrice,
-      price,
-      precio,
-      Precio,
-      precioUnitario,
-      productPrice,
-    } = req.body;
-
-    const finalPrice = parseNumber(
-      unitPrice ?? price ?? precio ?? Precio ?? precioUnitario ?? productPrice
-    );
-
-    if (!name || !TypeProduct || !description) {
-      return res.status(400).json({ message: "Todos los campos son obligatorios" });
+    try {
+        const {
+            name, TypeProduct, description, quantity, review,
+            unitPrice, price, precio, Precio, precioUnitario, productPrice,
+        } = req.body;
+        const finalPrice = parseNumber(
+            unitPrice ?? price ?? precio ?? Precio ?? precioUnitario ?? productPrice
+        );
+        if (!name || !TypeProduct || !description) {
+            return res.status(400).json({ message: "Todos los campos son obligatorios" });
+        }
+        if (!finalPrice || finalPrice <= 0) {
+            return res.status(400).json({ message: "El precio del producto debe ser mayor a 0" });
+        }
+        const newProduct = new productsModel({
+            name: name.trim(), TypeProduct, description: description.trim(),
+            unitPrice: finalPrice, price: finalPrice, quantity: Number(quantity) || 0, review,
+            image: req.file?.path || "", public_id: req.file?.filename || "",
+        });
+        await newProduct.save();
+        return res.status(200).json({ message: "Product saved" });
+    } catch (error) {
+        console.log("error" + error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-
-    if (!finalPrice || finalPrice <= 0) {
-      return res.status(400).json({ message: "El precio del producto debe ser mayor a 0" });
-    }
-
-    const newProduct = new productsModel({
-      name: name.trim(),
-      TypeProduct,
-      description: description.trim(),
-      unitPrice: finalPrice,
-      price: finalPrice,
-      quantity: Number(quantity) || 0,
-      review,
-      image: req.file?.path || "",
-      public_id: req.file?.filename || "",
-    });
-
-    await newProduct.save();
-
-    return res.status(200).json({ message: "Product saved" });
-  } catch (error) {
-    console.log("error" + error);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
 };
 
 productsController.updateProduct = async (req, res) => {
-  try {
-    const {
-      name,
-      TypeProduct,
-      description,
-      quantity,
-      review,
-      unitPrice,
-      price,
-      precio,
-      Precio,
-      precioUnitario,
-      productPrice,
-    } = req.body;
-
-    const productFound = await productsModel.findById(req.params.id);
-
-    if (!productFound) {
-      return res.status(404).json({ message: "Producto no encontrado" });
+    try {
+        const {
+            name, TypeProduct, description, quantity, review,
+            unitPrice, price, precio, Precio, precioUnitario, productPrice,
+        } = req.body;
+        const productFound = await productsModel.findById(req.params.id);
+        if (!productFound) {
+            return res.status(404).json({ message: "Producto no encontrado" });
+        }
+        const finalPrice = parseNumber(
+            unitPrice ?? price ?? precio ?? Precio ?? precioUnitario ?? productPrice
+        );
+        if (!name || !TypeProduct || !description) {
+            return res.status(400).json({ message: "Todos los campos son obligatorios" });
+        }
+        if (!finalPrice || finalPrice <= 0) {
+            return res.status(400).json({ message: "El precio del producto debe ser mayor a 0" });
+        }
+        const updatedData = {
+            name: name.trim(), TypeProduct, description: description.trim(),
+            unitPrice: finalPrice, price: finalPrice, quantity: Number(quantity) || 0, review,
+        };
+        if (req.file) {
+            if (productFound.public_id) {
+                await cloudinary.uploader.destroy(productFound.public_id);
+            }
+            updatedData.image = req.file.path;
+            updatedData.public_id = req.file.filename;
+        }
+        await productsModel.findByIdAndUpdate(req.params.id, updatedData, { new: true });
+        return res.status(200).json({ message: "Product updated" });
+    } catch (error) {
+        console.log("error" + error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-
-    const finalPrice = parseNumber(
-      unitPrice ?? price ?? precio ?? Precio ?? precioUnitario ?? productPrice
-    );
-
-    if (!name || !TypeProduct || !description) {
-      return res.status(400).json({ message: "Todos los campos son obligatorios" });
-    }
-
-    if (!finalPrice || finalPrice <= 0) {
-      return res.status(400).json({ message: "El precio del producto debe ser mayor a 0" });
-    }
-
-    const updatedData = {
-      name: name.trim(),
-      TypeProduct,
-      description: description.trim(),
-      unitPrice: finalPrice,
-      price: finalPrice,
-      quantity: Number(quantity) || 0,
-      review,
-    };
-
-    if (req.file) {
-      if (productFound.public_id) {
-        await cloudinary.uploader.destroy(productFound.public_id);
-      }
-
-      updatedData.image = req.file.path;
-      updatedData.public_id = req.file.filename;
-    }
-
-    await productsModel.findByIdAndUpdate(req.params.id, updatedData, {
-      new: true,
-    });
-
-    return res.status(200).json({ message: "Product updated" });
-  } catch (error) {
-    console.log("error" + error);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
 };
 
 productsController.deleteProduct = async (req, res) => {
-  try {
-    const productFound = await productsModel.findById(req.params.id);
-
-    if (!productFound) {
-      return res.status(404).json({ message: "Producto no encontrado" });
+    try {
+        const productFound = await productsModel.findById(req.params.id);
+        if (!productFound) {
+            return res.status(404).json({ message: "Producto no encontrado" });
+        }
+        if (productFound.public_id) {
+            await cloudinary.uploader.destroy(productFound.public_id);
+        }
+        await productsModel.findByIdAndDelete(req.params.id);
+        return res.status(200).json({ message: "Product deleted" });
+    } catch (error) {
+        console.log("error" + error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-
-    if (productFound.public_id) {
-      await cloudinary.uploader.destroy(productFound.public_id);
-    }
-
-    await productsModel.findByIdAndDelete(req.params.id);
-
-    return res.status(200).json({ message: "Product deleted" });
-  } catch (error) {
-    console.log("error" + error);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
 };
 
 productsController.getTopSellingProducts = async (req, res) => {
-  try {
-    const topProducts = await ordersModel.aggregate([
-      // ... same as before
-      { $match: { state: "Entregado" } },
-      { $unwind: "$products" },
-      { $lookup: { from: "Products", localField: "products.productId", foreignField: "_id", as: "productInfo" } },
-      { $unwind: { path: "$productInfo", preserveNullAndEmptyArrays: true } },
-      { $group: { _id: "$products.productId", name: { $first: { $ifNull: ["$productInfo.name", "Producto"] } }, quantitySold: { $sum: "$products.quantity" }, totalSold: { $sum: { $ifNull: ["$products.subtotal", 0] } } } },
-      { $sort: { quantitySold: -1 } },
-      { $limit: 5 },
-      { $project: { _id: 0, idProduct: "$_id", name: 1, quantitySold: 1, totalSold: 1 } },
-    ]);
-
-    return res.status(200).json(topProducts);
-  } catch (error) {
-    console.log("error" + error);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
+    try {
+        const topProducts = await ordersModel.aggregate([
+            { $match: { state: "Entregado" } },
+            { $unwind: "$products" },
+            { $lookup: { from: "Products", localField: "products.productId", foreignField: "_id", as: "productInfo" } },
+            { $unwind: { path: "$productInfo", preserveNullAndEmptyArrays: true } },
+            { $group: { _id: "$products.productId", name: { $first: { $ifNull: ["$productInfo.name", "Producto"] } }, quantitySold: { $sum: "$products.quantity" }, totalSold: { $sum: { $ifNull: ["$products.subtotal", 0] } } } },
+            { $sort: { quantitySold: -1 } },
+            { $limit: 5 },
+            { $project: { _id: 0, idProduct: "$_id", name: 1, quantitySold: 1, totalSold: 1 } },
+        ]);
+        return res.status(200).json(topProducts);
+    } catch (error) {
+        console.log("error" + error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
 };
 
 productsController.rateProduct = async (req, res) => {
-  try {
-    const { review } = req.body; // Can be 1-5 or null to clear
-    const productId = req.params.id;
-
-    const productFound = await productsModel.findById(productId);
-    if (!productFound) {
-      return res.status(404).json({ message: "Producto no encontrado" });
+    try {
+        const { review } = req.body;
+        const productId = req.params.id;
+        const productFound = await productsModel.findById(productId);
+        if (!productFound) {
+            return res.status(404).json({ message: "Producto no encontrado" });
+        }
+        productFound.review = review || 0;
+        await productFound.save();
+        return res.status(200).json({ message: "Calificación guardada", product: productFound });
+    } catch (error) {
+        console.log("error", error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-
-    productFound.review = review || 0; // 0 means no review/cleared
-    await productFound.save();
-
-    return res.status(200).json({ message: "Calificación guardada", product: productFound });
-  } catch (error) {
-    console.log("error", error);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
 };
 
 export default productsController;
