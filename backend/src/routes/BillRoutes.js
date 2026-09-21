@@ -5,20 +5,20 @@ import { validateAuthCookie } from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
 router
-    .route("/")
-    .get(validateAuthCookie(["employee", "customer"]), billController.getBills)
-    .post(validateAuthCookie(["employee"]), billController.insertBills);
+  .route("/")
+  .get(validateAuthCookie(["employee", "customer"]), billController.getBills)
+  .post(validateAuthCookie(["employee"]), billController.insertBills);
 
 // [NUEVO] Ruta para obtener facturas por cliente
 router.get(
-    "/customer/:customerId",
-    validateAuthCookie(["customer"]),
-    billController.getBillsByCustomer
+  "/customer/:customerId",
+  validateAuthCookie(["customer"]),
+  billController.getBillsByCustomer
 );
 
 router
-    .route("/:id")
-    .put(validateAuthCookie(["employee"]), billController.updateBills)
-    .delete(validateAuthCookie(["employee"]), billController.deleteBills);
+  .route("/:id")
+  .put(validateAuthCookie(["employee"]), billController.updateBills)
+  .delete(validateAuthCookie(["employee"]), billController.deleteBills);
 
 export default router;

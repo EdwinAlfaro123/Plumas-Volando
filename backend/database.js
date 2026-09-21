@@ -1,23 +1,23 @@
-import dns from "dns";
 import mongoose from "mongoose";
+import { config } from "./config.js";
 
-dns.setServers(["8.8.8.8", "1.1.1.1"]);
+const connectDB = async () => {
+  try {
+    if (!config.mongo.uri) {
+      throw new Error("MONGO_URI no está definida en las variables de entorno");
+    }
 
-mongoose
-  .connect("mongodb+srv://Plumasvolando:Plumasvolando123@cluster0.2f8enfz.mongodb.net/PlumasVolando", {
-    serverSelectionTimeoutMS: 10000,
-  })
-  .then(() => {
-    console.log("La Base está conectada");
-  })
-  .catch((error) => {
-    console.log("Error al conectar MongoDB:", error.message);
-  });
+    const conn = await mongoose.connect(config.mongo.uri, {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+    });
 
-mongoose.connection.on("disconnected", () => {
-  console.log("La Base está desconectada");
-});
+    console.log(`✅ MongoDB conectado: ${conn.connection.host}`);
+  } catch (error) {
+    console.error(" Error al conectar MongoDB:", error.message);
+    process.exit(1);
+  }
+};
 
-mongoose.connection.on("error", (error) => {
-  console.log("Error found:", error.message);
-});
+export default connectDB;

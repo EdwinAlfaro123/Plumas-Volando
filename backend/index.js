@@ -1,45 +1,19 @@
 import app from "./app.js";
-import "./database.js";
-
-
-// ============================================================
-// PUERTO
-// ============================================================
-
-// Render proporciona PORT mediante variable de entorno.
-// Cuando trabajamos localmente utilizamos 4000.
+import connectDB from "./database.js";
 
 const PORT = process.env.PORT || 4000;
 
-
-// ============================================================
-// SERVIDOR
-// ============================================================
-
 async function main() {
-
   try {
+    await connectDB();
 
     app.listen(PORT, "0.0.0.0", () => {
-
-      console.log(
-        `Server running on port ${PORT}`
-      );
-
+      console.log(`🚀 Server running on port ${PORT}`);
     });
-
   } catch (error) {
-
-    console.error(
-      "Error starting server:",
-      error
-    );
-
+    console.error(" Error starting server:", error);
     process.exit(1);
-
   }
-
 }
-
 
 main();
