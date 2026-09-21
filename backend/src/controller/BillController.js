@@ -1,8 +1,7 @@
 import billsModel from "../model/Bill.js"
-
 const billController = {};
 
-//SELECT
+// SELECT - Todas las facturas
 billController.getBills = async (req, res) => {
     try {
         const bills = await billsModel.find();
@@ -13,15 +12,24 @@ billController.getBills = async (req, res) => {
     }
 };
 
-//INSERT
+// [NUEVO] SELECT - Facturas por cliente
+billController.getBillsByCustomer = async (req, res) => {
+    try {
+        const { customerId } = req.params;
+        const bills = await billsModel.find({ customerId }).sort({ createdAt: -1 });
+        return res.status(200).json(bills);
+    } catch (error) {
+        console.log("error" + error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+// INSERT
 billController.insertBills = async (req, res) => {
     try {
         const {OrderId, date, paymentMethod} = req.body;
-
         const newBills = new billsModel({OrderId, date, paymentMethod})
-
         await newBills.save();
-
         return res.status(200).json({message: "Bill saved"})
     } catch (error) {
         console.log("error"+error)
@@ -29,29 +37,26 @@ billController.insertBills = async (req, res) => {
     }
 };
 
-//UPDATE
+// UPDATE
 billController.updateBills = async (req, res) => {
     try {
         let {
-            OrderId, 
-            date, 
+            OrderId,
+            date,
             paymentMethod
         } = req.body;
-
         const billsUpdated = await billsModel.findByIdAndUpdate(
             req.params.id,
             {
-                OrderId, 
-                date, 
+                OrderId,
+                date,
                 paymentMethod
             },
             {new: true}
         );
-
         if(!billsUpdated){
             return res.status(404).json({message: "Bills not found"})
         }
-
         return res.status(200).json({message: "Bill updated"})
     } catch (error) {
         console.log("error"+error)
@@ -59,15 +64,13 @@ billController.updateBills = async (req, res) => {
     }
 };
 
-//ELIMINAR
+// ELIMINAR
 billController.deleteBills = async (req, res) => {
     try {
         const deletedBills = await billsModel.findByIdAndDelete(req.params.id);
-
         if(!deletedBills){
             return res.status(404).json({message: "Bill not found"})
         }
-
         return res.status(200).json({message: "Bill deleted"})
     } catch (error) {
         console.log("error"+error)

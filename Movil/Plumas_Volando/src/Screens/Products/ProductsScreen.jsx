@@ -56,8 +56,8 @@ const ProductsScreen = ({ navigation }) => {
     // Efecto para Búsqueda en Tiempo Real (Debounce) y Filtros
     useEffect(() => {
         const timer = setTimeout(() => {
-            loadProducts(1, true); // Reinicia a la página 1 y limpia la lista
-        }, 500); // 500ms de debounce
+            loadProducts(1, true);
+        }, 500);
 
         return () => clearTimeout(timer);
     }, [search, filters]);
@@ -136,7 +136,8 @@ const ProductsScreen = ({ navigation }) => {
                     <ProductCard 
                         product={item} 
                         onAddToCart={handleAddToCart} 
-                        onPress={() => console.log("Ver detalle", item)} 
+                        // [MODIFICADO] Navegar a la pantalla de detalle pasando el producto
+                        onPress={() => navigation.navigate('ProductDetail', { product: item })} 
                     />
                 )}
             />

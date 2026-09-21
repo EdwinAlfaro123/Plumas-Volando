@@ -2,6 +2,7 @@ import mongoose, { Schema, model } from "mongoose"
 
 const BillSchema = new Schema({
     OrderId: {type: mongoose.Types.ObjectId, ref: "Orders"},
+    customerId: {type: mongoose.Types.ObjectId, ref: "Customers"},   
     date: {type: Date},
     paymentMethod: {type: String}
 },{
