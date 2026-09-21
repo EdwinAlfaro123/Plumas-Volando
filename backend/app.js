@@ -18,7 +18,7 @@ import eggsRoutes from "./src/routes/EggsRoutes.js";
 import orderRoutes from "./src/routes/OrderRoutes.js";
 import billRoutes from "./src/routes/BillRoutes.js";
 import salesHistoryRoutes from "./src/routes/SalesHistoryRoutes.js";
-import logoutRoutes from "./src/routes/LogoutController.js";
+
 
 dotenv.config();
 
@@ -66,7 +66,7 @@ app.use("/api/eggs", eggsRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/bill", billRoutes);
 app.use("/api/salesHistory", salesHistoryRoutes);
-app.use("/api/logout", logoutRoutes);
+
 
 // Ruta de prueba
 app.get("/api/health", (req, res) => {
