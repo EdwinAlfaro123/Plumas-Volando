@@ -50,7 +50,7 @@ const RecoverEmailPasswordPage = () => {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:4000/api/recoveryPasswordEmployee/requestCode",
+        "https://plumas-volandot.onrender.com/api/recoveryPasswordEmployee/requestCode",
         {
           method: "POST",
           headers: {
