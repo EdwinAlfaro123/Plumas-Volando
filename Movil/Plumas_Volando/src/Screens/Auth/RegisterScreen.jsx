@@ -7,7 +7,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 
 import { StatusBar } from 'expo-status-bar';
@@ -22,6 +21,7 @@ import FormInput from '../../Components/Common/FormInput';
 import Button from '../../Components/Common/Button';
 
 import { COLORS } from '../../Constants/theme';
+import { useToast } from '../../Context/ToastContext';
 
 import authService from '../../Services/authService';
 
@@ -294,6 +294,8 @@ const RegisterScreen = ({ navigation }) => {
   const { login } =
     useContext(AuthContext);
 
+  const { showToast } = useToast();
+
 
   // ==================================================
   // REGISTRO
@@ -331,28 +333,21 @@ const RegisterScreen = ({ navigation }) => {
 
         if (loginResult.success) {
 
-          Alert.alert(
-            '¡Bienvenido!',
-            'Tu cuenta fue creada exitosamente.'
+          showToast(
+            '¡Bienvenido! Tu cuenta fue creada exitosamente.',
+            'success'
           );
 
         }
 
         else {
 
-          Alert.alert(
-            '¡Cuenta creada!',
-            'Tu cuenta fue creada, pero hubo un error al iniciar sesión automáticamente.',
-            [
-              {
-                text: 'Iniciar sesión',
-                onPress: () =>
-                  navigation.navigate(
-                    'Login'
-                  ),
-              },
-            ]
+          showToast(
+            'Cuenta creada. Inicia sesión para continuar.',
+            'warning'
           );
+
+          navigation.navigate('Login');
 
         }
 
@@ -360,10 +355,10 @@ const RegisterScreen = ({ navigation }) => {
 
       else {
 
-        Alert.alert(
-          'Error al registrarse',
+        showToast(
           result.message ||
-            'Intenta de nuevo más tarde.'
+            'Intenta de nuevo más tarde.',
+          'error'
         );
 
       }
@@ -372,9 +367,9 @@ const RegisterScreen = ({ navigation }) => {
 
     catch (error) {
 
-      Alert.alert(
-        'Error',
-        'No se pudo conectar al servidor. Verifica tu conexión a internet.'
+      showToast(
+        'No se pudo conectar al servidor. Verifica tu conexión a internet.',
+        'error'
       );
 
     }

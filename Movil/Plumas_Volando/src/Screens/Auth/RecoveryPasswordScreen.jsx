@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  Alert,
   TouchableOpacity,
 } from 'react-native';
 
@@ -17,6 +16,7 @@ import Button from '../../Components/Common/Button';
 
 import { COLORS } from '../../Constants/theme';
 import { authService } from '../../Services/authService';
+import { useToast } from '../../Context/ToastContext';
 
 import {
   RecoveryPasswordStyles as styles,
@@ -28,6 +28,8 @@ const RecoveryPasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const { showToast } = useToast();
 
 
   // ==================================================
@@ -78,9 +80,10 @@ const RecoveryPasswordScreen = ({ navigation }) => {
 
       if (!response.success) {
 
-        Alert.alert(
-          'No se pudo enviar el código',
-          response.message
+        showToast(
+          response.message ||
+            'No se pudo enviar el código.',
+          'error'
         );
 
         return;
@@ -94,9 +97,9 @@ const RecoveryPasswordScreen = ({ navigation }) => {
 
       if (!recoveryToken) {
 
-        Alert.alert(
-          'Error',
-          'El servidor no devolvió el token de recuperación.'
+        showToast(
+          'El servidor no devolvió el token de recuperación.',
+          'error'
         );
 
         return;
@@ -120,9 +123,9 @@ const RecoveryPasswordScreen = ({ navigation }) => {
       );
 
 
-      Alert.alert(
-        'Error',
-        'No fue posible enviar el código. Intenta nuevamente.'
+      showToast(
+        'No fue posible enviar el código. Intenta nuevamente.',
+        'error'
       );
 
     } finally {

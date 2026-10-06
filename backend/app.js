@@ -24,7 +24,6 @@ dotenv.config();
 
 const app = express();
 
-// ✅ CORS - Debe ir primero
 app.use(
   cors({
     origin: [

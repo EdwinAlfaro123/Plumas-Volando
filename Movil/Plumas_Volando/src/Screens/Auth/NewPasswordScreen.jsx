@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  Alert,
   TouchableOpacity,
 } from 'react-native';
 
@@ -17,6 +16,7 @@ import Button from '../../Components/Common/Button';
 
 import { COLORS } from '../../Constants/theme';
 import { authService } from '../../Services/authService';
+import { useToast } from '../../Context/ToastContext';
 
 import {
   RecoveryPasswordStyles as styles,
@@ -45,6 +45,8 @@ const NewPasswordScreen = ({
 
   const [loading, setLoading] =
     useState(false);
+
+  const { showToast } = useToast();
 
 
   // ==================================================
@@ -109,19 +111,12 @@ const NewPasswordScreen = ({
 
     if (!recoveryToken) {
 
-      Alert.alert(
-        'Sesión expirada',
-        'Debes solicitar nuevamente la recuperación de contraseña.',
-        [
-          {
-            text: 'Aceptar',
-            onPress: () =>
-              navigation.replace(
-                'RecoveryPassword'
-              ),
-          },
-        ]
+      showToast(
+        'Sesión expirada. Solicita nuevamente la recuperación.',
+        'warning'
       );
+
+      navigation.replace('RecoveryPassword');
 
       return;
 
@@ -143,9 +138,10 @@ const NewPasswordScreen = ({
 
       if (!response.success) {
 
-        Alert.alert(
-          'No se pudo cambiar la contraseña',
-          response.message
+        showToast(
+          response.message ||
+            'No se pudo cambiar la contraseña.',
+          'error'
         );
 
         return;
@@ -153,29 +149,15 @@ const NewPasswordScreen = ({
       }
 
 
-      Alert.alert(
-        'Contraseña actualizada',
-        'Tu contraseña se cambió correctamente. Ya puedes iniciar sesión.',
-        [
-          {
-            text: 'Iniciar sesión',
-
-            onPress: () => {
-
-              navigation.reset({
-                index: 0,
-
-                routes: [
-                  {
-                    name: 'Login',
-                  },
-                ],
-              });
-
-            },
-          },
-        ]
+      showToast(
+        'Contraseña actualizada. Ya puedes iniciar sesión.',
+        'success'
       );
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
 
     } catch (error) {
 
@@ -185,9 +167,9 @@ const NewPasswordScreen = ({
       );
 
 
-      Alert.alert(
-        'Error',
-        'No fue posible actualizar tu contraseña.'
+      showToast(
+        'No fue posible actualizar tu contraseña.',
+        'error'
       );
 
     } finally {

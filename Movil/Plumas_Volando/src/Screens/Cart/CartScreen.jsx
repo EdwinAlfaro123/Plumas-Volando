@@ -1,6 +1,6 @@
 // src/Screens/Cart/CartScreen.jsx
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,11 +10,13 @@ import { formatCurrency } from '../../Utils/formatters';
 import Button from '../../Components/Common/Button';
 import { orderService } from '../../Services/orderService';
 import { useAuth } from '../../Hooks/useAuth';
+import { useToast } from '../../Context/ToastContext';
 
 const CartScreen = ({ navigation }) => {
   const { cartItems, total, updateQuantity, removeFromCart, clearCart } = useCart();
   const { user } = useAuth();
-  
+  const { showToast } = useToast();
+
   const [showCheckout, setShowCheckout] = useState(false);
   const [location, setLocation] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,7 @@ const CartScreen = ({ navigation }) => {
 
   const confirmOrder = async () => {
     if (!location.trim()) {
-      Alert.alert('Error', 'Por favor ingresa una dirección de entrega');
+      showToast('Por favor ingresa una dirección de entrega.', 'warning');
       return;
     }
 
@@ -59,10 +61,10 @@ const CartScreen = ({ navigation }) => {
         setSuccessData({ code: verificationCode, order: response.order });
         clearCart();
       } else {
-        Alert.alert('Error', response.message);
+        showToast(response.message || 'No se pudo procesar el pedido.', 'error');
       }
     } catch (error) {
-      Alert.alert('Error', 'No se pudo procesar el pedido');
+      showToast('No se pudo procesar el pedido.', 'error');
     } finally {
       setLoading(false);
     }
@@ -94,7 +96,7 @@ const CartScreen = ({ navigation }) => {
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>Carrito</Text>
-        
+
         {cartItems.map((item) => (
           <View key={item._id} style={styles.itemContainer}>
             <View style={styles.itemInfo}>
@@ -200,7 +202,7 @@ const styles = StyleSheet.create({
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
   summaryText: { fontSize: 16, color: COLORS.textPrimary },
   totalText: { fontSize: 20, fontWeight: '700', color: COLORS.primary },
-  
+
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   modalContent: {
     backgroundColor: COLORS.background, borderTopLeftRadius: 30, borderTopRightRadius: 30,

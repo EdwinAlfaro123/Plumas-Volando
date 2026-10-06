@@ -7,7 +7,6 @@ import {
   View,
   Text,
   TextInput,
-  Alert,
   TouchableOpacity,
 } from 'react-native';
 
@@ -20,6 +19,7 @@ import Button from '../../Components/Common/Button';
 
 import { COLORS } from '../../Constants/theme';
 import { authService } from '../../Services/authService';
+import { useToast } from '../../Context/ToastContext';
 
 import {
   RecoveryPasswordStyles as styles,
@@ -52,6 +52,8 @@ const RecoveryCodeScreen = ({
 
   const [error, setError] =
     useState('');
+
+  const { showToast } = useToast();
 
 
   const inputs = [
@@ -146,11 +148,10 @@ const RecoveryCodeScreen = ({
 
     if (!recoveryToken) {
 
-      Alert.alert(
-        'Sesión expirada',
-        'Solicita un nuevo código de recuperación.'
+      showToast(
+        'Sesión expirada. Solicita un nuevo código.',
+        'warning'
       );
-
 
       navigation.replace(
         'RecoveryPassword'
@@ -192,9 +193,9 @@ const RecoveryCodeScreen = ({
 
       if (!verifiedToken) {
 
-        Alert.alert(
-          'Error',
-          'No se recibió el token de verificación.'
+        showToast(
+          'No se recibió el token de verificación.',
+          'error'
         );
 
         return;
@@ -218,9 +219,9 @@ const RecoveryCodeScreen = ({
       );
 
 
-      Alert.alert(
-        'Error',
-        'No fue posible verificar el código.'
+      showToast(
+        'No fue posible verificar el código.',
+        'error'
       );
 
     } finally {
@@ -240,9 +241,9 @@ const RecoveryCodeScreen = ({
 
     if (!email) {
 
-      Alert.alert(
-        'Error',
-        'No se encontró el correo de recuperación.'
+      showToast(
+        'No se encontró el correo de recuperación.',
+        'error'
       );
 
       navigation.replace(
@@ -268,9 +269,10 @@ const RecoveryCodeScreen = ({
 
       if (!response.success) {
 
-        Alert.alert(
-          'Error',
-          response.message
+        showToast(
+          response.message ||
+            'No se pudo reenviar el código.',
+          'error'
         );
 
         return;
@@ -299,9 +301,9 @@ const RecoveryCodeScreen = ({
       inputs[0].current?.focus();
 
 
-      Alert.alert(
-        'Código reenviado',
-        'Hemos enviado un nuevo código a tu correo electrónico.'
+      showToast(
+        'Código reenviado. Revisa tu correo electrónico.',
+        'success'
       );
 
     } catch (error) {
@@ -312,9 +314,9 @@ const RecoveryCodeScreen = ({
       );
 
 
-      Alert.alert(
-        'Error',
-        'No fue posible reenviar el código.'
+      showToast(
+        'No fue posible reenviar el código.',
+        'error'
       );
 
     } finally {

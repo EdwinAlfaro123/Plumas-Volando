@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
   Image,
   ImageBackground,
@@ -21,6 +20,7 @@ import Button from '../../Components/Common/Button';
 
 import { COLORS } from '../../Constants/theme';
 import { AuthContext } from '../../Context/AuthContext';
+import { useToast } from '../../Context/ToastContext';
 
 import LogoImage from '../../../assets/logo-plumas.png';
 import BackgroundImage from '../../../assets/pattern-bg.png';
@@ -40,6 +40,7 @@ const LoginScreen = ({ navigation }) => {
 
 
   const { login } = useContext(AuthContext);
+  const { showToast } = useToast();
 
 
   const validateForm = () => {
@@ -98,11 +99,9 @@ const LoginScreen = ({ navigation }) => {
 
     } catch (error) {
 
-      Alert.alert(
-        'Error al iniciar sesión',
-
-        error.message ||
-          'Verifica tus credenciales e intenta de nuevo.'
+      showToast(
+        error.message || 'Verifica tus credenciales e intenta de nuevo.',
+        'error'
       );
 
     } finally {
