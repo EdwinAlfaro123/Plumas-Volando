@@ -80,7 +80,7 @@ orderController.getCustomerOrders = async (req, res) => {
     const { customerId } = req.params;
     const orders = await ordersModel
       .find({ customerId })
-      .populate("products.productId", "name nombre productName unitPrice price")
+      .populate("products.productId", "name nombre productName unitPrice price image")
       .sort({ createdAt: -1 })
       .limit(50);
     return res.status(200).json({
@@ -134,6 +134,9 @@ orderController.createOrderFromCart = async (req, res) => {
       orderDate: new Date(),
     });
 
+    // Generar código de verificación real desde el _id del pedido
+    order.verificationCode = order._id.toString().slice(-8).toUpperCase();
+
     await order.save({ session });
 
     for (const item of items) {
@@ -153,6 +156,7 @@ orderController.createOrderFromCart = async (req, res) => {
       success: true,
       message: "Compra realizada exitosamente",
       order,
+      verificationCode: order.verificationCode,
     });
   } catch (error) {
     await session.abortTransaction();

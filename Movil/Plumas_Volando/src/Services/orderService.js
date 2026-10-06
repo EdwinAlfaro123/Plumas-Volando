@@ -20,7 +20,11 @@ export const orderService = {
   createOrder: async (orderData) => {
     try {
       const response = await api.post('/orders/order/from-cart', orderData);
-      return { success: true, order: response.data.order };
+      return {
+        success: true,
+        order: response.data.order,
+        verificationCode: response.data.verificationCode,
+      };
     } catch (error) {
       return {
         success: false,

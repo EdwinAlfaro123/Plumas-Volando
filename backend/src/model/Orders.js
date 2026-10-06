@@ -17,7 +17,8 @@ const OrdersSchema = new Schema({
     paymentMethod: {type: String, enum: ["card", "cash", "No especificado"], default: "No especificado"},
     state: {type: String, enum: ["Pendiente", "Entregado", "Cancelado"], default: "Pendiente"},
     status: {type: String, enum: ["pending", "completed", "cancelled"], default: "pending"},
-    orderDate: {type: Date, default: Date.now}
+    orderDate: {type: Date, default: Date.now},
+    verificationCode: {type: String}
 },{
     timestamps: true,
     strict: false
