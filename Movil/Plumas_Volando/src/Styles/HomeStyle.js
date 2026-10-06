@@ -301,6 +301,96 @@ export const HomeStyles = StyleSheet.create({
     marginTop: 4,
     textAlign: 'center',
   },
+  // ÚLTIMO PEDIDO
+  lastOrderCard: {
+    backgroundColor: COLORS.background,
+    borderRadius: 22,
+    marginBottom: 22,
+  },
+  lastOrderCardInner: {
+    backgroundColor: COLORS.background,
+    borderRadius: 22,
+    overflow: 'hidden',
+    padding: 16,
+  },
+  lastOrderLight: {
+    borderColor: 'rgba(255,255,255,0.65)',
+    borderLeftWidth: 1,
+    borderTopWidth: 1,
+    borderRadius: 22,
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  lastOrderTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  lastOrderIconOuter: {
+    backgroundColor: COLORS.background,
+    borderRadius: 16,
+    marginRight: 12,
+  },
+  lastOrderIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: COLORS.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lastOrderInfo: {
+    flex: 1,
+  },
+  lastOrderId: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  lastOrderDate: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    marginTop: 2,
+  },
+  lastOrderTotal: {
+    color: COLORS.primary,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  lastOrderBottom: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.06)',
+  },
+  lastOrderBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  lastOrderBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  lastOrderCode: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+  },
+  lastOrderCodeValue: {
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+    fontFamily: 'monospace',
+  },
+
   actionList: {
     paddingBottom: 2,
   },
