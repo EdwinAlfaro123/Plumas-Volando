@@ -40,7 +40,7 @@ const getStateInfo = (order) => {
   return STATE_CONFIG[key] || { color: COLORS.textSecondary, bg: '#f5f5f5', icon: 'ellipse-outline', label: key };
 };
 
-const shortId = (id) => id ? String(id).slice(0, 4).toUpperCase() : '----';
+const shortId = (id) => id ? String(id).slice(-4).toUpperCase() : '---';
 
 // ─── PANTALLA ─────────────────────────────────────────────────────────────────
 

@@ -18,7 +18,7 @@ const getStateInfo = (order) => {
   return STATE_CONFIG[key] || { color: COLORS.textSecondary, icon: 'ellipse-outline', label: key };
 };
 
-const shortId = (id) => id ? `#${String(id).slice(0, 4).toUpperCase()}` : '#----';
+const shortId = (id) => id ? `#${String(id).slice(-3).toUpperCase()}` : '#---';
 
 const OrderCard = ({ order, onPress }) => {
   const price = order.totalPrice ?? order.total ?? 0;
