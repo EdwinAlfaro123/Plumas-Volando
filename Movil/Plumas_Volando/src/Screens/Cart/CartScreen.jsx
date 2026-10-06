@@ -12,6 +12,7 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -219,10 +220,20 @@ const CartScreen = ({ navigation }) => {
         </View>
 
         {/* ITEMS */}
-        {cartItems.map(item => (
+        {cartItems.map(item => {
+          const itemImage = item.imageUrl || item.image || null;
+          return (
           <View key={item._id} style={styles.itemCard}>
             <View style={styles.itemIconWrap}>
-              <Ionicons name="egg-outline" size={22} color={COLORS.primary} />
+              {itemImage ? (
+                <Image
+                  source={{ uri: itemImage }}
+                  style={styles.itemImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Ionicons name="egg-outline" size={22} color={COLORS.primary} />
+              )}
             </View>
             <View style={styles.itemInfo}>
               <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
@@ -250,7 +261,8 @@ const CartScreen = ({ navigation }) => {
               </TouchableOpacity>
             </View>
           </View>
-        ))}
+          );
+        })}
 
         {/* RESUMEN */}
         <View style={styles.summaryCard}>
@@ -702,14 +714,20 @@ const styles = StyleSheet.create({
     ...NEUROMORPHIC.combinedShadow,
   },
   itemIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 52,
+    height: 52,
+    borderRadius: 14,
     backgroundColor: COLORS.background,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+    overflow: 'hidden',
     ...NEUROMORPHIC.inset,
+  },
+  itemImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 14,
   },
   itemInfo: {
     flex: 1,
