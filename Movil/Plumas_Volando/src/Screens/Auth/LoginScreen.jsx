@@ -23,7 +23,7 @@ import { AuthContext } from '../../Context/AuthContext';
 import { useToast } from '../../Context/ToastContext';
 
 import LogoImage from '../../../assets/logo-plumas.png';
-import BackgroundImage from '../../../assets/pattern-bg.png';
+import BackgroundImage from '../../../assets/pattern-bg.jpg';
 
 import { LoginStyles as styles } from '../../Styles';
 

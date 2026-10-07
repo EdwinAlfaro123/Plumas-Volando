@@ -13,7 +13,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo-plumas.png",
         "backgroundColor": "#EEF0F5"
-      }
+      },
+      "package": "com.diegorod_14.Plumas_Volando"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -30,6 +31,11 @@
         }
       ],
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4294d705-1269-4bf2-b868-01ab30f4139a"
+      }
+    }
   }
 }
