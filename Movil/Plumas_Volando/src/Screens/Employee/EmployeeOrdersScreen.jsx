@@ -209,7 +209,7 @@ const EmployeeOrdersScreen = () => {
       </View>
 
       {/* FILTROS */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filterRow}>
+      <View style={s.filterRow}>
         {FILTERS.map(f => {
           const active = filter === f;
           const cfg    = STATE_CONFIG[f];
@@ -224,7 +224,7 @@ const EmployeeOrdersScreen = () => {
             </TouchableOpacity>
           );
         })}
-      </ScrollView>
+      </View>
 
       {/* LISTA */}
       {loading ? (
@@ -475,8 +475,8 @@ const getStyles = (colors, neuro) => StyleSheet.create({
   subtitle:   { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
   refreshBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', ...neuro.combinedShadow },
 
-  filterRow:  { paddingHorizontal: 20, paddingBottom: 12, gap: 8 },
-  filterChip: { flexDirection: 'row', alignItems: 'center', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: colors.background, ...neuro.combinedShadow },
+  filterRow:  { flexDirection: 'row', paddingHorizontal: 16, paddingBottom: 12, gap: 8 },
+  filterChip: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 20, paddingVertical: 10, backgroundColor: colors.background, ...neuro.combinedShadow },
   filterText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
 
   list:             { paddingHorizontal: 16, paddingBottom: 24 },
