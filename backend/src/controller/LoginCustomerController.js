@@ -101,7 +101,9 @@ LoginCustomerController.login = async (req, res) => {
         email: customerFound.email,
         phone: customerFound.phone,
         DUI: customerFound.DUI,
+        birthdate: customerFound.birthdate,
         isActive: customerFound.isActive,
+        profilePhoto: customerFound.profilePhoto || null,
       },
     });
   } catch (error) {

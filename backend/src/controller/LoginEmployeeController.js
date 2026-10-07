@@ -84,7 +84,6 @@ loginEmployeeController.login = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 
-    // ✅ CORREGIDO: Devolver token y datos del empleado
     return res.status(200).json({
       success: true,
       message: "Inicio de sesión exitoso",
@@ -97,6 +96,7 @@ loginEmployeeController.login = async (req, res) => {
         phone: employeeFound.phone,
         Status: employeeFound.Status,
         isActive: employeeFound.isActive,
+        profilePhoto: employeeFound.profilePhoto || null,
       },
     });
   } catch (error) {
