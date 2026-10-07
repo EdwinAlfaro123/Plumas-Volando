@@ -56,39 +56,39 @@ customerController.updateCustomers = async (req, res) => {
         return res.status(400).json({message: "Invalid email"});
       }
 
-      //DUI
+      //DUI (opcional)
       const duiRegex = /^\d{8}-\d$/;
 
-      if (!duiRegex.test(DUI)) {
+      if (DUI && !duiRegex.test(DUI)) {
         return res.status(400).json({message: "Invalid DUI format. Example: 12345678-9"});
       }
 
-      //BirthDate
-      const birthDateObj = new Date(birthdate);
+      //BirthDate (opcional)
+      if (birthdate) {
+        const birthDateObj = new Date(birthdate);
 
-      if (isNaN(birthDateObj.getTime())) {
-        return res.status(400).json({message: "Invalid birthdate"});
+        if (isNaN(birthDateObj.getTime())) {
+          return res.status(400).json({message: "Invalid birthdate"});
+        }
+
+        const today = new Date();
+        let age = today.getFullYear() - birthDateObj.getFullYear();
+        const monthDiff = today.getMonth() - birthDateObj.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDateObj.getDate())) {
+          age--;
+        }
+
+        if (age < 18) {
+          return res.status(400).json({message: "Customer must be at least 18 years old"});
+        }
       }
 
-      const today = new Date();
-
-      let age = today.getFullYear() - birthDateObj.getFullYear();
-
-      const monthDiff = today.getMonth() - birthDateObj.getMonth();
-
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDateObj.getDate())) {
-        age--;
-      }
-
-      if (age < 18) {
-        return res.status(400).json({message: "Customer must be at least 18 years old"});
-      }
-
-      //Validar si existe el DUI
-      const existingDUI = await customerModel.findOne({ DUI, _id: { $ne: req.params.id }});
-
-      if (existingDUI) {
-        return res.status(400).json({message: "DUI already exists"});
+      //Validar si existe el DUI (solo si se proporcionó)
+      if (DUI) {
+        const existingDUI = await customerModel.findOne({ DUI, _id: { $ne: req.params.id }});
+        if (existingDUI) {
+          return res.status(400).json({message: "DUI already exists"});
+        }
       }
   
       // Validar teléfono
@@ -108,19 +108,14 @@ customerController.updateCustomers = async (req, res) => {
         return res.status(400).json({message: "Email already exists"});
       }
   
-      // Actualizar empleado
+      // Actualizar cliente
+      const updateData = { name, lastname, phone, email, isActive };
+      if (birthdate) updateData.birthdate = birthdate;
+      if (DUI)       updateData.DUI       = DUI;
+
       const customerUpdated = await customerModel.findByIdAndUpdate(
         req.params.id,
-        {
-            name,
-            lastname,
-            birthdate,
-            phone,
-            email,
-            password,
-            DUI,
-            isActive
-        },
+        updateData,
         { new: true }
       );
   

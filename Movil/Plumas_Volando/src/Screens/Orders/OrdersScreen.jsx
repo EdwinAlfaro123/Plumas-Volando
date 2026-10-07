@@ -115,7 +115,10 @@ const OrdersScreen = ({ navigation }) => {
     setLoading(true);
     setError('');
     const response = await orderService.getOrders(user._id);
-    if (response.success) setOrders(response.orders);
+    if (response.success) {
+      const seen = new Set();
+      setOrders((response.orders || []).filter(o => { if (seen.has(o._id)) return false; seen.add(o._id); return true; }));
+    }
     else setError(response.message);
     setLoading(false);
   };

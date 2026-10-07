@@ -132,7 +132,11 @@ const EmployeeOrdersScreen = () => {
     try {
       const res  = await api.get(`/orders?page=${pageNum}&limit=${PAGE_SIZE}`);
       const data = res.data?.orders ?? (Array.isArray(res.data) ? res.data : []);
-      setOrders(prev => reset || pageNum === 1 ? data : [...prev, ...data]);
+      setOrders(prev => {
+        const combined = reset || pageNum === 1 ? data : [...prev, ...data];
+        const seen = new Set();
+        return combined.filter(o => { if (seen.has(o._id)) return false; seen.add(o._id); return true; });
+      });
       setPage(res.data?.page ?? pageNum);
       setTotalPages(res.data?.totalPages ?? 1);
       setTotal(res.data?.total ?? data.length);

@@ -70,11 +70,12 @@ export const useAppColors = () => useContext(ThemeContext).colors;
 export const useIsDark    = () => useContext(ThemeContext).isDark;
 
 export const ThemeProvider = ({ children }) => {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
     AsyncStorage.getItem('theme_dark').then(v => {
-      if (v === '1') setIsDark(true);
+      // null = nunca guardado → mantener dark por defecto (true)
+      if (v !== null) setIsDark(v === '1');
     });
   }, []);
 

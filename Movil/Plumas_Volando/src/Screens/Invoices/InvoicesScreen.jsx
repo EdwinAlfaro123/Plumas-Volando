@@ -106,7 +106,10 @@ const InvoicesScreen = ({ navigation }) => {
     setLoading(true);
     setError('');
     const response = await invoiceService.getInvoices(user._id);
-    if (response.success) setInvoices(response.invoices);
+    if (response.success) {
+      const seen = new Set();
+      setInvoices((response.invoices || []).filter(i => { if (seen.has(i._id)) return false; seen.add(i._id); return true; }));
+    }
     else setError(response.message);
     setLoading(false);
   };

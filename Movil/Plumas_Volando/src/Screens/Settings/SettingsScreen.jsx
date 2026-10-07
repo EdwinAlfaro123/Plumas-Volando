@@ -12,7 +12,6 @@ import {
   ActivityIndicator,
   Dimensions,
   Image,
-  Switch,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -93,7 +92,7 @@ const FormField = ({ label, value, onChangeText, placeholder, hint, keyboardType
 
 const SettingsScreen = ({ navigation }) => {
   const { user, logout, updateUser, profilePhotoUri, updateProfilePhoto } = useContext(AuthContext);
-  const { isDark, toggleTheme, colors, darkNeuro } = useTheme();
+  const { isDark, colors, darkNeuro } = useTheme();
   const neuro = isDark ? darkNeuro : NEUROMORPHIC;
   const { showToast } = useToast();
 
@@ -266,7 +265,7 @@ const SettingsScreen = ({ navigation }) => {
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: [ImagePicker.MediaType.IMAGE],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.3,
@@ -392,24 +391,6 @@ const SettingsScreen = ({ navigation }) => {
             <Ionicons name="settings-outline" size={16} color={colors.primary} />
             <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Configuración</Text>
           </View>
-
-          {/* Modo oscuro */}
-          <View style={styles.menuOption}>
-            <View style={[styles.menuIconWrap, { backgroundColor: colors.background }, neuro.inset]}>
-              <Ionicons name={isDark ? 'moon' : 'sunny-outline'} size={18} color={colors.primary} />
-            </View>
-            <View style={styles.menuTexts}>
-              <Text style={[styles.menuLabel, { color: colors.textPrimary }]}>Modo oscuro</Text>
-              <Text style={[styles.menuSublabel, { color: colors.textSecondary }]}>{isDark ? 'Activado' : 'Desactivado'}</Text>
-            </View>
-            <Switch
-              value={isDark}
-              onValueChange={toggleTheme}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor="#fff"
-            />
-          </View>
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
           <MenuOption icon="receipt-outline"       label="Mis pedidos"  sublabel="Ver historial de compras"        onPress={() => navigation.navigate('Orders')}   colors={colors} neuro={neuro} />
           <View style={[styles.divider, { backgroundColor: colors.border }]} />
