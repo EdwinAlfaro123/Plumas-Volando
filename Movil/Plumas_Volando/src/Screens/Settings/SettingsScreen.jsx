@@ -19,7 +19,6 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, NEUROMORPHIC } from '../../Constants/theme';
 import { AuthContext } from '../../Context/AuthContext';
-import { useTheme } from '../../Context/ThemeContext';
 import { maskEmail } from '../../Utils/formatters';
 import { useToast } from '../../Context/ToastContext';
 import api from '../../Services/api';
@@ -28,83 +27,66 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // ─── FILA DE INFORMACIÓN ──────────────────────────────────────────────────────
 
-const InfoRow = ({ icon, label, value, colors, neuro }) => {
-  const c = colors || COLORS;
-  const n = neuro  || NEUROMORPHIC;
-  return (
-    <View style={styles.infoRow}>
-      <View style={[styles.infoIconWrap, { backgroundColor: c.background }, n.inset]}>
-        <Ionicons name={icon} size={17} color={c.primary} />
-      </View>
-      <View style={styles.infoTexts}>
-        <Text style={[styles.infoLabel, { color: c.textMuted }]}>{label}</Text>
-        <Text style={[styles.infoValue, { color: c.textPrimary }]}>{value || 'No disponible'}</Text>
-      </View>
+const InfoRow = ({ icon, label, value }) => (
+  <View style={styles.infoRow}>
+    <View style={styles.infoIconWrap}>
+      <Ionicons name={icon} size={17} color={COLORS.primary} />
     </View>
-  );
-};
+    <View style={styles.infoTexts}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value || 'No disponible'}</Text>
+    </View>
+  </View>
+);
 
 // ─── OPCIÓN DE MENÚ ───────────────────────────────────────────────────────────
 
-const MenuOption = ({ icon, label, sublabel, onPress, danger, colors, neuro }) => {
-  const c = colors || COLORS;
-  const n = neuro  || NEUROMORPHIC;
-  return (
-    <TouchableOpacity style={styles.menuOption} onPress={onPress} activeOpacity={0.8}>
-      <View style={[styles.menuIconWrap, { backgroundColor: c.background }, n.inset]}>
-        <Ionicons name={icon} size={18} color={danger ? c.error : c.primary} />
-      </View>
-      <View style={styles.menuTexts}>
-        <Text style={[styles.menuLabel, { color: danger ? c.error : c.textPrimary }]}>{label}</Text>
-        {sublabel && <Text style={[styles.menuSublabel, { color: c.textSecondary }]}>{sublabel}</Text>}
-      </View>
-      <Ionicons name="chevron-forward" size={16} color={danger ? c.error : c.textSecondary} />
-    </TouchableOpacity>
-  );
-};
+const MenuOption = ({ icon, label, sublabel, onPress, danger }) => (
+  <TouchableOpacity style={styles.menuOption} onPress={onPress} activeOpacity={0.8}>
+    <View style={styles.menuIconWrap}>
+      <Ionicons name={icon} size={18} color={danger ? COLORS.error : COLORS.primary} />
+    </View>
+    <View style={styles.menuTexts}>
+      <Text style={[styles.menuLabel, danger && { color: COLORS.error }]}>{label}</Text>
+      {sublabel && <Text style={styles.menuSublabel}>{sublabel}</Text>}
+    </View>
+    <Ionicons name="chevron-forward" size={16} color={danger ? COLORS.error : COLORS.textSecondary} />
+  </TouchableOpacity>
+);
 
 // ─── CAMPO DEL FORMULARIO ─────────────────────────────────────────────────────
 
-const FormField = ({ label, value, onChangeText, placeholder, hint, keyboardType, autoCapitalize, maxLength, colors: c, neuro: n }) => {
-  const colors = c || COLORS;
-  const neuro  = n || NEUROMORPHIC;
-  return (
-    <View style={styles.fieldWrap}>
-      <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{label}</Text>
-      <View style={[styles.fieldInputWrap, { backgroundColor: colors.background }, neuro.inset]}>
-        <TextInput
-          style={[styles.fieldInput, { color: colors.textPrimary }]}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder || label}
-          placeholderTextColor={colors.textMuted}
-          keyboardType={keyboardType || 'default'}
-          autoCapitalize={autoCapitalize || 'words'}
-          maxLength={maxLength}
-        />
-      </View>
-      {hint && <Text style={[styles.fieldHint, { color: colors.textMuted }]}>{hint}</Text>}
+const FormField = ({ label, value, onChangeText, placeholder, hint, keyboardType, autoCapitalize, maxLength }) => (
+  <View style={styles.fieldWrap}>
+    <Text style={styles.fieldLabel}>{label}</Text>
+    <View style={styles.fieldInputWrap}>
+      <TextInput
+        style={styles.fieldInput}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder || label}
+        placeholderTextColor={COLORS.textMuted}
+        keyboardType={keyboardType || 'default'}
+        autoCapitalize={autoCapitalize || 'words'}
+        maxLength={maxLength}
+      />
     </View>
-  );
-};
+    {hint && <Text style={styles.fieldHint}>{hint}</Text>}
+  </View>
+);
 
 // ─── PANTALLA ─────────────────────────────────────────────────────────────────
 
 const SettingsScreen = ({ navigation }) => {
   const { user, logout, updateUser, profilePhotoUri, updateProfilePhoto } = useContext(AuthContext);
-  const { isDark, colors, darkNeuro } = useTheme();
-  const neuro = isDark ? darkNeuro : NEUROMORPHIC;
   const { showToast } = useToast();
 
-  // ── Estado del modal de edición ──
   const [editVisible, setEditVisible] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({});
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // ── Abrir modal con datos actuales ──
   const openEdit = () => {
-    // Normalizar teléfono: si viene sin guión, insertarlo
     const rawPhone = user?.phone || '';
     const displayPhone = rawPhone.includes('-')
       ? rawPhone
@@ -112,7 +94,6 @@ const SettingsScreen = ({ navigation }) => {
         ? `${rawPhone.slice(0, 4)}-${rawPhone.slice(4)}`
         : rawPhone;
 
-    // Normalizar fecha: convertir ISO a DD/MM/YYYY para mostrar
     let displayDate = '';
     if (user?.birthdate) {
       const d = new Date(user.birthdate);
@@ -135,7 +116,6 @@ const SettingsScreen = ({ navigation }) => {
     setEditVisible(true);
   };
 
-  // ── Formatear teléfono automáticamente ──
   const handlePhoneChange = (text) => {
     const clean = text.replace(/[^0-9]/g, '');
     const formatted = clean.length > 4
@@ -144,9 +124,7 @@ const SettingsScreen = ({ navigation }) => {
     setForm(f => ({ ...f, phone: formatted }));
   };
 
-  // ── Formatear fecha mientras se escribe (acepta - o /) ──
   const handleDateChange = (text) => {
-    // Conservar solo dígitos
     const clean = text.replace(/[^0-9]/g, '');
     let formatted = clean;
     if (clean.length > 2 && clean.length <= 4) {
@@ -157,7 +135,6 @@ const SettingsScreen = ({ navigation }) => {
     setForm(f => ({ ...f, birthdate: formatted }));
   };
 
-  // ── Seleccionar fecha desde el picker nativo ──
   const onPickerChange = (_event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
@@ -168,7 +145,6 @@ const SettingsScreen = ({ navigation }) => {
     }
   };
 
-  // Parsear el valor actual del form para el picker (necesita un Date)
   const pickerDate = (() => {
     if (!form.birthdate) return new Date(2000, 0, 1);
     const normalized = form.birthdate.replace(/-/g, '/');
@@ -181,11 +157,9 @@ const SettingsScreen = ({ navigation }) => {
     return new Date(2000, 0, 1);
   })();
 
-  // ── Guardar perfil ──
   const handleSave = async () => {
     const { name, lastname, email, phone, DUI, birthdate } = form;
 
-    // Validaciones básicas
     if (!name.trim() || name.trim().length < 3) {
       showToast('El nombre debe tener al menos 3 caracteres.', 'error'); return;
     }
@@ -204,7 +178,6 @@ const SettingsScreen = ({ navigation }) => {
       showToast('El DUI debe tener el formato 12345678-9.', 'error'); return;
     }
 
-    // Convertir fecha DD/MM/YYYY o DD-MM-YYYY → ISO
     let isoDate = user?.birthdate || '';
     if (birthdate) {
       const normalized = birthdate.replace(/-/g, '/');
@@ -233,18 +206,16 @@ const SettingsScreen = ({ navigation }) => {
         isActive:  user?.isActive ?? true,
       });
 
-      // Actualizar contexto + AsyncStorage
       const updated = {
         ...user,
-        name:     name.trim(),
-        lastname: lastname.trim(),
-        email:    email.trim().toLowerCase(),
-        phone:    cleanPhone,
-        DUI:      DUI.trim() || user?.DUI || '',
+        name:      name.trim(),
+        lastname:  lastname.trim(),
+        email:     email.trim().toLowerCase(),
+        phone:     cleanPhone,
+        DUI:       DUI.trim() || user?.DUI || '',
         birthdate: isoDate,
       };
       updateUser(updated);
-
       setEditVisible(false);
       showToast('¡Perfil actualizado correctamente!', 'success');
     } catch (err) {
@@ -255,7 +226,6 @@ const SettingsScreen = ({ navigation }) => {
     }
   };
 
-  // ── Cambiar foto de perfil (guarda en DB como base64) ──
   const pickPhoto = async () => {
     try {
       const ImagePicker = require('expo-image-picker');
@@ -274,9 +244,7 @@ const SettingsScreen = ({ navigation }) => {
       if (!result.canceled && result.assets?.[0]) {
         const asset = result.assets[0];
         const base64Uri = `data:image/jpeg;base64,${asset.base64}`;
-        // Guardar en DB
         await api.patch(`/customer/${user._id}/photo`, { profilePhoto: base64Uri });
-        // Actualizar contexto local
         updateProfilePhoto(base64Uri);
         updateUser({ ...user, profilePhoto: base64Uri });
         showToast('¡Foto de perfil actualizada!', 'success');
@@ -287,7 +255,6 @@ const SettingsScreen = ({ navigation }) => {
     }
   };
 
-  // ── Logout ──
   const handleLogout = async () => {
     await logout();
   };
@@ -297,14 +264,12 @@ const SettingsScreen = ({ navigation }) => {
     .map(n => n.charAt(0).toUpperCase())
     .join('');
 
-  // Teléfono formateado para mostrar
   const displayPhone = (() => {
     const raw = user?.phone || '';
     if (raw.includes('-')) return raw;
     return raw.length === 8 ? `${raw.slice(0, 4)}-${raw.slice(4)}` : raw || 'No disponible';
   })();
 
-  // Fecha formateada para mostrar
   const displayBirthdate = (() => {
     if (!user?.birthdate) return 'No disponible';
     const d = new Date(user.birthdate);
@@ -316,21 +281,18 @@ const SettingsScreen = ({ navigation }) => {
   })();
 
   return (
-    <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]} edges={['top']}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+    <SafeAreaView style={styles.screen} edges={['top']}>
+      <StatusBar style="dark" />
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
-        {/* ── ENCABEZADO ── */}
+        {/* ENCABEZADO */}
         <View style={styles.header}>
-          <Text style={[styles.screenTitle, { color: colors.textPrimary }]}>Perfil</Text>
-          <Text style={[styles.screenSubtitle, { color: colors.textSecondary }]}>Tu información personal</Text>
+          <Text style={styles.screenTitle}>Perfil</Text>
+          <Text style={styles.screenSubtitle}>Tu información personal</Text>
         </View>
 
-        {/* ── AVATAR + NOMBRE ── */}
+        {/* AVATAR + NOMBRE */}
         <View style={styles.profileSection}>
           <View style={styles.avatarWrapper}>
             <View style={styles.avatarOuter}>
@@ -342,73 +304,71 @@ const SettingsScreen = ({ navigation }) => {
                 )}
               </View>
             </View>
-            {/* Botón cámara */}
             <TouchableOpacity style={styles.photoEditBtn} onPress={pickPhoto} activeOpacity={0.8}>
               <Ionicons name="camera-outline" size={14} color="#fff" />
             </TouchableOpacity>
           </View>
 
-          <Text style={[styles.profileName, { color: colors.textPrimary }]}>{user?.name} {user?.lastname}</Text>
-          <Text style={[styles.profileEmail, { color: colors.textSecondary }]}>{maskEmail(user?.email)}</Text>
+          <Text style={styles.profileName}>{user?.name} {user?.lastname}</Text>
+          <Text style={styles.profileEmail}>{maskEmail(user?.email)}</Text>
 
-          <View style={[styles.roleBadge, { backgroundColor: colors.background }, neuro.combinedShadow]}>
-            <Ionicons name="egg-outline" size={12} color={colors.primary} />
-            <Text style={[styles.roleText, { color: colors.primary }]}>Cliente</Text>
+          <View style={styles.roleBadge}>
+            <Ionicons name="egg-outline" size={12} color={COLORS.primary} />
+            <Text style={styles.roleText}>Cliente</Text>
           </View>
         </View>
 
-        {/* ── INFORMACIÓN PERSONAL ── */}
-        <View style={[styles.sectionCard, { backgroundColor: colors.background }, neuro.combinedShadow]}>
-          <View style={[styles.sectionTitleRow, { borderBottomColor: colors.border }]}>
-            <Ionicons name="person-circle-outline" size={16} color={colors.primary} />
-            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Información personal</Text>
+        {/* INFORMACIÓN PERSONAL */}
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionTitleRow}>
+            <Ionicons name="person-circle-outline" size={16} color={COLORS.primary} />
+            <Text style={styles.sectionTitle}>Información personal</Text>
             <TouchableOpacity style={styles.editBtn} onPress={openEdit} activeOpacity={0.8}>
-              <Ionicons name="pencil-outline" size={14} color={colors.primary} />
-              <Text style={[styles.editBtnText, { color: colors.primary }]}>Editar</Text>
+              <Ionicons name="pencil-outline" size={14} color={COLORS.primary} />
+              <Text style={styles.editBtnText}>Editar</Text>
             </TouchableOpacity>
           </View>
 
-          <InfoRow icon="person-outline"    label="Nombres"              value={user?.name} colors={colors} neuro={neuro} />
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          <InfoRow icon="people-outline"    label="Apellidos"            value={user?.lastname} colors={colors} neuro={neuro} />
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          <InfoRow icon="mail-outline"      label="Correo electrónico"   value={maskEmail(user?.email)} colors={colors} neuro={neuro} />
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          <InfoRow icon="call-outline"      label="Teléfono"             value={displayPhone} colors={colors} neuro={neuro} />
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          <InfoRow icon="calendar-outline"  label="Fecha de nacimiento"  value={displayBirthdate} colors={colors} neuro={neuro} />
+          <InfoRow icon="person-outline"   label="Nombres"             value={user?.name} />
+          <View style={styles.divider} />
+          <InfoRow icon="people-outline"   label="Apellidos"           value={user?.lastname} />
+          <View style={styles.divider} />
+          <InfoRow icon="mail-outline"     label="Correo electrónico"  value={maskEmail(user?.email)} />
+          <View style={styles.divider} />
+          <InfoRow icon="call-outline"     label="Teléfono"            value={displayPhone} />
+          <View style={styles.divider} />
+          <InfoRow icon="calendar-outline" label="Fecha de nacimiento" value={displayBirthdate} />
           {user?.DUI && (
             <>
-              <View style={[styles.divider, { backgroundColor: colors.border }]} />
-              <InfoRow icon="card-outline" label="DUI" value={user.DUI} colors={colors} neuro={neuro} />
+              <View style={styles.divider} />
+              <InfoRow icon="card-outline" label="DUI" value={user.DUI} />
             </>
           )}
         </View>
 
-        {/* ── CONFIGURACIÓN ── */}
-        <View style={[styles.sectionCard, { backgroundColor: colors.background }, neuro.combinedShadow]}>
-          <View style={[styles.sectionTitleRow, { borderBottomColor: colors.border }]}>
-            <Ionicons name="settings-outline" size={16} color={colors.primary} />
-            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Configuración</Text>
+        {/* CONFIGURACIÓN */}
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionTitleRow}>
+            <Ionicons name="settings-outline" size={16} color={COLORS.primary} />
+            <Text style={styles.sectionTitle}>Configuración</Text>
           </View>
 
-          <MenuOption icon="receipt-outline"       label="Mis pedidos"  sublabel="Ver historial de compras"        onPress={() => navigation.navigate('Orders')}   colors={colors} neuro={neuro} />
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          <MenuOption icon="document-text-outline" label="Mis facturas" sublabel="Ver mis comprobantes"             onPress={() => navigation.navigate('Invoices')}  colors={colors} neuro={neuro} />
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          <MenuOption icon="grid-outline"          label="Catálogo"     sublabel="Explorar productos disponibles"   onPress={() => navigation.navigate('Products')}  colors={colors} neuro={neuro} />
+          <MenuOption icon="receipt-outline"       label="Mis pedidos"  sublabel="Ver historial de compras"       onPress={() => navigation.navigate('Orders')}   />
+          <View style={styles.divider} />
+          <MenuOption icon="document-text-outline" label="Mis facturas" sublabel="Ver mis comprobantes"            onPress={() => navigation.navigate('Invoices')}  />
+          <View style={styles.divider} />
+          <MenuOption icon="grid-outline"          label="Catálogo"     sublabel="Explorar productos disponibles"  onPress={() => navigation.navigate('Products')}  />
         </View>
 
-        {/* ── CERRAR SESIÓN ── */}
-        <View style={[styles.sectionCard, { backgroundColor: colors.background }, neuro.combinedShadow]}>
-          <MenuOption icon="log-out-outline" label="Cerrar sesión" sublabel="Salir de tu cuenta" onPress={handleLogout} danger colors={colors} neuro={neuro} />
+        {/* CERRAR SESIÓN */}
+        <View style={styles.sectionCard}>
+          <MenuOption icon="log-out-outline" label="Cerrar sesión" sublabel="Salir de tu cuenta" onPress={handleLogout} danger />
         </View>
 
-        <Text style={[styles.versionText, { color: colors.textMuted }]}>Plumas Volando · v1.0.0</Text>
-
+        <Text style={styles.versionText}>Plumas Volando · v1.0.0</Text>
       </ScrollView>
 
-      {/* ── MODAL EDITAR PERFIL ───────────────────────────────────── */}
+      {/* MODAL EDITAR PERFIL */}
       <Modal
         visible={editVisible}
         animationType="slide"
@@ -419,21 +379,18 @@ const SettingsScreen = ({ navigation }) => {
           style={styles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View style={[styles.modalSheet, { backgroundColor: colors.background }]}>
+          <View style={styles.modalSheet}>
+            <View style={styles.sheetHandle} />
 
-            {/* Handle */}
-            <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
-
-            {/* Header */}
-            <View style={[styles.sheetHeader, { borderBottomColor: colors.border }]}>
+            <View style={styles.sheetHeader}>
               <TouchableOpacity
-                style={[styles.closeBtn, { backgroundColor: colors.background }, neuro.combinedShadow]}
+                style={styles.closeBtn}
                 onPress={() => !saving && setEditVisible(false)}
                 disabled={saving}
               >
-                <Ionicons name="close" size={18} color={colors.textSecondary} />
+                <Ionicons name="close" size={18} color={COLORS.textSecondary} />
               </TouchableOpacity>
-              <Text style={[styles.sheetTitle, { color: colors.textPrimary }]}>Editar perfil</Text>
+              <Text style={styles.sheetTitle}>Editar perfil</Text>
               <View style={{ width: 36 }} />
             </View>
 
@@ -442,38 +399,38 @@ const SettingsScreen = ({ navigation }) => {
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
             >
-              <FormField label="Nombre(s)"           value={form.name}      onChangeText={v => setForm(f => ({ ...f, name: v }))}     placeholder="Ej: Juan"          colors={colors} neuro={neuro} />
-              <FormField label="Apellidos"            value={form.lastname}  onChangeText={v => setForm(f => ({ ...f, lastname: v }))} placeholder="Ej: García López"  colors={colors} neuro={neuro} />
-              <FormField label="Correo electrónico"   value={form.email}     onChangeText={v => setForm(f => ({ ...f, email: v }))}    placeholder="correo@ejemplo.com" keyboardType="email-address" autoCapitalize="none" colors={colors} neuro={neuro} />
-              <FormField label="Teléfono"             value={form.phone}     onChangeText={handlePhoneChange}                          placeholder="0000-0000"          keyboardType="numeric" autoCapitalize="none" hint="8 dígitos, el guión se inserta automáticamente" maxLength={9} colors={colors} neuro={neuro} />
-              <FormField label="DUI"                  value={form.DUI}       onChangeText={v => setForm(f => ({ ...f, DUI: v }))}      placeholder="12345678-9"         autoCapitalize="none" hint="Formato: 12345678-9" maxLength={10} colors={colors} neuro={neuro} />
-              {/* Fecha de nacimiento — input manual + botón calendario */}
+              <FormField label="Nombre(s)"          value={form.name}     onChangeText={v => setForm(f => ({ ...f, name: v }))}     placeholder="Ej: Juan" />
+              <FormField label="Apellidos"           value={form.lastname} onChangeText={v => setForm(f => ({ ...f, lastname: v }))} placeholder="Ej: García López" />
+              <FormField label="Correo electrónico"  value={form.email}    onChangeText={v => setForm(f => ({ ...f, email: v }))}    placeholder="correo@ejemplo.com" keyboardType="email-address" autoCapitalize="none" />
+              <FormField label="Teléfono"            value={form.phone}    onChangeText={handlePhoneChange}                          placeholder="0000-0000" keyboardType="numeric" autoCapitalize="none" hint="8 dígitos, el guión se inserta automáticamente" maxLength={9} />
+              <FormField label="DUI"                 value={form.DUI}      onChangeText={v => setForm(f => ({ ...f, DUI: v }))}      placeholder="12345678-9" autoCapitalize="none" hint="Formato: 12345678-9" maxLength={10} />
+
+              {/* Fecha de nacimiento */}
               <View style={styles.fieldWrap}>
-                <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Fecha de nacimiento</Text>
+                <Text style={styles.fieldLabel}>Fecha de nacimiento</Text>
                 <View style={styles.dateRow}>
-                  <View style={[styles.fieldInputWrap, { flex: 1, backgroundColor: colors.background }, neuro.inset]}>
+                  <View style={[styles.fieldInputWrap, { flex: 1 }]}>
                     <TextInput
-                      style={[styles.fieldInput, { color: colors.textPrimary }]}
+                      style={styles.fieldInput}
                       value={form.birthdate}
                       onChangeText={handleDateChange}
                       placeholder="DD/MM/AAAA"
-                      placeholderTextColor={colors.textMuted}
+                      placeholderTextColor={COLORS.textMuted}
                       keyboardType="numeric"
                       maxLength={10}
                     />
                   </View>
                   <TouchableOpacity
-                    style={[styles.calendarBtn, { backgroundColor: colors.background }, neuro.combinedShadow]}
+                    style={styles.calendarBtn}
                     onPress={() => setShowDatePicker(true)}
                     activeOpacity={0.8}
                   >
-                    <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+                    <Ionicons name="calendar-outline" size={20} color={COLORS.primary} />
                   </TouchableOpacity>
                 </View>
-                <Text style={[styles.fieldHint, { color: colors.textMuted }]}>Acepta DD/MM/AAAA o DD-MM-AAAA</Text>
+                <Text style={styles.fieldHint}>Acepta DD/MM/AAAA o DD-MM-AAAA</Text>
               </View>
 
-              {/* DatePicker nativo (se abre al pulsar el calendario) */}
               {showDatePicker && (
                 <DateTimePicker
                   value={pickerDate}
@@ -484,7 +441,6 @@ const SettingsScreen = ({ navigation }) => {
                 />
               )}
 
-              {/* Botón guardar */}
               <TouchableOpacity
                 style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
                 onPress={handleSave}
@@ -500,12 +456,10 @@ const SettingsScreen = ({ navigation }) => {
                   </>
                 )}
               </TouchableOpacity>
-
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
       </Modal>
-
     </SafeAreaView>
   );
 };
@@ -522,36 +476,14 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
 
-  // ENCABEZADO
-  header: {
-    marginBottom: 24,
-  },
-  screenTitle: {
-    ...TYPOGRAPHY.heading,
-    fontSize: 26,
-    color: COLORS.textPrimary,
-  },
-  screenSubtitle: {
-    ...TYPOGRAPHY.caption,
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-  },
+  header: { marginBottom: 24 },
+  screenTitle: { ...TYPOGRAPHY.heading, fontSize: 26, color: COLORS.textPrimary },
+  screenSubtitle: { ...TYPOGRAPHY.caption, fontSize: 13, color: COLORS.textSecondary, marginTop: 4 },
 
   // PERFIL
-  profileSection: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  avatarWrapper: {
-    position: 'relative',
-    marginBottom: 16,
-  },
-  avatarPhoto: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-  },
+  profileSection: { alignItems: 'center', marginBottom: 24 },
+  avatarWrapper: { position: 'relative', marginBottom: 16 },
+  avatarPhoto: { width: 88, height: 88, borderRadius: 44 },
   photoEditBtn: {
     position: 'absolute',
     bottom: 0,
@@ -585,26 +517,11 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
   },
-  avatarInitials: {
-    ...TYPOGRAPHY.heading,
-    fontSize: 30,
-    color: COLORS.primary,
-    letterSpacing: 2,
-  },
-  profileName: {
-    ...TYPOGRAPHY.heading,
-    fontSize: 20,
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-  },
-  profileEmail: {
-    ...TYPOGRAPHY.caption,
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-    textAlign: 'center',
-  },
+  avatarInitials: { ...TYPOGRAPHY.heading, fontSize: 30, color: COLORS.primary, letterSpacing: 2 },
+  profileName: { ...TYPOGRAPHY.heading, fontSize: 20, color: COLORS.textPrimary, textAlign: 'center' },
+  profileEmail: { ...TYPOGRAPHY.caption, fontSize: 13, color: COLORS.textSecondary, marginTop: 4, textAlign: 'center' },
   roleBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -616,13 +533,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     ...NEUROMORPHIC.combinedShadow,
   },
-  roleText: {
-    fontSize: 11,
-    color: COLORS.primary,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
+  roleText: { fontSize: 11, color: COLORS.primary, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase' },
 
   // SECCIÓN CARD
   sectionCard: {
@@ -659,25 +570,11 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     ...NEUROMORPHIC.combinedShadow,
   },
-  editBtnText: {
-    fontSize: 12,
-    color: COLORS.primary,
-    fontWeight: '700',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#E8EAF0',
-    marginHorizontal: 16,
-  },
+  editBtnText: { fontSize: 12, color: COLORS.primary, fontWeight: '700' },
+  divider: { height: 1, backgroundColor: '#E8EAF0', marginHorizontal: 16 },
 
   // FILA INFO
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 13,
-    gap: 12,
-  },
+  infoRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 13, gap: 12 },
   infoIconWrap: {
     width: 36,
     height: 36,
@@ -687,31 +584,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     ...NEUROMORPHIC.inset,
   },
-  infoTexts: {
-    flex: 1,
-  },
-  infoLabel: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    marginBottom: 2,
-  },
-  infoValue: {
-    fontSize: 15,
-    color: COLORS.textPrimary,
-    fontWeight: '500',
-  },
+  infoTexts: { flex: 1 },
+  infoLabel: { fontSize: 11, color: COLORS.textMuted, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 2 },
+  infoValue: { fontSize: 15, color: COLORS.textPrimary, fontWeight: '500' },
 
   // MENÚ
-  menuOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 12,
-  },
+  menuOption: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
   menuIconWrap: {
     width: 36,
     height: 36,
@@ -721,35 +599,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     ...NEUROMORPHIC.inset,
   },
-  menuTexts: {
-    flex: 1,
-  },
-  menuLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-  },
-  menuSublabel: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 1,
-  },
+  menuTexts: { flex: 1 },
+  menuLabel: { fontSize: 15, fontWeight: '600', color: COLORS.textPrimary },
+  menuSublabel: { fontSize: 12, color: COLORS.textSecondary, marginTop: 1 },
 
-  // VERSIÓN
-  versionText: {
-    textAlign: 'center',
-    fontSize: 12,
-    color: COLORS.textMuted,
-    marginTop: 8,
-    letterSpacing: 0.3,
-  },
+  versionText: { textAlign: 'center', fontSize: 12, color: COLORS.textMuted, marginTop: 8, letterSpacing: 0.3 },
 
   // MODAL
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    justifyContent: 'flex-end',
-  },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
   modalSheet: {
     backgroundColor: COLORS.background,
     borderTopLeftRadius: 28,
@@ -758,13 +615,9 @@ const styles = StyleSheet.create({
     ...NEUROMORPHIC.topShadow,
   },
   sheetHandle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
+    width: 40, height: 4, borderRadius: 2,
     backgroundColor: '#DDE1E9',
-    alignSelf: 'center',
-    marginTop: 10,
-    marginBottom: 4,
+    alignSelf: 'center', marginTop: 10, marginBottom: 4,
   },
   sheetHeader: {
     flexDirection: 'row',
@@ -776,89 +629,45 @@ const styles = StyleSheet.create({
     borderBottomColor: '#EEF0F6',
   },
   closeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 36, height: 36, borderRadius: 18,
     backgroundColor: COLORS.background,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center', alignItems: 'center',
     ...NEUROMORPHIC.combinedShadow,
   },
-  sheetTitle: {
-    ...TYPOGRAPHY.subheading,
-    fontSize: 17,
-    color: COLORS.textPrimary,
-  },
-  formScroll: {
-    padding: 20,
-    paddingBottom: 40,
-  },
+  sheetTitle: { ...TYPOGRAPHY.subheading, fontSize: 17, color: COLORS.textPrimary },
+  formScroll: { padding: 20, paddingBottom: 40 },
 
   // CAMPOS
-  fieldWrap: {
-    marginBottom: 16,
-  },
+  fieldWrap: { marginBottom: 16 },
   fieldLabel: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 12, fontWeight: '700',
     color: COLORS.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 7,
+    textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 7,
   },
   fieldInputWrap: {
     backgroundColor: COLORS.background,
     borderRadius: 14,
     ...NEUROMORPHIC.inset,
   },
-  fieldInput: {
-    fontSize: 15,
-    color: COLORS.textPrimary,
-    paddingHorizontal: 16,
-    paddingVertical: 13,
-  },
-  fieldHint: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginTop: 5,
-    paddingHorizontal: 4,
-  },
+  fieldInput: { fontSize: 15, color: COLORS.textPrimary, paddingHorizontal: 16, paddingVertical: 13 },
+  fieldHint: { fontSize: 11, color: COLORS.textMuted, marginTop: 5, paddingHorizontal: 4 },
 
-  // FILA FECHA
-  dateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
+  // FECHA
+  dateRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   calendarBtn: {
-    width: 50,
-    height: 50,
-    borderRadius: 14,
+    width: 50, height: 50, borderRadius: 14,
     backgroundColor: COLORS.background,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center', alignItems: 'center',
     ...NEUROMORPHIC.combinedShadow,
   },
 
   // BOTÓN GUARDAR
   saveBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: COLORS.primary,
-    borderRadius: 16,
-    paddingVertical: 15,
-    marginTop: 8,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: COLORS.primary, borderRadius: 16, paddingVertical: 15, marginTop: 8,
   },
-  saveBtnDisabled: {
-    opacity: 0.65,
-  },
-  saveBtnText: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#fff',
-  },
+  saveBtnDisabled: { opacity: 0.65 },
+  saveBtnText: { fontSize: 15, fontWeight: '800', color: '#fff' },
 });
 
 export default SettingsScreen;
