@@ -552,4 +552,4 @@ CLOUDINARY_API_SECRET=tu_api_secret
 
 ### Link de descarga APK
 
-https://expo.dev/accounts/diegorod_14/projects/Plumas_Volando/builds/b21caf04-6735-4811-bfc4-ec45b3cbf25f
+- https://expo.dev/artifacts/eas/EXg8GuXDrc9MLCd7ax6OF6JqJdC4EKl2vbmgWhb2EN8.apk
