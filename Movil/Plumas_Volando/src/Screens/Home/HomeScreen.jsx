@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../../Context/AuthContext';
 import { useCart } from '../../Context/CartContext';
 import { COLORS, NEUROMORPHIC } from '../../Constants/theme';
+import { useTheme } from '../../Context/ThemeContext';
 import api from '../../Services/api';
 import { formatCurrency, formatDate } from '../../Utils/formatters';
 import { HomeStyles as styles } from '../../Styles/HomeStyle';
@@ -107,6 +108,7 @@ const STATE_LABELS = {
 const HomeScreen = ({ navigation }) => {
   const { user } = useContext(AuthContext);
   const { addToCart } = useCart();
+  const { colors, isDark } = useTheme();
   const [products, setProducts] = useState([]);
   const [summary, setSummary] = useState({ pending: 0, spent: 0, total: 0, invoices: 0 });
   const [latestOrder, setLatestOrder] = useState(null);
@@ -189,8 +191,8 @@ const HomeScreen = ({ navigation }) => {
     : null;
 
   return (
-    <SafeAreaView edges={['top']} style={styles.screen}>
-      <StatusBar style="dark" />
+    <SafeAreaView edges={['top']} style={[styles.screen, { backgroundColor: colors.background }]}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <ScrollView
         contentContainerStyle={[styles.content, isCompact && styles.contentCompact]}
         refreshControl={<RefreshControl colors={[COLORS.primary]} refreshing={refreshing} tintColor={COLORS.primary} onRefresh={onRefresh} />}

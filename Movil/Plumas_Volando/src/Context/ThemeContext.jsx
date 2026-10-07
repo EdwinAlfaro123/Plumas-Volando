@@ -65,7 +65,9 @@ const DARK_NEURO = {
 // ─── CONTEXTO ─────────────────────────────────────────────────────────────────
 
 const ThemeContext = createContext();
-export const useTheme = () => useContext(ThemeContext);
+export const useTheme     = () => useContext(ThemeContext);
+export const useAppColors = () => useContext(ThemeContext).colors;
+export const useIsDark    = () => useContext(ThemeContext).isDark;
 
 export const ThemeProvider = ({ children }) => {
   const [isDark, setIsDark] = useState(false);

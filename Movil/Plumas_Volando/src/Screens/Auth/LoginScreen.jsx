@@ -10,7 +10,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
 } from 'react-native';
 
 import { StatusBar } from 'expo-status-bar';
@@ -40,9 +39,7 @@ const LoginScreen = ({ navigation }) => {
   const [errors, setErrors] = useState({});
 
 
-  const [accountType, setAccountType] = useState('customer'); // 'customer' | 'employee'
-
-  const { login, loginEmployee } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
   const { showToast } = useToast();
 
 
@@ -95,11 +92,7 @@ const LoginScreen = ({ navigation }) => {
 
     try {
 
-      if (accountType === 'employee') {
-        await loginEmployee(email, password);
-      } else {
-        await login(email, password);
-      }
+      await login(email, password);
 
     } catch (error) {
 
@@ -249,32 +242,6 @@ const LoginScreen = ({ navigation }) => {
           <View style={styles.contentPanel}>
 
 
-            {/* TOGGLE CLIENTE / EMPLEADO */}
-
-            <View style={loginToggleStyles.pill}>
-              <TouchableOpacity
-                style={[loginToggleStyles.option, accountType === 'customer' && loginToggleStyles.optionActive]}
-                onPress={() => setAccountType('customer')}
-                activeOpacity={0.8}
-              >
-                <Ionicons name="person-outline" size={14} color={accountType === 'customer' ? '#fff' : COLORS.textSecondary} />
-                <Text style={[loginToggleStyles.optionText, accountType === 'customer' && loginToggleStyles.optionTextActive]}>
-                  Cliente
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[loginToggleStyles.option, accountType === 'employee' && loginToggleStyles.optionActive]}
-                onPress={() => setAccountType('employee')}
-                activeOpacity={0.8}
-              >
-                <Ionicons name="briefcase-outline" size={14} color={accountType === 'employee' ? '#fff' : COLORS.textSecondary} />
-                <Text style={[loginToggleStyles.optionText, accountType === 'employee' && loginToggleStyles.optionTextActive]}>
-                  Empleado
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-
             {/* ENCABEZADO */}
 
             <View style={styles.header}>
@@ -285,9 +252,7 @@ const LoginScreen = ({ navigation }) => {
 
 
               <Text style={styles.welcomeSubtitle}>
-                {accountType === 'employee'
-                  ? 'Acceso corporativo — empleados'
-                  : 'Inicia sesión para continuar'}
+                Inicia sesión para continuar
               </Text>
 
             </View>
@@ -324,7 +289,7 @@ const LoginScreen = ({ navigation }) => {
               <TouchableOpacity
                 style={styles.forgotPassword}
                 onPress={() =>
-                  navigation.navigate('RecoveryPassword', { accountType })
+                  navigation.navigate('RecoveryPassword')
                 }
                 activeOpacity={0.7}
               >
@@ -349,27 +314,26 @@ const LoginScreen = ({ navigation }) => {
               {renderLoginButton()}
 
 
-              {/* DIVISOR + REGISTRO — solo para clientes */}
+              {/* DIVISOR */}
 
-              {accountType === 'customer' && (
-                <>
-                  <View style={styles.dividerContainer}>
-                    <View style={styles.dividerLine} />
-                    <View style={styles.dividerBadge}>
-                      <Text style={styles.dividerText}>o</Text>
-                    </View>
-                    <View style={styles.dividerLine} />
-                  </View>
+              <View style={styles.dividerContainer}>
+                <View style={styles.dividerLine} />
+                <View style={styles.dividerBadge}>
+                  <Text style={styles.dividerText}>o</Text>
+                </View>
+                <View style={styles.dividerLine} />
+              </View>
 
-                  <Button
-                    title="Crear una cuenta"
-                    onPress={() => navigation.navigate('Register')}
-                    variant="outline"
-                    size="medium"
-                    style={styles.registerButton}
-                  />
-                </>
-              )}
+
+              {/* REGISTRO */}
+
+              <Button
+                title="Crear una cuenta"
+                onPress={() => navigation.navigate('Register')}
+                variant="outline"
+                size="medium"
+                style={styles.registerButton}
+              />
 
             </View>
 
@@ -407,47 +371,5 @@ const LoginScreen = ({ navigation }) => {
 
 };
 
-
-const loginToggleStyles = StyleSheet.create({
-  pill: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.background,
-    borderRadius: 30,
-    padding: 4,
-    marginHorizontal: 20,
-    marginTop: 16,
-    marginBottom: 4,
-    shadowColor: '#B8BAC8',
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 0.7,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  option: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    borderRadius: 26,
-  },
-  optionActive: {
-    backgroundColor: COLORS.primary,
-    shadowColor: '#3A6BE8',
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  optionText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-  },
-  optionTextActive: {
-    color: '#FFFFFF',
-  },
-});
 
 export default LoginScreen;

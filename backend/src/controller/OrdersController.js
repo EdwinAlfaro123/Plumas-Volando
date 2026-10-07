@@ -56,18 +56,30 @@ const createBillIfDelivered = async (order) => {
   });
 };
 
-// Obtener todas las órdenes
+// Obtener todas las órdenes (paginado)
 orderController.getOrders = async (req, res) => {
   try {
-    const orders = await ordersModel
-      .find()
-      .populate(
-        "products.productId",
-        "name nombre productName unitPrice UnitPrice price Price precio Precio"
-      )
-      .populate("customerId", "name lastName lastname nombre apellido email")
-      .sort({ createdAt: -1 });
-    return res.status(200).json(orders);
+    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(50, parseInt(req.query.limit) || 15);
+    const skip  = (page - 1) * limit;
+
+    const [total, orders] = await Promise.all([
+      ordersModel.countDocuments(),
+      ordersModel
+        .find()
+        .populate("products.productId", "name nombre productName unitPrice UnitPrice price Price precio Precio imageUrl image")
+        .populate("customerId", "name lastName lastname nombre apellido email")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+    ]);
+
+    return res.status(200).json({
+      orders,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
     console.log("error " + error);
     return res.status(500).json({ message: "Internal server error" });
@@ -404,17 +416,23 @@ orderController.updateOrder = async (req, res) => {
   }
 };
 
-// Cambiar solo el estado de una orden (empleado)
+// Cambiar solo el estado de una orden (empleado) + comentario opcional
 orderController.patchOrderState = async (req, res) => {
   try {
-    const { state } = req.body;
+    const { state, employeeComment } = req.body;
     const valid = ['Pendiente', 'Entregado', 'Cancelado'];
     if (!valid.includes(state)) {
       return res.status(400).json({ message: 'Estado inválido. Usa: Pendiente, Entregado o Cancelado' });
     }
+    const updateData = { state };
+    if (employeeComment !== undefined) {
+      updateData.employeeComment = typeof employeeComment === 'string'
+        ? employeeComment.trim()
+        : '';
+    }
     const updated = await ordersModel.findByIdAndUpdate(
       req.params.id,
-      { state },
+      updateData,
       { new: true }
     );
     if (!updated) return res.status(404).json({ message: 'Orden no encontrada' });

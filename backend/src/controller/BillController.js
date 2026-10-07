@@ -13,13 +13,19 @@ billController.getBills = async (req, res) => {
   }
 };
 
-// [NUEVO] SELECT - Facturas por cliente
+// SELECT - Facturas por cliente (con datos del pedido y productos)
 billController.getBillsByCustomer = async (req, res) => {
   try {
     const { customerId } = req.params;
     const bills = await billsModel
       .find({ customerId })
-      .populate("OrderId")
+      .populate({
+        path: "OrderId",
+        populate: {
+          path: "products.productId",
+          select: "name nombre productName unitPrice price imageUrl image",
+        },
+      })
       .sort({ createdAt: -1 });
     return res.status(200).json(bills);
   } catch (error) {

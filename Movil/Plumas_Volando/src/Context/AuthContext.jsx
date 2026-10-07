@@ -24,10 +24,14 @@ export const AuthProvider = ({ children }) => {
 
       if (token && userData) {
         api.defaults.headers.Authorization = `Bearer ${token}`;
-        setUser(JSON.parse(userData));
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
         setUserType(type);
         setIsAuthenticated(true);
-        if (photo) setProfilePhotoUri(photo);
+        // Preferir foto guardada en DB; si no, usar la del AsyncStorage local
+        const dbPhoto = parsedUser?.profilePhoto;
+        if (dbPhoto) setProfilePhotoUri(dbPhoto);
+        else if (photo) setProfilePhotoUri(photo);
       }
     } catch (error) {
       console.log('Error checking auth status:', error);
@@ -36,30 +40,33 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ── Login cliente ──
+  // ── Login unificado: prueba cliente primero, luego empleado ──
   const login = async (email, password) => {
-    const response = await api.post('/loginCustomer', { email, password });
-    if (response.data.success) {
-      const { token, customer } = response.data;
-      await AsyncStorage.multiSet([
-        ['authToken', token],
-        ['userData', JSON.stringify(customer)],
-        ['userType', 'customer'],
-      ]);
-      api.defaults.headers.Authorization = `Bearer ${token}`;
-      setUser(customer);
-      setUserType('customer');
-      setIsAuthenticated(true);
-      return { success: true };
+    // Intento 1: cliente
+    try {
+      const res = await api.post('/loginCustomer', { email, password });
+      if (res.data.success) {
+        const { token, customer } = res.data;
+        await AsyncStorage.multiSet([
+          ['authToken', token],
+          ['userData', JSON.stringify(customer)],
+          ['userType', 'customer'],
+        ]);
+        api.defaults.headers.Authorization = `Bearer ${token}`;
+        setUser(customer);
+        setUserType('customer');
+        setIsAuthenticated(true);
+        if (customer.profilePhoto) setProfilePhotoUri(customer.profilePhoto);
+        return { success: true };
+      }
+    } catch {
+      // no era cliente, intentar como empleado
     }
-    throw new Error(response.data.message || 'Error al iniciar sesión');
-  };
 
-  // ── Login empleado ──
-  const loginEmployee = async (email, password) => {
-    const response = await api.post('/loginEmployee', { email, password });
-    if (response.data.success) {
-      const { token, employee } = response.data;
+    // Intento 2: empleado
+    const res = await api.post('/loginEmployee', { email, password });
+    if (res.data.success) {
+      const { token, employee } = res.data;
       await AsyncStorage.multiSet([
         ['authToken', token],
         ['userData', JSON.stringify(employee)],
@@ -69,10 +76,14 @@ export const AuthProvider = ({ children }) => {
       setUser(employee);
       setUserType('employee');
       setIsAuthenticated(true);
+      if (employee.profilePhoto) setProfilePhotoUri(employee.profilePhoto);
       return { success: true };
     }
-    throw new Error(response.data.message || 'Error al iniciar sesión');
+    throw new Error(res.data.message || 'Correo o contraseña incorrectos.');
   };
+
+  // ── loginEmployee se mantiene por compatibilidad interna ──
+  const loginEmployee = async (email, password) => login(email, password);
 
   // ── Logout ──
   const logout = async () => {

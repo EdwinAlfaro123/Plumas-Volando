@@ -9,34 +9,36 @@ const shortInvoiceId = (invoice) => {
   return '#' + String(raw).slice(-4).toUpperCase();
 };
 
-const InvoiceCard = ({ invoice, onPress }) => (
-  <TouchableOpacity
-    activeOpacity={0.8}
-    style={styles.card}
-    onPress={onPress}
-  >
-    {/* ICONO */}
-    <View style={styles.iconContainer}>
-      <Ionicons name="document-text-outline" size={22} color={COLORS.primary} />
-    </View>
-
-    {/* INFO */}
-    <View style={styles.info}>
-      <Text style={styles.invoiceId}>Factura {shortInvoiceId(invoice)}</Text>
-      <Text style={styles.date}>
-        {formatDate(invoice.date || invoice.createdAt)}
-      </Text>
-    </View>
-
-    {/* TOTAL + FLECHA */}
-    <View style={styles.right}>
-      <Text style={styles.total}>{formatCurrency(invoice.total ?? invoice.totalAmount ?? 0)}</Text>
-      <View style={styles.arrowWrap}>
-        <Ionicons name="chevron-forward" size={14} color={COLORS.textSecondary} />
+const InvoiceCard = ({ invoice, onPress }) => {
+  // El total y el estado vienen del pedido enlazado (invoice.OrderId)
+  const order = invoice?.OrderId;
+  const total = order?.totalPrice ?? order?.total ?? invoice?.total ?? 0;
+  return (
+    <TouchableOpacity activeOpacity={0.8} style={styles.card} onPress={onPress}>
+      {/* ICONO */}
+      <View style={styles.iconContainer}>
+        <Ionicons name="document-text-outline" size={22} color={COLORS.primary} />
       </View>
-    </View>
-  </TouchableOpacity>
-);
+
+      {/* INFO */}
+      <View style={styles.info}>
+        <Text style={styles.invoiceId}>Factura {shortInvoiceId(invoice)}</Text>
+        <Text style={styles.date}>{formatDate(invoice.date || invoice.createdAt)}</Text>
+        {order?.state && (
+          <Text style={[styles.date, { color: '#22c55e', fontWeight: '600' }]}>{order.state}</Text>
+        )}
+      </View>
+
+      {/* TOTAL + FLECHA */}
+      <View style={styles.right}>
+        <Text style={styles.total}>{formatCurrency(total)}</Text>
+        <View style={styles.arrowWrap}>
+          <Ionicons name="chevron-forward" size={14} color={COLORS.textSecondary} />
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   card: {

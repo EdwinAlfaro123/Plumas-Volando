@@ -92,6 +92,26 @@ employeeController.updateEmployees = async (req, res) => {
     }
 };
 
+// ACTUALIZAR FOTO DE PERFIL
+employeeController.patchEmployeePhoto = async (req, res) => {
+  try {
+    const { profilePhoto } = req.body;
+    if (!profilePhoto) {
+      return res.status(400).json({ message: "profilePhoto is required" });
+    }
+    const updated = await employeeModel.findByIdAndUpdate(
+      req.params.id,
+      { profilePhoto },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ message: "Employee not found" });
+    return res.status(200).json({ message: "Photo updated", profilePhoto: updated.profilePhoto });
+  } catch (error) {
+    console.log("error " + error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 //ELIMINAR
 employeeController.deleteEmployee = async (req, res) => {
     try {

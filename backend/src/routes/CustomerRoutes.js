@@ -13,4 +13,6 @@ router
   .put(validateAuthCookie(["employee", "customer"]), customerController.updateCustomers)
   .delete(validateAuthCookie(["employee"]), customerController.deleteCustomer);
 
+router.patch("/:id/photo", validateAuthCookie(["customer", "employee"]), customerController.patchCustomerPhoto);
+
 export default router;

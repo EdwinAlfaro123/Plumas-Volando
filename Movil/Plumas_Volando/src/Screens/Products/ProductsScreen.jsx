@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, NEUROMORPHIC } from '../../Constants/theme';
+import { useTheme } from '../../Context/ThemeContext';
 import ProductCard from '../../Components/Data/ProductCard';
 import DataState from '../../Components/Data/DataSate';
 import FloatingCartButton from '../../Components/Navigation/FloatingCartButton';
@@ -14,12 +15,13 @@ import { productService } from '../../Services/productService';
 import { useCart } from '../../Context/CartContext';
 
 const ProductsScreen = ({ navigation }) => {
+    const { colors, isDark, darkNeuro } = useTheme();
+    const neuro = isDark ? darkNeuro : NEUROMORPHIC;
     const { addToCart } = useCart();
     
     // Estados de Datos
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -29,11 +31,9 @@ const ProductsScreen = ({ navigation }) => {
     const [filters, setFilters] = useState({ category: '', minPrice: '', maxPrice: '', sort: '' });
     const [showFilterModal, setShowFilterModal] = useState(false);
 
-    // Cargar Productos
-    const loadProducts = async (pageNumber = 1, resetList = false) => {
-        if (pageNumber === 1) setLoading(true);
-        else setLoadingMore(true);
-        
+    // Cargar Productos — muestra exactamente 10 por página
+    const loadProducts = async (pageNumber = 1) => {
+        setLoading(true);
         setError('');
         const response = await productService.getProducts({
             page: pageNumber,
@@ -43,21 +43,20 @@ const ProductsScreen = ({ navigation }) => {
         });
 
         if (response.success) {
-            setProducts((current) => resetList || pageNumber === 1 ? response.products : [...current, ...response.products]);
-            setPage(response.currentPage);
-            setTotalPages(response.totalPages);
-        } else if (pageNumber === 1) {
+            setProducts(response.products);
+            setPage(response.currentPage ?? pageNumber);
+            setTotalPages(response.totalPages ?? 1);
+        } else {
             setError(response.message);
         }
-        
+
         setLoading(false);
-        setLoadingMore(false);
     };
 
     // Efecto para Búsqueda en Tiempo Real (Debounce) y Filtros
     useEffect(() => {
         const timer = setTimeout(() => {
-            loadProducts(1, true);
+            loadProducts(1);
         }, 500);
 
         return () => clearTimeout(timer);
@@ -66,7 +65,7 @@ const ProductsScreen = ({ navigation }) => {
     // Recargar stock cada vez que la pantalla recibe el foco
     useFocusEffect(
         useCallback(() => {
-            loadProducts(1, true);
+            loadProducts(1);
         }, [search, filters])
     );
 
@@ -83,15 +82,15 @@ const ProductsScreen = ({ navigation }) => {
     const activeFiltersCount = Object.values(filters).filter(v => v !== '' && v !== null).length;
 
     return (
-        <SafeAreaView edges={['top']} style={styles.container}>
-            <StatusBar style="dark" />
+        <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: colors.background }]}>
+            <StatusBar style={isDark ? 'light' : 'dark'} />
             
             {/* HEADER */}
             <View style={styles.header}>
                 <View style={styles.headerTop}>
                     <View style={styles.headerCopy}>
-                        <Text numberOfLines={1} style={styles.title}>Productos frescos</Text>
-                        <Text numberOfLines={1} style={styles.subtitle}>Elige lo que necesitas para tu hogar.</Text>
+                        <Text numberOfLines={1} style={[styles.title, { color: colors.textPrimary }]}>Productos frescos</Text>
+                        <Text numberOfLines={1} style={[styles.subtitle, { color: colors.textSecondary }]}>Elige lo que necesitas para tu hogar.</Text>
                     </View>
                     <FloatingCartButton navigation={navigation} />
                 </View>
@@ -104,13 +103,13 @@ const ProductsScreen = ({ navigation }) => {
                 />
 
                 {/* FILTER BUTTON */}
-                <TouchableOpacity 
-                    style={styles.filterButton} 
+                <TouchableOpacity
+                    style={[styles.filterButton, { backgroundColor: colors.background }, neuro.flat]}
                     onPress={() => setShowFilterModal(true)}
                     activeOpacity={0.8}
                 >
-                    <Ionicons name="options-outline" size={18} color={COLORS.primary} />
-                    <Text style={styles.filterButtonText}>Filtros</Text>
+                    <Ionicons name="options-outline" size={18} color={colors.primary} />
+                    <Text style={[styles.filterButtonText, { color: colors.primary }]}>Filtros</Text>
                     {activeFiltersCount > 0 && (
                         <View style={styles.badge}>
                             <Text style={styles.badgeText}>{activeFiltersCount}</Text>
@@ -120,35 +119,60 @@ const ProductsScreen = ({ navigation }) => {
             </View>
 
             {/* LISTA DE PRODUCTOS */}
-            <FlatList
-                data={products}
-                keyExtractor={(item, index) => item._id || item.id || String(index)}
-                numColumns={2}
-                columnWrapperStyle={products.length > 1 ? styles.columnWrapper : undefined}
-                contentContainerStyle={styles.content}
-                showsVerticalScrollIndicator={false}
-                onEndReached={() => !loadingMore && page < totalPages && loadProducts(page + 1)}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={loadingMore ? <View style={styles.footer}><ActivityIndicator color={COLORS.primary} /></View> : null}
-                ListEmptyComponent={
-                    !loading ? (
-                        <DataState 
-                            emptyText="No se encontraron productos con estos criterios" 
-                            error={error} 
-                            loading={loading} 
-                            onRetry={() => loadProducts(1, true)} 
+            {loading ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={COLORS.primary} />
+                </View>
+            ) : (
+                <FlatList
+                    data={products}
+                    keyExtractor={(item, index) => item._id || item.id || String(index)}
+                    numColumns={2}
+                    columnWrapperStyle={products.length > 1 ? styles.columnWrapper : undefined}
+                    contentContainerStyle={styles.content}
+                    showsVerticalScrollIndicator={false}
+                    ListEmptyComponent={
+                        <DataState
+                            emptyText="No se encontraron productos con estos criterios"
+                            error={error}
+                            loading={false}
+                            onRetry={() => loadProducts(1)}
                         />
-                    ) : null
-                }
-                renderItem={({ item }) => (
-                    <ProductCard 
-                        product={item} 
-                        onAddToCart={handleAddToCart} 
-                        // [MODIFICADO] Navegar a la pantalla de detalle pasando el producto
-                        onPress={() => navigation.navigate('ProductDetail', { product: item })} 
-                    />
-                )}
-            />
+                    }
+                    ListFooterComponent={
+                        totalPages > 1 ? (
+                            <View style={styles.pagination}>
+                                <TouchableOpacity
+                                    style={[styles.pageBtn, { backgroundColor: colors.background }, neuro.combinedShadow, page <= 1 && styles.pageBtnDisabled]}
+                                    onPress={() => page > 1 && loadProducts(page - 1)}
+                                    activeOpacity={0.8}
+                                    disabled={page <= 1}
+                                >
+                                    <Ionicons name="chevron-back" size={18} color={page <= 1 ? colors.textMuted : colors.primary} />
+                                </TouchableOpacity>
+                                <View style={[styles.pageIndicator, { backgroundColor: colors.background }, neuro.inset]}>
+                                    <Text style={[styles.pageText, { color: colors.textPrimary }]}>{page} / {totalPages}</Text>
+                                </View>
+                                <TouchableOpacity
+                                    style={[styles.pageBtn, { backgroundColor: colors.background }, neuro.combinedShadow, page >= totalPages && styles.pageBtnDisabled]}
+                                    onPress={() => page < totalPages && loadProducts(page + 1)}
+                                    activeOpacity={0.8}
+                                    disabled={page >= totalPages}
+                                >
+                                    <Ionicons name="chevron-forward" size={18} color={page >= totalPages ? colors.textMuted : colors.primary} />
+                                </TouchableOpacity>
+                            </View>
+                        ) : null
+                    }
+                    renderItem={({ item }) => (
+                        <ProductCard
+                            product={item}
+                            onAddToCart={handleAddToCart}
+                            onPress={() => navigation.navigate('ProductDetail', { product: item })}
+                        />
+                    )}
+                />
+            )}
 
             {/* MODAL DE FILTROS */}
             <FilterBottomSheet
@@ -182,9 +206,27 @@ const styles = StyleSheet.create({
     },
     badgeText: { color: COLORS.textLight, fontSize: 10, fontWeight: '800' },
 
-    content: { paddingBottom: 96, paddingHorizontal: 20, paddingTop: 4 },
+    content: { paddingBottom: 20, paddingHorizontal: 20, paddingTop: 4 },
     columnWrapper: { justifyContent: 'space-between' },
-    footer: { alignItems: 'center', paddingVertical: 22 },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+
+    // PAGINACIÓN
+    pagination: {
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+        gap: 12, paddingVertical: 20, paddingBottom: 96,
+    },
+    pageBtn: {
+        width: 40, height: 40, borderRadius: 20,
+        backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center',
+        ...NEUROMORPHIC.combinedShadow,
+    },
+    pageBtnDisabled: { opacity: 0.4 },
+    pageIndicator: {
+        backgroundColor: COLORS.background, borderRadius: 20,
+        paddingHorizontal: 20, paddingVertical: 10,
+        ...NEUROMORPHIC.inset,
+    },
+    pageText: { fontSize: 14, fontWeight: '700', color: COLORS.textPrimary },
 });
 
 export default ProductsScreen;
