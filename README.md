@@ -550,12 +550,6 @@ CLOUDINARY_API_SECRET=tu_api_secret
 
 ---
 
-## Licencia
+### Link de descarga APK
 
-<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
-  <img alt="Licencia Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
-</a>
-
-Este proyecto está licenciado bajo la [Licencia Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional](http://creativecommons.org/licenses/by-nc-sa/4.0/).
-
-Puedes compartir y adaptar el material siempre que des crédito al equipo original, no lo uses con fines comerciales y distribuyas las obras derivadas bajo la misma licencia.
+https://expo.dev/accounts/diegorod_14/projects/Plumas_Volando/builds/b21caf04-6735-4811-bfc4-ec45b3cbf25f
