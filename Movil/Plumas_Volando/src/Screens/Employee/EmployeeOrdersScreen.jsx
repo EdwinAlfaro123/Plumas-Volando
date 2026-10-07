@@ -115,13 +115,10 @@ const EmployeeOrdersScreen = () => {
   const neuro = isDark ? darkNeuro : NEUROMORPHIC;
   const { showToast } = useToast();
 
-  const [orders, setOrders]           = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [page, setPage]               = useState(1);
-  const [totalPages, setTotalPages]   = useState(1);
-  const [total, setTotal]             = useState(0);
-  const [filter, setFilter]           = useState('Todos');
+  const [allOrders, setAllOrders]   = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [filter, setFilter]         = useState('Todos');
+  const [page, setPage]             = useState(1);
 
   const [selected, setSelected]   = useState(null);
   const [updating, setUpdating]   = useState(false);
@@ -129,32 +126,32 @@ const EmployeeOrdersScreen = () => {
   const [showVerify, setShowVerify] = useState(false);
   const [verifyCode, setVerifyCode] = useState('');
 
-  const loadPage = useCallback(async (pageNum = 1, reset = false) => {
-    if (pageNum === 1) setLoading(true); else setLoadingMore(true);
+  const loadOrders = useCallback(async () => {
+    setLoading(true);
     try {
-      const res  = await api.get(`/orders?page=${pageNum}&limit=${PAGE_SIZE}`);
-      const data = res.data?.orders ?? (Array.isArray(res.data) ? res.data : []);
-      setOrders(prev => {
-        const combined = reset || pageNum === 1 ? data : [...prev, ...data];
-        const seen = new Set();
-        return combined.filter(o => { if (seen.has(o._id)) return false; seen.add(o._id); return true; });
-      });
-      setPage(res.data?.page ?? pageNum);
-      setTotalPages(res.data?.totalPages ?? 1);
-      setTotal(res.data?.total ?? data.length);
+      // Carga hasta 3 páginas del backend (150 pedidos) para paginación local
+      const first = await api.get(`/orders?page=1&limit=50`);
+      const firstData  = first.data?.orders ?? [];
+      const backTotal  = first.data?.totalPages ?? 1;
+      let combined = [...firstData];
+      if (backTotal >= 2) {
+        const second = await api.get(`/orders?page=2&limit=50`);
+        combined = [...combined, ...(second.data?.orders ?? [])];
+      }
+      if (backTotal >= 3) {
+        const third = await api.get(`/orders?page=3&limit=50`);
+        combined = [...combined, ...(third.data?.orders ?? [])];
+      }
+      const seen = new Set();
+      setAllOrders(combined.filter(o => { if (seen.has(o._id)) return false; seen.add(o._id); return true; }));
     } catch {
       showToast('No se pudieron cargar los pedidos.', 'error');
     } finally {
       setLoading(false);
-      setLoadingMore(false);
     }
   }, []);
 
-  useFocusEffect(useCallback(() => { loadPage(1, true); }, []));
-
-  const loadMore = () => {
-    if (!loadingMore && page < totalPages) loadPage(page + 1);
-  };
+  useFocusEffect(useCallback(() => { loadOrders(); setPage(1); }, []));
 
   const applyStateChange = async (newState) => {
     if (!selected) return;
@@ -165,7 +162,7 @@ const EmployeeOrdersScreen = () => {
       if (newState === 'Entregado') payload.verificationCode = verifyCode.trim().toUpperCase();
       await api.patch(`/orders/${selected._id}/state`, payload);
       const updatedOrder = { ...selected, state: newState, employeeComment: payload.employeeComment ?? selected.employeeComment };
-      setOrders(prev => prev.map(o => o._id === selected._id ? updatedOrder : o));
+      setAllOrders(prev => prev.map(o => o._id === selected._id ? updatedOrder : o));
       setSelected(updatedOrder);
       setShowVerify(false);
       setVerifyCode('');
@@ -181,8 +178,13 @@ const EmployeeOrdersScreen = () => {
   const closeModal = () => { setSelected(null); setComment(''); setShowVerify(false); setVerifyCode(''); };
 
   const FILTERS  = ['Todos', 'Pendiente', 'Entregado', 'Cancelado'];
-  const filtered = filter === 'Todos' ? orders : orders.filter(o => (o.state || 'Pendiente') === filter);
+  const filtered   = filter === 'Todos' ? allOrders : allOrders.filter(o => (o.state || 'Pendiente') === filter);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage   = Math.min(page, totalPages);
+  const pageData   = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
   const selectedState = selected ? getState(selected) : null;
+
+  const handleFilterChange = (f) => { setFilter(f); setPage(1); };
 
   const s = getStyles(colors, neuro);
 
@@ -195,10 +197,10 @@ const EmployeeOrdersScreen = () => {
         <View>
           <Text style={s.title}>Pedidos</Text>
           <Text style={s.subtitle}>
-            {loading ? 'Cargando…' : `${total} en total · página ${page}/${totalPages}`}
+            {loading ? 'Cargando…' : `${filtered.length} pedido${filtered.length !== 1 ? 's' : ''} · página ${safePage}/${totalPages}`}
           </Text>
         </View>
-        <TouchableOpacity style={s.refreshBtn} onPress={() => loadPage(1, true)} disabled={loading}>
+        <TouchableOpacity style={s.refreshBtn} onPress={() => { loadOrders(); setPage(1); }} disabled={loading}>
           {loading
             ? <ActivityIndicator size="small" color={colors.primary} />
             : <Ionicons name="refresh-outline" size={20} color={colors.primary} />
@@ -215,7 +217,7 @@ const EmployeeOrdersScreen = () => {
             <TouchableOpacity
               key={f}
               style={[s.filterChip, active && { backgroundColor: cfg?.color ?? colors.primary }]}
-              onPress={() => setFilter(f)}
+              onPress={() => handleFilterChange(f)}
             >
               {cfg && <Ionicons name={cfg.icon} size={12} color={active ? '#fff' : cfg.color} style={{ marginRight: 4 }} />}
               <Text style={[s.filterText, active && { color: '#fff' }]}>{f}</Text>
@@ -230,7 +232,7 @@ const EmployeeOrdersScreen = () => {
           <ActivityIndicator size="large" color={colors.primary} />
           <Text style={s.loadingText}>Cargando pedidos…</Text>
         </View>
-      ) : filtered.length === 0 ? (
+      ) : pageData.length === 0 ? (
         <View style={s.center}>
           <View style={s.emptyIcon}>
             <Ionicons name="receipt-outline" size={40} color={colors.primary} />
@@ -242,24 +244,34 @@ const EmployeeOrdersScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={filtered}
+          data={pageData}
           keyExtractor={o => o._id}
           renderItem={({ item }) => <OrderCard order={item} onPress={() => openModal(item)} colors={colors} neuro={neuro} />}
           contentContainerStyle={s.list}
           showsVerticalScrollIndicator={false}
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.3}
           ListFooterComponent={
-            loadingMore ? (
-              <View style={s.footerLoader}>
-                <ActivityIndicator size="small" color={colors.primary} />
-                <Text style={s.footerLoaderText}>Cargando más…</Text>
+            totalPages > 1 ? (
+              <View style={s.pagination}>
+                <TouchableOpacity
+                  style={[s.pageBtn, safePage === 1 && s.pageBtnDisabled]}
+                  onPress={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={safePage === 1}
+                >
+                  <Ionicons name="chevron-back" size={16} color={safePage === 1 ? colors.textMuted : colors.primary} />
+                  <Text style={[s.pageBtnText, safePage === 1 && { color: colors.textMuted }]}>Anterior</Text>
+                </TouchableOpacity>
+                <View style={[s.pageIndicator, neuro.inset]}>
+                  <Text style={[s.pageIndicatorText, { color: colors.textPrimary }]}>{safePage} / {totalPages}</Text>
+                </View>
+                <TouchableOpacity
+                  style={[s.pageBtn, safePage === totalPages && s.pageBtnDisabled]}
+                  onPress={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={safePage === totalPages}
+                >
+                  <Text style={[s.pageBtnText, safePage === totalPages && { color: colors.textMuted }]}>Siguiente</Text>
+                  <Ionicons name="chevron-forward" size={16} color={safePage === totalPages ? colors.textMuted : colors.primary} />
+                </TouchableOpacity>
               </View>
-            ) : page < totalPages ? (
-              <TouchableOpacity style={s.loadMoreBtn} onPress={loadMore}>
-                <Ionicons name="chevron-down" size={16} color={colors.primary} />
-                <Text style={s.loadMoreText}>Ver más pedidos</Text>
-              </TouchableOpacity>
             ) : null
           }
         />
@@ -473,10 +485,12 @@ const getStyles = (colors, neuro) => StyleSheet.create({
   emptyIcon:        { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', ...neuro.combinedShadow },
   emptyTitle:       { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
   emptyText:        { fontSize: 13, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
-  footerLoader:     { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, paddingVertical: 16 },
-  footerLoaderText: { fontSize: 13, color: colors.textSecondary },
-  loadMoreBtn:      { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6, paddingVertical: 14, marginHorizontal: 40, marginTop: 4, borderRadius: 20, backgroundColor: colors.background, ...neuro.combinedShadow },
-  loadMoreText:     { fontSize: 13, fontWeight: '600', color: colors.primary },
+  pagination:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4, paddingVertical: 8, gap: 8 },
+  pageBtn:           { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.background, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, ...neuro.combinedShadow },
+  pageBtnDisabled:   { opacity: 0.4 },
+  pageBtnText:       { fontSize: 13, fontWeight: '600', color: colors.primary },
+  pageIndicator:     { flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 14, paddingVertical: 10 },
+  pageIndicatorText: { fontSize: 13, fontWeight: '700' },
 
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' },
   sheet:   { backgroundColor: colors.background, borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: SCREEN_HEIGHT * 0.93, ...neuro.topShadow },
