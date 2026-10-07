@@ -36,6 +36,12 @@ router.get(
   orderController.getCustomerOrders
 );
 
+router.patch(
+  "/:id/state",
+  validateAuthCookie(["employee"]),
+  orderController.patchOrderState
+);
+
 router
   .route("/:id")
   .put(validateAuthCookie(["employee", "customer"]), orderController.updateOrder)

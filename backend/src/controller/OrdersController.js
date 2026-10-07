@@ -404,6 +404,28 @@ orderController.updateOrder = async (req, res) => {
   }
 };
 
+// Cambiar solo el estado de una orden (empleado)
+orderController.patchOrderState = async (req, res) => {
+  try {
+    const { state } = req.body;
+    const valid = ['Pendiente', 'Entregado', 'Cancelado'];
+    if (!valid.includes(state)) {
+      return res.status(400).json({ message: 'Estado inválido. Usa: Pendiente, Entregado o Cancelado' });
+    }
+    const updated = await ordersModel.findByIdAndUpdate(
+      req.params.id,
+      { state },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ message: 'Orden no encontrada' });
+    await createBillIfDelivered(updated);
+    return res.status(200).json({ message: 'Estado actualizado', order: updated });
+  } catch (error) {
+    console.log('error ' + error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 // Eliminar orden
 orderController.deleteOrder = async (req, res) => {
   try {

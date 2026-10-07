@@ -8,30 +8,37 @@ import RecoveryCodeScreen from '../Screens/Auth/RecoveryCodeScreen';
 import NewPasswordScreen from '../Screens/Auth/NewPasswordScreen';
 import AppLoadingScreen from '../Screens/AppLoadingScreen';
 import TabNavigator from './TabNavigator';
+import EmployeeTabNavigator from './EmployeeTabNavigator';
 import InvoiceDetailScreen from '../Screens/Invoices/InvoiceDetailScreen';
-// [NUEVO] Importar pantalla de detalle
 import ProductDetailScreen from '../Screens/Products/ProductDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
-    const { isAuthenticated, loading } = useContext(AuthContext);
+    const { isAuthenticated, loading, userType } = useContext(AuthContext);
 
     if (loading) return <AppLoadingScreen />;
 
     return (
         <Stack.Navigator screenOptions={{ animation: 'fade', headerShown: false }}>
             {isAuthenticated ? (
-                <>
-                    <Stack.Screen component={TabNavigator} name="Main" />
-                    <Stack.Screen component={InvoiceDetailScreen} name="InvoiceDetail" />
-                    {/* [NUEVO] Ruta para el detalle del producto */}
-                    <Stack.Screen 
-                        component={ProductDetailScreen} 
-                        name="ProductDetail" 
-                        options={{ animation: 'slide_from_bottom' }} 
-                    />
-                </>
+                userType === 'employee' ? (
+                    // ── EMPLEADO ──────────────────────────────────────────
+                    <>
+                        <Stack.Screen component={EmployeeTabNavigator} name="EmployeeMain" />
+                    </>
+                ) : (
+                    // ── CLIENTE ───────────────────────────────────────────
+                    <>
+                        <Stack.Screen component={TabNavigator} name="Main" />
+                        <Stack.Screen component={InvoiceDetailScreen} name="InvoiceDetail" />
+                        <Stack.Screen
+                            component={ProductDetailScreen}
+                            name="ProductDetail"
+                            options={{ animation: 'slide_from_bottom' }}
+                        />
+                    </>
+                )
             ) : (
                 <>
                     <Stack.Screen component={LoginScreen} name="Login" />

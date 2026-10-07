@@ -5,25 +5,25 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './src/Context/AuthContext';
 import { CartProvider } from './src/Context/CartContext';
 import { ToastProvider } from './src/Context/ToastContext';
+import { ThemeProvider } from './src/Context/ThemeContext';
 import AppNavigator from './src/Navigation/AppNavigator';
-import { StatusBar } from 'expo-status-bar';
 import Toast from './src/Components/Common/Toast';
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      <ToastProvider>
-        <AuthProvider>
-          <CartProvider>
-            <NavigationContainer>
-              <StatusBar style="dark" />
-              <AppNavigator />
-            </NavigationContainer>
-          </CartProvider>
-        </AuthProvider>
-        {/* Toast fuera de NavigationContainer para que aparezca sobre todo */}
-        <Toast />
-      </ToastProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <CartProvider>
+              <NavigationContainer>
+                <AppNavigator />
+              </NavigationContainer>
+            </CartProvider>
+          </AuthProvider>
+          <Toast />
+        </ToastProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

@@ -4,6 +4,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  StyleSheet,
 } from 'react-native';
 
 import { StatusBar } from 'expo-status-bar';
@@ -23,7 +24,9 @@ import {
 } from '../../Styles';
 
 
-const RecoveryPasswordScreen = ({ navigation }) => {
+const RecoveryPasswordScreen = ({ navigation, route }) => {
+
+  const accountType = route?.params?.accountType || 'customer';
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
@@ -211,7 +214,27 @@ const RecoveryPasswordScreen = ({ navigation }) => {
           </View>
 
 
-          <View style={styles.form}>
+          {/* NOTA EMPLEADO */}
+
+          {accountType === 'employee' && (
+            <View style={employeeNoteStyles.banner}>
+              <View style={employeeNoteStyles.iconWrap}>
+                <Ionicons name="briefcase-outline" size={20} color={COLORS.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={employeeNoteStyles.title}>Cuenta de empleado</Text>
+                <Text style={employeeNoteStyles.body}>
+                  Los empleados no pueden restablecer su contraseña de forma autónoma. Contacta al administrador del sistema para recuperar el acceso.
+                </Text>
+              </View>
+            </View>
+          )}
+
+
+          <View
+            style={[styles.form, accountType === 'employee' && { opacity: 0.4 }]}
+            pointerEvents={accountType === 'employee' ? 'none' : 'auto'}
+          >
 
             <FormInput
               label="Ingresa tu correo electrónico"
@@ -279,5 +302,33 @@ const RecoveryPasswordScreen = ({ navigation }) => {
 
 };
 
+
+const employeeNoteStyles = StyleSheet.create({
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    backgroundColor: '#EEF2FF',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.primary,
+  },
+  iconWrap: {
+    marginTop: 1,
+  },
+  title: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.primary,
+    marginBottom: 4,
+  },
+  body: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+  },
+});
 
 export default RecoveryPasswordScreen;

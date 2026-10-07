@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -61,6 +62,13 @@ const ProductsScreen = ({ navigation }) => {
 
         return () => clearTimeout(timer);
     }, [search, filters]);
+
+    // Recargar stock cada vez que la pantalla recibe el foco
+    useFocusEffect(
+        useCallback(() => {
+            loadProducts(1, true);
+        }, [search, filters])
+    );
 
     const handleAddToCart = (product) => {
         addToCart(product);
