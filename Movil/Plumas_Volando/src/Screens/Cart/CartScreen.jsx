@@ -141,6 +141,8 @@ const CartScreen = ({ navigation }) => {
       })),
       total,
       subtotal: total,
+      state: 'Pendiente',
+      status: 'Pendiente',
       paymentMethod: form.paymentMethod,
       customerData: {
         _id: user?._id,
