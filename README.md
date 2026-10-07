@@ -21,11 +21,12 @@ El proyecto nace de una propuesta de negocio real combinada con el desarrollo de
 
 ## Tecnologías
 
-| Área             | Tecnologías                                                                        |
-| ---------------- | ---------------------------------------------------------------------------------- |
-| Frontend Admin   | React, Vite, React Router DOM, Axios, Lucide React, CSS                            |
-| Frontend Público | React, Vite, React Router, EmailJS, Leaflet, React Leaflet, Lucide React, CSS      |
-| Backend          | Node.js, Express, MongoDB, Mongoose, JWT, Bcryptjs, Nodemailer, Cloudinary, Multer |
+| Área             | Tecnologías                                                                                                      |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Frontend Admin   | React, Vite, React Router DOM, Axios, Lucide React, CSS                                                          |
+| Frontend Público | React, Vite, React Router, EmailJS, Leaflet, React Leaflet, Lucide React, CSS                                    |
+| Backend          | Node.js, Express, MongoDB, Mongoose, JWT, Bcryptjs, Nodemailer, Cloudinary, Multer                               |
+| Móvil            | React Native, Expo SDK 57, React Navigation, Axios, AsyncStorage, Expo Image Picker, Expo Splash Screen          |
 
 ---
 
@@ -33,6 +34,108 @@ El proyecto nace de una propuesta de negocio real combinada con el desarrollo de
 
 ```bash
 Plumas-Volando/
+├── Movil/
+│   └── Plumas_Volando/
+│       ├── assets/
+│       │   ├── adaptive-icon.png
+│       │   ├── favicon.png
+│       │   ├── icon.png
+│       │   ├── logo-plumas.png
+│       │   └── splash-icon.png
+│       │
+│       ├── src/
+│       │   ├── Components/
+│       │   │   ├── Auth/
+│       │   │   │   ├── AppLogo.jsx
+│       │   │   │   ├── AuthLayout.jsx
+│       │   │   │   └── ScreenTitle.jsx
+│       │   │   │
+│       │   │   ├── Common/
+│       │   │   │   ├── AuthLinkButton.jsx
+│       │   │   │   ├── Button.jsx
+│       │   │   │   ├── CustomAlert.jsx
+│       │   │   │   ├── FilterBottomSheet.jsx
+│       │   │   │   ├── FormInput.jsx
+│       │   │   │   ├── Loader.jsx
+│       │   │   │   ├── PurchaseLoadingOverlay.jsx
+│       │   │   │   ├── SearchBar.jsx
+│       │   │   │   └── Toast.jsx
+│       │   │   │
+│       │   │   ├── Data/
+│       │   │   │   ├── DataSate.jsx
+│       │   │   │   ├── InvoiceCard.jsx
+│       │   │   │   ├── OrderCard.jsx
+│       │   │   │   └── ProductCard.jsx
+│       │   │   │
+│       │   │   └── Navigation/
+│       │   │       ├── FloatingCartButton.jsx
+│       │   │       └── FloatingTabBar.jsx
+│       │   │
+│       │   ├── Constants/
+│       │   │   └── theme.js
+│       │   │
+│       │   ├── Context/
+│       │   │   ├── AuthContext.jsx
+│       │   │   ├── CartContext.jsx
+│       │   │   ├── ThemeContext.jsx
+│       │   │   └── ToastContext.jsx
+│       │   │
+│       │   ├── Navigation/
+│       │   │   ├── AppNavigator.jsx
+│       │   │   ├── EmployeeTabNavigator.jsx
+│       │   │   └── TabNavigator.jsx
+│       │   │
+│       │   ├── Screens/
+│       │   │   ├── Auth/
+│       │   │   │   ├── LoginScreen.jsx
+│       │   │   │   ├── NewPasswordScreen.jsx
+│       │   │   │   ├── RecoveryCodeScreen.jsx
+│       │   │   │   ├── RecoveryPasswordScreen.jsx
+│       │   │   │   └── RegisterScreen.jsx
+│       │   │   │
+│       │   │   ├── Cart/
+│       │   │   │   └── CartScreen.jsx
+│       │   │   │
+│       │   │   ├── Employee/
+│       │   │   │   ├── EmployeeCustomersScreen.jsx
+│       │   │   │   ├── EmployeeOrdersScreen.jsx
+│       │   │   │   └── EmployeeSettingsScreen.jsx
+│       │   │   │
+│       │   │   ├── Home/
+│       │   │   │   └── HomeScreen.jsx
+│       │   │   │
+│       │   │   ├── Invoices/
+│       │   │   │   ├── InvoiceDetailScreen.jsx
+│       │   │   │   └── InvoicesScreen.jsx
+│       │   │   │
+│       │   │   ├── Orders/
+│       │   │   │   └── OrdersScreen.jsx
+│       │   │   │
+│       │   │   ├── Products/
+│       │   │   │   ├── ProductDetailScreen.jsx
+│       │   │   │   └── ProductsScreen.jsx
+│       │   │   │
+│       │   │   ├── Settings/
+│       │   │   │   └── SettingsScreen.jsx
+│       │   │   │
+│       │   │   └── AppLoadingScreen.jsx
+│       │   │
+│       │   ├── Services/
+│       │   │   ├── api.js
+│       │   │   ├── authService.js
+│       │   │   └── productService.js
+│       │   │
+│       │   ├── Styles/
+│       │   │   └── index.js
+│       │   │
+│       │   └── Utils/
+│       │       └── formatters.js
+│       │
+│       ├── App.js
+│       ├── app.json
+│       ├── index.js
+│       └── package.json
+│
 ├── backend/
 │   ├── src/
 │   │   ├── controller/
@@ -257,6 +360,42 @@ Plumas-Volando/
 
 ## Instalación
 
+### Aplicación móvil
+
+```bash
+cd Movil/Plumas_Volando
+npm install
+npx expo start
+```
+
+Para ejecutar directamente en un dispositivo o emulador:
+
+```bash
+npx expo start --android
+npx expo start --ios
+```
+
+Dependencias principales:
+
+```bash
+@expo/vector-icons
+@react-native-async-storage/async-storage
+@react-native-community/datetimepicker
+@react-navigation/bottom-tabs
+@react-navigation/native
+@react-navigation/native-stack
+axios
+expo
+expo-image-picker
+expo-linear-gradient
+expo-splash-screen
+expo-status-bar
+react-native
+react-native-gesture-handler
+react-native-safe-area-context
+react-native-screens
+```
+
 ### Backend
 
 ```bash
@@ -327,6 +466,12 @@ vite
 
 ## Variables de entorno
 
+Dentro de la carpeta `Movil/Plumas_Volando/` se debe crear un archivo `.env` con la siguiente estructura:
+
+```env
+EXPO_PUBLIC_API_URL=https://plumas-volandot.onrender.com/api
+```
+
 Dentro de la carpeta `backend/` se debe crear un archivo `.env` con la siguiente estructura:
 
 ```env
@@ -383,3 +528,34 @@ CLOUDINARY_API_SECRET=tu_api_secret
 * Carrito de compras.
 * Formulario de contacto.
 * Ubicación mediante mapa.
+
+### Aplicación móvil (cliente)
+
+* Registro e inicio de sesión con persistencia de sesión.
+* Edición de perfil y foto de perfil.
+* Recuperación de contraseña por correo y código de verificación.
+* Catálogo de productos con búsqueda, filtros y paginación.
+* Carrito de compras con control de stock en tiempo real.
+* Historial de pedidos con detalle de cada compra y factura.
+* Diseño neomórfico con soporte para modo oscuro.
+
+### Aplicación móvil (empleado)
+
+* Inicio de sesión con cuenta de empleado.
+* Gestión de pedidos: cambio de estado (Pendiente / Entregado / Cancelado).
+* Código de verificación requerido al marcar un pedido como entregado.
+* Comentario al cliente opcional al actualizar el estado.
+* Listado de clientes registrados con filtros y paginación.
+* Paginación de 5 elementos por página en pedidos y clientes.
+
+---
+
+## Licencia
+
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+  <img alt="Licencia Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
+</a>
+
+Este proyecto está licenciado bajo la [Licencia Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional](http://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+Puedes compartir y adaptar el material siempre que des crédito al equipo original, no lo uses con fines comerciales y distribuyas las obras derivadas bajo la misma licencia.
