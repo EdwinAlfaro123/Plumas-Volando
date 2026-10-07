@@ -9,7 +9,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, NEUROMORPHIC, TYPOGRAPHY } from '../../Constants/theme';
-import { useTheme } from '../../Context/ThemeContext';
 import { useToast } from '../../Context/ToastContext';
 import api from '../../Services/api';
 import { formatCurrency, formatDateTime } from '../../Utils/formatters';
@@ -28,13 +27,13 @@ const shortId  = (id) => id ? '#' + String(id).slice(-4).toUpperCase() : '#----'
 
 // ─── IMAGEN PRODUCTO ──────────────────────────────────────────────────────────
 
-const ProductImg = ({ uri, size = 48, colors }) => {
+const ProductImg = ({ uri, size = 48 }) => {
   const [err, setErr] = useState(false);
   const r = size / 2;
   if (!uri || err) {
     return (
-      <View style={{ width: size, height: size, borderRadius: r, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
-        <Ionicons name="egg-outline" size={size * 0.45} color={colors.primary} />
+      <View style={{ width: size, height: size, borderRadius: r, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center' }}>
+        <Ionicons name="egg-outline" size={size * 0.45} color={COLORS.primary} />
       </View>
     );
   }
@@ -50,14 +49,14 @@ const ProductImg = ({ uri, size = 48, colors }) => {
 
 // ─── CARD DE PEDIDO ───────────────────────────────────────────────────────────
 
-const OrderCard = ({ order, onPress, colors, neuro }) => {
+const OrderCard = ({ order, onPress }) => {
   const s     = getState(order);
   const name  = order.customerName || order.customerId?.name || 'Cliente';
   const items = order.products?.length ?? 0;
 
   return (
     <TouchableOpacity
-      style={[{ flexDirection: 'row', backgroundColor: colors.background, borderRadius: 18, marginBottom: 12, overflow: 'hidden' }, neuro.combinedShadow]}
+      style={[{ flexDirection: 'row', backgroundColor: COLORS.background, borderRadius: 18, marginBottom: 12, overflow: 'hidden' }, NEUROMORPHIC.combinedShadow]}
       onPress={onPress}
       activeOpacity={0.85}
     >
@@ -65,30 +64,30 @@ const OrderCard = ({ order, onPress, colors, neuro }) => {
       <View style={{ flex: 1, padding: 14 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            <Ionicons name="receipt-outline" size={13} color={colors.primary} />
-            <Text style={{ fontSize: 14, fontWeight: '800', color: colors.textPrimary }}>{shortId(order._id)}</Text>
+            <Ionicons name="receipt-outline" size={13} color={COLORS.primary} />
+            <Text style={{ fontSize: 14, fontWeight: '800', color: COLORS.textPrimary }}>{shortId(order._id)}</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, borderRadius: 12, paddingHorizontal: 8, paddingVertical: 4, backgroundColor: s.bg }}>
             <Ionicons name={s.icon} size={11} color={s.color} />
             <Text style={{ fontSize: 11, fontWeight: '700', color: s.color }}>{s.label}</Text>
           </View>
         </View>
-        <Text style={{ fontSize: 13, color: colors.primary, fontWeight: '600', marginBottom: 8 }} numberOfLines={1}>{name}</Text>
+        <Text style={{ fontSize: 13, color: COLORS.primary, fontWeight: '600', marginBottom: 8 }} numberOfLines={1}>{name}</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-            <Ionicons name="cube-outline" size={12} color={colors.textMuted} />
-            <Text style={{ fontSize: 11, color: colors.textMuted }}>{items} producto{items !== 1 ? 's' : ''}</Text>
+            <Ionicons name="cube-outline" size={12} color={COLORS.textMuted} />
+            <Text style={{ fontSize: 11, color: COLORS.textMuted }}>{items} producto{items !== 1 ? 's' : ''}</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-            <Ionicons name="calendar-outline" size={12} color={colors.textMuted} />
-            <Text style={{ fontSize: 11, color: colors.textMuted }}>{formatDateTime(order.createdAt || order.date)}</Text>
+            <Ionicons name="calendar-outline" size={12} color={COLORS.textMuted} />
+            <Text style={{ fontSize: 11, color: COLORS.textMuted }}>{formatDateTime(order.createdAt || order.date)}</Text>
           </View>
-          <Text style={{ marginLeft: 'auto', fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>{formatCurrency(order.totalPrice ?? order.total ?? 0)}</Text>
+          <Text style={{ marginLeft: 'auto', fontSize: 14, fontWeight: '700', color: COLORS.textPrimary }}>{formatCurrency(order.totalPrice ?? order.total ?? 0)}</Text>
         </View>
         {!!order.employeeComment && (
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
-            <Ionicons name="chatbubble-outline" size={12} color={colors.primary} />
-            <Text style={{ flex: 1, fontSize: 11, color: colors.primary, fontStyle: 'italic' }} numberOfLines={1}>{order.employeeComment}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#E8EAF0' }}>
+            <Ionicons name="chatbubble-outline" size={12} color={COLORS.primary} />
+            <Text style={{ flex: 1, fontSize: 11, color: COLORS.primary, fontStyle: 'italic' }} numberOfLines={1}>{order.employeeComment}</Text>
           </View>
         )}
       </View>
@@ -98,21 +97,19 @@ const OrderCard = ({ order, onPress, colors, neuro }) => {
 
 // ─── FILA INFO ────────────────────────────────────────────────────────────────
 
-const InfoRow = ({ icon, label, value, colors, neuro }) => (
+const InfoRow = ({ icon, label, value }) => (
   <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 10, gap: 10 }}>
-    <View style={[{ width: 30, height: 30, borderRadius: 15, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }, neuro.inset]}>
-      <Ionicons name={icon} size={14} color={colors.primary} />
+    <View style={[{ width: 30, height: 30, borderRadius: 15, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center' }, NEUROMORPHIC.inset]}>
+      <Ionicons name={icon} size={14} color={COLORS.primary} />
     </View>
-    <Text style={{ fontSize: 12, color: colors.textSecondary, fontWeight: '600', width: 64 }}>{label}</Text>
-    <Text style={{ flex: 1, fontSize: 13, color: colors.textPrimary }} numberOfLines={2}>{value || '—'}</Text>
+    <Text style={{ fontSize: 12, color: COLORS.textSecondary, fontWeight: '600', width: 64 }}>{label}</Text>
+    <Text style={{ flex: 1, fontSize: 13, color: COLORS.textPrimary }} numberOfLines={2}>{value || '—'}</Text>
   </View>
 );
 
 // ─── PANTALLA PRINCIPAL ───────────────────────────────────────────────────────
 
 const EmployeeOrdersScreen = () => {
-  const { colors, isDark, darkNeuro } = useTheme();
-  const neuro = isDark ? darkNeuro : NEUROMORPHIC;
   const { showToast } = useToast();
 
   const [allOrders, setAllOrders]   = useState([]);
@@ -186,11 +183,11 @@ const EmployeeOrdersScreen = () => {
 
   const handleFilterChange = (f) => { setFilter(f); setPage(1); };
 
-  const s = getStyles(colors, neuro);
+  const s = getStyles();
 
   return (
     <SafeAreaView style={s.screen} edges={['top']}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar style="dark" />
 
       {/* ENCABEZADO */}
       <View style={s.header}>
@@ -202,8 +199,8 @@ const EmployeeOrdersScreen = () => {
         </View>
         <TouchableOpacity style={s.refreshBtn} onPress={() => { loadOrders(); setPage(1); }} disabled={loading}>
           {loading
-            ? <ActivityIndicator size="small" color={colors.primary} />
-            : <Ionicons name="refresh-outline" size={20} color={colors.primary} />
+            ? <ActivityIndicator size="small" color={COLORS.primary} />
+            : <Ionicons name="refresh-outline" size={20} color={COLORS.primary} />
           }
         </TouchableOpacity>
       </View>
@@ -216,7 +213,7 @@ const EmployeeOrdersScreen = () => {
           return (
             <TouchableOpacity
               key={f}
-              style={[s.filterChip, active && { backgroundColor: cfg?.color ?? colors.primary }]}
+              style={[s.filterChip, active && { backgroundColor: cfg?.color ?? COLORS.primary }]}
               onPress={() => handleFilterChange(f)}
             >
               {cfg && <Ionicons name={cfg.icon} size={12} color={active ? '#fff' : cfg.color} style={{ marginRight: 4 }} />}
@@ -229,13 +226,13 @@ const EmployeeOrdersScreen = () => {
       {/* LISTA */}
       {loading ? (
         <View style={s.center}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={s.loadingText}>Cargando pedidos…</Text>
         </View>
       ) : pageData.length === 0 ? (
         <View style={s.center}>
           <View style={s.emptyIcon}>
-            <Ionicons name="receipt-outline" size={40} color={colors.primary} />
+            <Ionicons name="receipt-outline" size={40} color={COLORS.primary} />
           </View>
           <Text style={s.emptyTitle}>Sin pedidos</Text>
           <Text style={s.emptyText}>
@@ -246,7 +243,7 @@ const EmployeeOrdersScreen = () => {
         <FlatList
           data={pageData}
           keyExtractor={o => o._id}
-          renderItem={({ item }) => <OrderCard order={item} onPress={() => openModal(item)} colors={colors} neuro={neuro} />}
+          renderItem={({ item }) => <OrderCard order={item} onPress={() => openModal(item)} />}
           contentContainerStyle={s.list}
           showsVerticalScrollIndicator={false}
           ListFooterComponent={
@@ -257,19 +254,19 @@ const EmployeeOrdersScreen = () => {
                   onPress={() => setPage(p => Math.max(1, p - 1))}
                   disabled={safePage === 1}
                 >
-                  <Ionicons name="chevron-back" size={16} color={safePage === 1 ? colors.textMuted : colors.primary} />
-                  <Text style={[s.pageBtnText, safePage === 1 && { color: colors.textMuted }]}>Anterior</Text>
+                  <Ionicons name="chevron-back" size={16} color={safePage === 1 ? COLORS.textMuted : COLORS.primary} />
+                  <Text style={[s.pageBtnText, safePage === 1 && { color: COLORS.textMuted }]}>Anterior</Text>
                 </TouchableOpacity>
-                <View style={[s.pageIndicator, neuro.inset]}>
-                  <Text style={[s.pageIndicatorText, { color: colors.textPrimary }]}>{safePage} / {totalPages}</Text>
+                <View style={[s.pageIndicator, NEUROMORPHIC.inset]}>
+                  <Text style={[s.pageIndicatorText, { color: COLORS.textPrimary }]}>{safePage} / {totalPages}</Text>
                 </View>
                 <TouchableOpacity
                   style={[s.pageBtn, safePage === totalPages && s.pageBtnDisabled]}
                   onPress={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={safePage === totalPages}
                 >
-                  <Text style={[s.pageBtnText, safePage === totalPages && { color: colors.textMuted }]}>Siguiente</Text>
-                  <Ionicons name="chevron-forward" size={16} color={safePage === totalPages ? colors.textMuted : colors.primary} />
+                  <Text style={[s.pageBtnText, safePage === totalPages && { color: COLORS.textMuted }]}>Siguiente</Text>
+                  <Ionicons name="chevron-forward" size={16} color={safePage === totalPages ? COLORS.textMuted : COLORS.primary} />
                 </TouchableOpacity>
               </View>
             ) : null
@@ -285,7 +282,7 @@ const EmployeeOrdersScreen = () => {
 
             <View style={s.sheetHeader}>
               <TouchableOpacity style={s.closeBtn} onPress={closeModal}>
-                <Ionicons name="close" size={18} color={colors.textSecondary} />
+                <Ionicons name="close" size={18} color={COLORS.textSecondary} />
               </TouchableOpacity>
               <Text style={s.sheetTitle}>Detalle del Pedido</Text>
               <View style={{ width: 36 }} />
@@ -308,22 +305,22 @@ const EmployeeOrdersScreen = () => {
 
                 {/* DATOS DEL CLIENTE */}
                 <View style={s.infoCard}>
-                  <View style={[s.infoCardTitle, { borderBottomColor: colors.border }]}>
-                    <Ionicons name="person-circle-outline" size={15} color={colors.primary} />
+                  <View style={[s.infoCardTitle, { borderBottomColor: '#E8EAF0' }]}>
+                    <Ionicons name="person-circle-outline" size={15} color={COLORS.primary} />
                     <Text style={s.infoCardTitleText}>Cliente</Text>
                   </View>
-                  <InfoRow icon="person-outline"   label="Nombre"    value={selected.customerName || selected.customerId?.name || 'No disponible'} colors={colors} neuro={neuro} />
-                  <InfoRow icon="mail-outline"     label="Correo"    value={selected.customerEmail || selected.customerId?.email || 'No disponible'} colors={colors} neuro={neuro} />
-                  <InfoRow icon="calendar-outline" label="Fecha"     value={formatDateTime(selected.createdAt || selected.date)} colors={colors} neuro={neuro} />
-                  <InfoRow icon="location-outline" label="Dirección" value={selected.location || 'No especificada'} colors={colors} neuro={neuro} />
-                  <InfoRow icon="cash-outline"     label="Pago"      value={selected.paymentMethod === 'card' ? 'Tarjeta' : selected.paymentMethod === 'cash' ? 'Efectivo' : (selected.paymentMethod || 'No especificado')} colors={colors} neuro={neuro} />
+                  <InfoRow icon="person-outline"   label="Nombre"    value={selected.customerName || selected.customerId?.name || 'No disponible'} />
+                  <InfoRow icon="mail-outline"     label="Correo"    value={selected.customerEmail || selected.customerId?.email || 'No disponible'} />
+                  <InfoRow icon="calendar-outline" label="Fecha"     value={formatDateTime(selected.createdAt || selected.date)} />
+                  <InfoRow icon="location-outline" label="Dirección" value={selected.location || 'No especificada'} />
+                  <InfoRow icon="cash-outline"     label="Pago"      value={selected.paymentMethod === 'card' ? 'Tarjeta' : selected.paymentMethod === 'cash' ? 'Efectivo' : (selected.paymentMethod || 'No especificado')} />
                 </View>
 
                 {/* PRODUCTOS */}
                 {(selected.products || []).length > 0 && (
                   <View style={s.productsCard}>
-                    <View style={[s.infoCardTitle, { borderBottomColor: colors.border }]}>
-                      <Ionicons name="cube-outline" size={15} color={colors.primary} />
+                    <View style={[s.infoCardTitle, { borderBottomColor: '#E8EAF0' }]}>
+                      <Ionicons name="cube-outline" size={15} color={COLORS.primary} />
                       <Text style={s.infoCardTitleText}>Productos ({selected.products.length})</Text>
                     </View>
                     {selected.products.map((item, i) => {
@@ -331,8 +328,8 @@ const EmployeeOrdersScreen = () => {
                       const name = prod?.name || prod?.nombre || prod?.productName || `Producto ${i + 1}`;
                       const uri  = prod?.imageUrl || prod?.image || null;
                       return (
-                        <View key={i} style={[s.productRow, { borderBottomColor: colors.border }]}>
-                          <ProductImg uri={uri} size={48} colors={colors} />
+                        <View key={i} style={[s.productRow, { borderBottomColor: '#E8EAF0' }]}>
+                          <ProductImg uri={uri} size={48} />
                           <View style={s.productInfo}>
                             <Text style={s.productName} numberOfLines={2}>{name}</Text>
                             <Text style={s.productQty}>Cantidad: {item.quantity}</Text>
@@ -355,7 +352,7 @@ const EmployeeOrdersScreen = () => {
                 {/* COMENTARIO */}
                 <View style={s.commentSection}>
                   <View style={s.commentHeader}>
-                    <Ionicons name="chatbubble-ellipses-outline" size={15} color={colors.primary} />
+                    <Ionicons name="chatbubble-ellipses-outline" size={15} color={COLORS.primary} />
                     <Text style={s.commentTitle}>Comentario al cliente</Text>
                     <Text style={s.commentOptional}>(opcional)</Text>
                   </View>
@@ -365,7 +362,7 @@ const EmployeeOrdersScreen = () => {
                       value={comment}
                       onChangeText={setComment}
                       placeholder="Ej: Tu pedido está listo para recoger…"
-                      placeholderTextColor={colors.textMuted}
+                      placeholderTextColor={COLORS.textMuted}
                       multiline
                       maxLength={300}
                     />
@@ -408,19 +405,19 @@ const EmployeeOrdersScreen = () => {
 
                 {/* INPUT DE VERIFICACIÓN (aparece al pulsar Entregado) */}
                 {showVerify && (
-                  <View style={[s.verifySection, neuro.combinedShadow]}>
+                  <View style={[s.verifySection, NEUROMORPHIC.combinedShadow]}>
                     <View style={s.verifyHeader}>
-                      <Ionicons name="shield-checkmark-outline" size={15} color={colors.primary} />
+                      <Ionicons name="shield-checkmark-outline" size={15} color={COLORS.primary} />
                       <Text style={s.verifyTitle}>Código de verificación del cliente</Text>
                     </View>
-                    <Text style={[s.verifyHint, { color: colors.textMuted }]}>Pide al cliente que te muestre su código de pedido.</Text>
-                    <View style={[s.verifyInputWrap, neuro.inset]}>
+                    <Text style={[s.verifyHint, { color: COLORS.textMuted }]}>Pide al cliente que te muestre su código de pedido.</Text>
+                    <View style={[s.verifyInputWrap, NEUROMORPHIC.inset]}>
                       <TextInput
-                        style={[s.verifyInput, { color: colors.textPrimary }]}
+                        style={[s.verifyInput, { color: COLORS.textPrimary }]}
                         value={verifyCode}
                         onChangeText={v => setVerifyCode(v.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
                         placeholder="Ej: A1B2C3D4"
-                        placeholderTextColor={colors.textMuted}
+                        placeholderTextColor={COLORS.textMuted}
                         autoCapitalize="characters"
                         maxLength={8}
                         autoFocus
@@ -431,7 +428,7 @@ const EmployeeOrdersScreen = () => {
                         style={s.verifyCancelBtn}
                         onPress={() => { setShowVerify(false); setVerifyCode(''); }}
                       >
-                        <Text style={[s.verifyCancelText, { color: colors.textSecondary }]}>Cancelar</Text>
+                        <Text style={[s.verifyCancelText, { color: COLORS.textSecondary }]}>Cancelar</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={[s.verifyConfirmBtn, (!verifyCode.trim() || updating) && { opacity: 0.5 }]}
@@ -452,7 +449,7 @@ const EmployeeOrdersScreen = () => {
                 )}
 
                 <View style={s.stateNoteWrap}>
-                  <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
+                  <Ionicons name="information-circle-outline" size={14} color={COLORS.textMuted} />
                   <Text style={s.stateNote}>Al cambiar a "Entregado" se genera automáticamente la factura del cliente.</Text>
                 </View>
 
@@ -467,85 +464,85 @@ const EmployeeOrdersScreen = () => {
 
 // ─── ESTILOS DINÁMICOS ────────────────────────────────────────────────────────
 
-const getStyles = (colors, neuro) => StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const getStyles = () => StyleSheet.create({
+  screen: { flex: 1, backgroundColor: COLORS.background },
 
   header:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 14, paddingBottom: 10 },
-  title:      { ...TYPOGRAPHY.heading, fontSize: 26, color: colors.textPrimary },
-  subtitle:   { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
-  refreshBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', ...neuro.combinedShadow },
+  title:      { ...TYPOGRAPHY.heading, fontSize: 26, color: COLORS.textPrimary },
+  subtitle:   { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
+  refreshBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center', ...NEUROMORPHIC.combinedShadow },
 
   filterRow:  { flexDirection: 'row', paddingHorizontal: 16, paddingBottom: 12, gap: 8 },
-  filterChip: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 20, paddingVertical: 10, backgroundColor: colors.background, ...neuro.combinedShadow },
-  filterText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
+  filterChip: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 20, paddingVertical: 10, backgroundColor: COLORS.background, ...NEUROMORPHIC.combinedShadow },
+  filterText: { fontSize: 12, fontWeight: '600', color: COLORS.textSecondary },
 
   list:             { paddingHorizontal: 16, paddingBottom: 24 },
   center:           { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12, padding: 20 },
-  loadingText:      { fontSize: 14, color: colors.textSecondary },
-  emptyIcon:        { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', ...neuro.combinedShadow },
-  emptyTitle:       { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
-  emptyText:        { fontSize: 13, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
+  loadingText:      { fontSize: 14, color: COLORS.textSecondary },
+  emptyIcon:        { width: 72, height: 72, borderRadius: 36, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center', ...NEUROMORPHIC.combinedShadow },
+  emptyTitle:       { fontSize: 17, fontWeight: '700', color: COLORS.textPrimary },
+  emptyText:        { fontSize: 13, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 20 },
   pagination:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4, paddingVertical: 8, gap: 8 },
-  pageBtn:           { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.background, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, ...neuro.combinedShadow },
+  pageBtn:           { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.background, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, ...NEUROMORPHIC.combinedShadow },
   pageBtnDisabled:   { opacity: 0.4 },
-  pageBtnText:       { fontSize: 13, fontWeight: '600', color: colors.primary },
+  pageBtnText:       { fontSize: 13, fontWeight: '600', color: COLORS.primary },
   pageIndicator:     { flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 14, paddingVertical: 10 },
   pageIndicatorText: { fontSize: 13, fontWeight: '700' },
 
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' },
-  sheet:   { backgroundColor: colors.background, borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: SCREEN_HEIGHT * 0.93, ...neuro.topShadow },
-  handle:  { width: 40, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: 'center', marginTop: 10, marginBottom: 4 },
-  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.border },
-  closeBtn:    { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', ...neuro.combinedShadow },
-  sheetTitle:  { ...TYPOGRAPHY.subheading, fontSize: 17, color: colors.textPrimary },
+  sheet:   { backgroundColor: COLORS.background, borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: SCREEN_HEIGHT * 0.93, ...NEUROMORPHIC.topShadow },
+  handle:  { width: 40, height: 4, borderRadius: 2, backgroundColor: '#E8EAF0', alignSelf: 'center', marginTop: 10, marginBottom: 4 },
+  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#E8EAF0' },
+  closeBtn:    { width: 36, height: 36, borderRadius: 18, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center', ...NEUROMORPHIC.combinedShadow },
+  sheetTitle:  { ...TYPOGRAPHY.subheading, fontSize: 17, color: COLORS.textPrimary },
   sheetContent:{ padding: 20, paddingBottom: 50 },
 
   detailIdRow:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  detailIdBadge:  { backgroundColor: colors.background, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 10, ...neuro.inset },
-  detailIdLabel:  { fontSize: 11, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
-  detailIdValue:  { fontSize: 20, fontWeight: '800', color: colors.textPrimary, letterSpacing: 2 },
+  detailIdBadge:  { backgroundColor: COLORS.background, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 10, ...NEUROMORPHIC.inset },
+  detailIdLabel:  { fontSize: 11, color: COLORS.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
+  detailIdValue:  { fontSize: 20, fontWeight: '800', color: COLORS.textPrimary, letterSpacing: 2 },
   detailStateBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8 },
   detailStateText:  { fontSize: 14, fontWeight: '700' },
 
-  infoCard:         { backgroundColor: colors.background, borderRadius: 16, marginBottom: 14, overflow: 'hidden', ...neuro.combinedShadow },
+  infoCard:         { backgroundColor: COLORS.background, borderRadius: 16, marginBottom: 14, overflow: 'hidden', ...NEUROMORPHIC.combinedShadow },
   infoCardTitle:    { flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 14, paddingVertical: 10, borderBottomWidth: 1 },
-  infoCardTitleText:{ fontSize: 12, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase' },
+  infoCardTitleText:{ fontSize: 12, fontWeight: '700', color: COLORS.textSecondary, textTransform: 'uppercase' },
 
-  productsCard:     { backgroundColor: colors.background, borderRadius: 16, marginBottom: 14, overflow: 'hidden', ...neuro.combinedShadow },
+  productsCard:     { backgroundColor: COLORS.background, borderRadius: 16, marginBottom: 14, overflow: 'hidden', ...NEUROMORPHIC.combinedShadow },
   productRow:       { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 10, borderBottomWidth: 1 },
   productInfo:      { flex: 1 },
-  productName:      { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
-  productQty:       { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  productName:      { fontSize: 14, fontWeight: '600', color: COLORS.textPrimary },
+  productQty:       { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
   productSubtotalWrap: { alignItems: 'flex-end' },
-  productSubtotal:  { fontSize: 14, fontWeight: '700', color: colors.primary },
+  productSubtotal:  { fontSize: 14, fontWeight: '700', color: COLORS.primary },
 
-  totalRow:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.background, borderRadius: 16, padding: 16, marginBottom: 20, ...neuro.combinedShadow },
-  totalLabel: { fontSize: 14, color: colors.textSecondary },
-  totalValue: { fontSize: 22, fontWeight: '800', color: colors.primary },
+  totalRow:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: COLORS.background, borderRadius: 16, padding: 16, marginBottom: 20, ...NEUROMORPHIC.combinedShadow },
+  totalLabel: { fontSize: 14, color: COLORS.textSecondary },
+  totalValue: { fontSize: 22, fontWeight: '800', color: COLORS.primary },
 
   commentSection:  { marginBottom: 20 },
   commentHeader:   { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 10 },
-  commentTitle:    { fontSize: 13, fontWeight: '700', color: colors.textPrimary },
-  commentOptional: { fontSize: 12, color: colors.textMuted },
-  commentInputWrap:{ backgroundColor: colors.background, borderRadius: 14, ...neuro.inset },
-  commentInput:    { fontSize: 14, color: colors.textPrimary, paddingHorizontal: 14, paddingTop: 12, paddingBottom: 8, minHeight: 80, textAlignVertical: 'top' },
-  commentCount:    { textAlign: 'right', fontSize: 11, color: colors.textMuted, paddingHorizontal: 14, paddingBottom: 8 },
+  commentTitle:    { fontSize: 13, fontWeight: '700', color: COLORS.textPrimary },
+  commentOptional: { fontSize: 12, color: COLORS.textMuted },
+  commentInputWrap:{ backgroundColor: COLORS.background, borderRadius: 14, ...NEUROMORPHIC.inset },
+  commentInput:    { fontSize: 14, color: COLORS.textPrimary, paddingHorizontal: 14, paddingTop: 12, paddingBottom: 8, minHeight: 80, textAlignVertical: 'top' },
+  commentCount:    { textAlign: 'right', fontSize: 11, color: COLORS.textMuted, paddingHorizontal: 14, paddingBottom: 8 },
 
-  changeStateTitle: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 },
+  changeStateTitle: { fontSize: 13, fontWeight: '700', color: COLORS.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 },
   stateButtons:     { flexDirection: 'row', gap: 10, marginBottom: 14 },
   stateBtn:         { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 2, borderRadius: 14, paddingVertical: 13 },
   stateBtnText:     { fontSize: 12, fontWeight: '700' },
   stateNoteWrap:    { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
-  stateNote:        { flex: 1, fontSize: 11, color: colors.textMuted, lineHeight: 16 },
+  stateNote:        { flex: 1, fontSize: 11, color: COLORS.textMuted, lineHeight: 16 },
 
-  verifySection:    { backgroundColor: colors.background, borderRadius: 16, padding: 14, marginBottom: 14 },
+  verifySection:    { backgroundColor: COLORS.background, borderRadius: 16, padding: 14, marginBottom: 14 },
   verifyHeader:     { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 4 },
-  verifyTitle:      { fontSize: 13, fontWeight: '700', color: colors.textPrimary },
+  verifyTitle:      { fontSize: 13, fontWeight: '700', color: COLORS.textPrimary },
   verifyHint:       { fontSize: 12, marginBottom: 10, lineHeight: 16 },
   verifyInputWrap:  { borderRadius: 12, marginBottom: 12 },
   verifyInput:      { fontSize: 18, fontWeight: '800', letterSpacing: 4, textAlign: 'center', paddingVertical: 14, paddingHorizontal: 16 },
   verifyActions:    { flexDirection: 'row', gap: 10 },
-  verifyCancelBtn:  { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border },
+  verifyCancelBtn:  { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: '#E8EAF0' },
   verifyCancelText: { fontSize: 13, fontWeight: '600' },
   verifyConfirmBtn: { flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#22c55e', borderRadius: 12, paddingVertical: 12 },
   verifyConfirmText:{ fontSize: 13, fontWeight: '700', color: '#fff' },

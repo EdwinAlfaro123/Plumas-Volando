@@ -4,15 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, NEUROMORPHIC, TYPOGRAPHY } from '../../Constants/theme';
-import { useTheme } from '../../Context/ThemeContext';
 import { AuthContext } from '../../Context/AuthContext';
 import { maskEmail } from '../../Utils/formatters';
 import { useToast } from '../../Context/ToastContext';
 import api from '../../Services/api';
 
 const EmployeeSettingsScreen = () => {
-  const { colors, isDark, darkNeuro } = useTheme();
-  const neuro = isDark ? darkNeuro : NEUROMORPHIC;
   const { user, logout, profilePhotoUri, updateProfilePhoto, updateUser } = useContext(AuthContext);
   const { showToast } = useToast();
 
@@ -47,13 +44,13 @@ const EmployeeSettingsScreen = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.screen, { backgroundColor: colors.background }]} edges={['top']}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+    <SafeAreaView style={styles.screen} edges={['top']}>
+      <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>Perfil</Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Cuenta de empleado</Text>
+          <Text style={styles.title}>Perfil</Text>
+          <Text style={styles.subtitle}>Cuenta de empleado</Text>
         </View>
 
         {/* AVATAR */}
@@ -72,54 +69,54 @@ const EmployeeSettingsScreen = () => {
               <Ionicons name="camera-outline" size={14} color="#fff" />
             </TouchableOpacity>
           </View>
-          <Text style={[styles.profileName, { color: colors.textPrimary }]}>{user?.name} {user?.lastName || user?.lastname}</Text>
-          <Text style={[styles.profileEmail, { color: colors.textSecondary }]}>{maskEmail(user?.email)}</Text>
-          <View style={[styles.roleBadge, { backgroundColor: colors.background }, neuro.combinedShadow]}>
+          <Text style={styles.profileName}>{user?.name} {user?.lastName || user?.lastname}</Text>
+          <Text style={styles.profileEmail}>{maskEmail(user?.email)}</Text>
+          <View style={styles.roleBadge}>
             <Ionicons name="briefcase-outline" size={12} color={COLORS.primary} />
             <Text style={styles.roleText}>Empleado</Text>
           </View>
         </View>
 
         {/* INFO */}
-        <View style={[styles.card, { backgroundColor: colors.background }, neuro.combinedShadow]}>
-          <View style={[styles.cardTitle, { borderBottomColor: colors.border }]}>
-            <Ionicons name="person-circle-outline" size={16} color={colors.primary} />
-            <Text style={[styles.cardTitleText, { color: colors.textSecondary }]}>Información</Text>
+        <View style={styles.card}>
+          <View style={styles.cardTitle}>
+            <Ionicons name="person-circle-outline" size={16} color={COLORS.primary} />
+            <Text style={styles.cardTitleText}>Información</Text>
           </View>
-          <InfoRow icon="person-outline"   label="Nombre"  value={`${user?.name || ''} ${user?.lastName || user?.lastname || ''}`} colors={colors} neuro={neuro} />
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          <InfoRow icon="mail-outline"     label="Correo"  value={maskEmail(user?.email)} colors={colors} neuro={neuro} />
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          <InfoRow icon="call-outline"     label="Teléfono" value={user?.phone || 'No disponible'} colors={colors} neuro={neuro} />
+          <InfoRow icon="person-outline"   label="Nombre"  value={`${user?.name || ''} ${user?.lastName || user?.lastname || ''}`} />
+          <View style={styles.divider} />
+          <InfoRow icon="mail-outline"     label="Correo"  value={maskEmail(user?.email)} />
+          <View style={styles.divider} />
+          <InfoRow icon="call-outline"     label="Teléfono" value={user?.phone || 'No disponible'} />
         </View>
 
         {/* CERRAR SESIÓN */}
-        <TouchableOpacity style={[styles.card, styles.logoutCard, { backgroundColor: colors.background }, neuro.combinedShadow]} onPress={logout} activeOpacity={0.8}>
+        <TouchableOpacity style={[styles.card, styles.logoutCard]} onPress={logout} activeOpacity={0.8}>
           <View style={styles.logoutIconWrap}>
             <Ionicons name="log-out-outline" size={18} color={COLORS.error} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.logoutText}>Cerrar sesión</Text>
-            <Text style={[styles.logoutSub, { color: colors.textSecondary }]}>Salir de la cuenta de empleado</Text>
+            <Text style={styles.logoutSub}>Salir de la cuenta de empleado</Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color={COLORS.error} />
         </TouchableOpacity>
 
-        <Text style={[styles.version, { color: colors.textMuted }]}>Plumas Volando · v1.0.0 · Empleado</Text>
+        <Text style={styles.version}>Plumas Volando · v1.0.0 · Empleado</Text>
 
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-const InfoRow = ({ icon, label, value, colors, neuro }) => (
+const InfoRow = ({ icon, label, value }) => (
   <View style={styles.infoRow}>
-    <View style={[styles.infoIcon, { backgroundColor: colors.background }, neuro.inset]}>
-      <Ionicons name={icon} size={16} color={colors.primary} />
+    <View style={styles.infoIcon}>
+      <Ionicons name={icon} size={16} color={COLORS.primary} />
     </View>
     <View style={styles.infoTexts}>
-      <Text style={[styles.infoLabel, { color: colors.textMuted }]}>{label}</Text>
-      <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{value || 'No disponible'}</Text>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value || 'No disponible'}</Text>
     </View>
   </View>
 );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, NEUROMORPHIC } from '../../Constants/theme';
-import { useTheme } from '../../Context/ThemeContext';
 import OrderCard from '../../Components/Data/OrderCard';
 import DataState from '../../Components/Data/DataSate';
 import Button from '../../Components/Common/Button';
@@ -41,24 +40,24 @@ const getStateInfo = (order) => {
 
 const shortId = (id) => id ? String(id).slice(-4).toUpperCase() : '---';
 
-// ─── SUB-COMPONENTES ──────────────────────────────────────────────────────────
+// â”€â”€â”€ SUB-COMPONENTES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-const ProductImage = ({ uri, colors }) => {
+const ProductImage = ({ uri }) => {
   const [error, setError] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
 
   if (!uri || error) {
     return (
-      <View style={[piStyles.placeholder, { backgroundColor: colors.background }]}>
-        <Ionicons name="egg-outline" size={22} color={colors.primary} />
+      <View style={[piStyles.placeholder, { backgroundColor: COLORS.background }]}>
+        <Ionicons name="egg-outline" size={22} color={COLORS.primary} />
       </View>
     );
   }
   return (
     <>
       {loading && (
-        <View style={[piStyles.placeholder, { position: 'absolute', zIndex: 1, backgroundColor: colors.background }]}>
-          <ActivityIndicator size="small" color={colors.primary} />
+        <View style={[piStyles.placeholder, { position: 'absolute', zIndex: 1, backgroundColor: COLORS.background }]}>
+          <ActivityIndicator size="small" color={COLORS.primary} />
         </View>
       )}
       <Image
@@ -77,13 +76,13 @@ const piStyles = StyleSheet.create({
   image:       { width: 60, height: 60, borderRadius: 14 },
 });
 
-const DetailSection = ({ icon, title, children, colors, neuro }) => (
-  <View style={[dsStyles.section, { backgroundColor: colors.background }, neuro.combinedShadow]}>
-    <View style={[dsStyles.header, { borderBottomColor: colors.border }]}>
-      <View style={[dsStyles.icon, { backgroundColor: colors.background }, neuro.inset]}>
-        <Ionicons name={icon} size={14} color={colors.primary} />
+const DetailSection = ({ icon, title, children }) => (
+  <View style={[dsStyles.section, NEUROMORPHIC.combinedShadow, { backgroundColor: COLORS.background }]}>
+    <View style={[dsStyles.header, { borderBottomColor: '#E8EAF0' }]}>
+      <View style={[dsStyles.icon, NEUROMORPHIC.inset, { backgroundColor: COLORS.background }]}>
+        <Ionicons name={icon} size={14} color={COLORS.primary} />
       </View>
-      <Text style={[dsStyles.title, { color: colors.textSecondary }]}>{title}</Text>
+      <Text style={[dsStyles.title, { color: COLORS.textSecondary }]}>{title}</Text>
     </View>
     <View style={dsStyles.body}>{children}</View>
   </View>
@@ -97,12 +96,9 @@ const dsStyles = StyleSheet.create({
   body:    { padding: 14, gap: 4 },
 });
 
-// ─── PANTALLA ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ PANTALLA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const OrdersScreen = ({ navigation }) => {
-  const { colors, isDark, darkNeuro } = useTheme();
-  const neuro = isDark ? darkNeuro : NEUROMORPHIC;
-
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -123,7 +119,7 @@ const OrdersScreen = ({ navigation }) => {
     setLoading(false);
   };
 
-  const s = getStyles(colors, neuro);
+  const s = getStyles();
 
   const renderContent = () => {
     if (loading) return <DataState loading={loading} />;
@@ -132,10 +128,10 @@ const OrdersScreen = ({ navigation }) => {
       return (
         <View style={s.emptyContainer}>
           <View style={s.emptyIconWrapper}>
-            <Ionicons name="receipt-outline" size={56} color={colors.primary} />
+            <Ionicons name="receipt-outline" size={56} color={COLORS.primary} />
           </View>
           <Text style={s.emptyTitle}>No hay pedidos realizados</Text>
-          <Text style={s.emptyText}>Aún no has registrado ningún pedido. ¡Explora nuestro catálogo y haz tu primera compra!</Text>
+          <Text style={s.emptyText}>AÃºn no has registrado ningÃºn pedido. Â¡Explora nuestro catÃ¡logo y haz tu primera compra!</Text>
           <Button title="Ir a Productos" onPress={() => navigation.navigate('Products')} size="medium" style={s.emptyButton} />
         </View>
       );
@@ -147,11 +143,11 @@ const OrdersScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={s.container} edges={['top']}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar style="dark" />
 
       <ScrollView contentContainerStyle={s.scrollContent}>
         <Text style={s.title}>Pedidos</Text>
-        <Text style={s.subtitle}>Aquí encontrarás tus pedidos realizados</Text>
+        <Text style={s.subtitle}>AquÃ­ encontrarÃ¡s tus pedidos realizados</Text>
         {renderContent()}
       </ScrollView>
 
@@ -163,7 +159,7 @@ const OrdersScreen = ({ navigation }) => {
 
             <View style={s.sheetHeader}>
               <TouchableOpacity style={s.closeBtn} onPress={() => setSelectedOrder(null)}>
-                <Ionicons name="close" size={18} color={colors.textSecondary} />
+                <Ionicons name="close" size={18} color={COLORS.textSecondary} />
               </TouchableOpacity>
               <Text style={s.sheetTitle}>Detalle del Pedido</Text>
               <View style={{ width: 36 }} />
@@ -189,29 +185,29 @@ const OrdersScreen = ({ navigation }) => {
                   })()}
                 </View>
 
-                {/* CÓDIGO */}
+                {/* CÃ“DIGO */}
                 {selectedOrder.verificationCode && (
                   <View style={s.codeCard}>
-                    <Text style={s.codeCardLabel}>Código de verificación</Text>
+                    <Text style={s.codeCardLabel}>CÃ³digo de verificaciÃ³n</Text>
                     <Text style={s.codeCardValue}>{selectedOrder.verificationCode}</Text>
-                    <Text style={s.codeCardHint}>Presenta este código al recibir tu pedido</Text>
+                    <Text style={s.codeCardHint}>Presenta este cÃ³digo al recibir tu pedido</Text>
                   </View>
                 )}
 
                 {/* FECHA */}
-                <DetailSection icon="calendar-outline" title="Fecha y hora" colors={colors} neuro={neuro}>
+                <DetailSection icon="calendar-outline" title="Fecha y hora">
                   <Text style={s.detailValue}>{formatDateTime(selectedOrder.date || selectedOrder.orderDate || selectedOrder.createdAt)}</Text>
                 </DetailSection>
 
                 {/* CLIENTE */}
-                <DetailSection icon="person-outline" title="Datos del cliente" colors={colors} neuro={neuro}>
+                <DetailSection icon="person-outline" title="Datos del cliente">
                   {selectedOrder.customerName  && <Text style={s.detailValue}>{selectedOrder.customerName}</Text>}
                   {selectedOrder.customerEmail && <Text style={[s.detailValue, s.detailSub]}>{selectedOrder.customerEmail}</Text>}
                 </DetailSection>
 
-                {/* DIRECCIÓN */}
+                {/* DIRECCIÃ“N */}
                 {!!selectedOrder.location && (
-                  <DetailSection icon="location-outline" title="Dirección de entrega" colors={colors} neuro={neuro}>
+                  <DetailSection icon="location-outline" title="DirecciÃ³n de entrega">
                     <Text style={s.detailValue}>{selectedOrder.location}</Text>
                   </DetailSection>
                 )}
@@ -219,8 +215,8 @@ const OrdersScreen = ({ navigation }) => {
                 {/* PAGO */}
                 <DetailSection
                   icon={selectedOrder.paymentMethod === 'card' ? 'card-outline' : 'cash-outline'}
-                  title="Método de pago"
-                  colors={colors} neuro={neuro}
+                  title="MÃ©todo de pago"
+                 
                 >
                   <Text style={s.detailValue}>
                     {selectedOrder.paymentMethod === 'card' ? 'Tarjeta' :
@@ -230,16 +226,16 @@ const OrdersScreen = ({ navigation }) => {
                 </DetailSection>
 
                 {/* PRODUCTOS */}
-                <DetailSection icon="cube-outline" title="Productos" colors={colors} neuro={neuro}>
+                <DetailSection icon="cube-outline" title="Productos">
                   {(selectedOrder.products || []).map((item, index) => {
                     const product  = typeof item.productId === 'object' ? item.productId : null;
                     const name     = product?.name || product?.nombre || product?.productName || `Producto ${index + 1}`;
                     const imageUri = product?.imageUrl || product?.image || null;
                     const subtotal = item.subtotal ?? 0;
                     return (
-                      <View key={index} style={[s.productRow, { borderBottomColor: colors.border }]}>
-                        <View style={[s.productImageWrap, { backgroundColor: colors.background }, neuro.inset]}>
-                          <ProductImage uri={imageUri} colors={colors} />
+                      <View key={index} style={[s.productRow, { borderBottomColor: '#E8EAF0' }]}>
+                        <View style={[s.productImageWrap, NEUROMORPHIC.inset, { backgroundColor: COLORS.background }]}>
+                          <ProductImage uri={imageUri} />
                         </View>
                         <View style={s.productInfo}>
                           <Text style={s.productName} numberOfLines={2}>{name}</Text>
@@ -262,7 +258,7 @@ const OrdersScreen = ({ navigation }) => {
                   <View style={s.employeeCommentCard}>
                     <View style={s.employeeCommentHeader}>
                       <View style={s.employeeCommentIcon}>
-                        <Ionicons name="chatbubble-ellipses" size={15} color={colors.primary} />
+                        <Ionicons name="chatbubble-ellipses" size={15} color={COLORS.primary} />
                       </View>
                       <Text style={s.employeeCommentTitle}>Respuesta del equipo</Text>
                     </View>
@@ -279,60 +275,61 @@ const OrdersScreen = ({ navigation }) => {
   );
 };
 
-// ─── ESTILOS DINÁMICOS ────────────────────────────────────────────────────────
+// â”€â”€â”€ ESTILOS DINÃMICOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-const getStyles = (colors, neuro) => StyleSheet.create({
-  container:    { flex: 1, backgroundColor: colors.background },
+const getStyles = () => StyleSheet.create({
+  container:    { flex: 1, backgroundColor: COLORS.background },
   scrollContent:{ padding: 20, paddingBottom: 80 },
-  title:        { ...TYPOGRAPHY.heading, fontSize: 26, color: colors.textPrimary },
-  subtitle:     { ...TYPOGRAPHY.caption, fontSize: 14, color: colors.textSecondary, marginBottom: 20, marginTop: 4 },
+  title:        { ...TYPOGRAPHY.heading, fontSize: 26, color: COLORS.textPrimary },
+  subtitle:     { ...TYPOGRAPHY.caption, fontSize: 14, color: COLORS.textSecondary, marginBottom: 20, marginTop: 4 },
 
   emptyContainer:  { alignItems: 'center', justifyContent: 'center', paddingVertical: 40, marginTop: 20 },
-  emptyIconWrapper:{ width: 100, height: 100, borderRadius: 50, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', marginBottom: 20, ...neuro.combinedShadow },
-  emptyTitle:      { ...TYPOGRAPHY.heading, fontSize: 20, color: colors.textPrimary, textAlign: 'center', marginBottom: 10 },
-  emptyText:       { ...TYPOGRAPHY.body, fontSize: 15, color: colors.textSecondary, textAlign: 'center', lineHeight: 22, paddingHorizontal: 20, marginBottom: 20 },
+  emptyIconWrapper:{ width: 100, height: 100, borderRadius: 50, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center', marginBottom: 20, ...NEUROMORPHIC.combinedShadow },
+  emptyTitle:      { ...TYPOGRAPHY.heading, fontSize: 20, color: COLORS.textPrimary, textAlign: 'center', marginBottom: 10 },
+  emptyText:       { ...TYPOGRAPHY.body, fontSize: 15, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 22, paddingHorizontal: 20, marginBottom: 20 },
   emptyButton:     { width: '80%', maxWidth: 250 },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' },
-  modalSheet:   { backgroundColor: colors.background, borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: SCREEN_HEIGHT * 0.92, minHeight: SCREEN_HEIGHT * 0.5, ...neuro.topShadow },
-  sheetHandle:  { width: 40, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: 'center', marginTop: 10, marginBottom: 4 },
-  sheetHeader:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.border },
-  closeBtn:     { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', ...neuro.combinedShadow },
-  sheetTitle:   { ...TYPOGRAPHY.subheading, fontSize: 17, color: colors.textPrimary },
+  modalSheet:   { backgroundColor: COLORS.background, borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: SCREEN_HEIGHT * 0.92, minHeight: SCREEN_HEIGHT * 0.5, ...NEUROMORPHIC.topShadow },
+  sheetHandle:  { width: 40, height: 4, borderRadius: 2, backgroundColor: '#E8EAF0', alignSelf: 'center', marginTop: 10, marginBottom: 4 },
+  sheetHeader:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#E8EAF0' },
+  closeBtn:     { width: 36, height: 36, borderRadius: 18, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center', ...NEUROMORPHIC.combinedShadow },
+  sheetTitle:   { ...TYPOGRAPHY.subheading, fontSize: 17, color: COLORS.textPrimary },
 
   detailScroll: { padding: 20, paddingBottom: 40 },
 
   idRow:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  idBadge:  { backgroundColor: colors.background, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 10, ...neuro.inset },
-  idLabel:  { fontSize: 11, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
-  idValue:  { ...TYPOGRAPHY.subheading, fontSize: 18, color: colors.textPrimary, letterSpacing: 2, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
+  idBadge:  { backgroundColor: COLORS.background, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 10, ...NEUROMORPHIC.inset },
+  idLabel:  { fontSize: 11, color: COLORS.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
+  idValue:  { ...TYPOGRAPHY.subheading, fontSize: 18, color: COLORS.textPrimary, letterSpacing: 2, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
   stateBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6 },
   stateText:  { fontSize: 13, fontWeight: '700' },
 
-  codeCard:      { backgroundColor: colors.background, borderRadius: 18, padding: 16, alignItems: 'center', marginBottom: 16, borderWidth: 2, borderColor: colors.primary, ...neuro.combinedShadow },
-  codeCardLabel: { fontSize: 11, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 },
-  codeCardValue: { fontSize: 28, fontWeight: '900', color: colors.primary, letterSpacing: 6, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
-  codeCardHint:  { fontSize: 11, color: colors.textMuted, marginTop: 6, textAlign: 'center' },
+  codeCard:      { backgroundColor: COLORS.background, borderRadius: 18, padding: 16, alignItems: 'center', marginBottom: 16, borderWidth: 2, borderColor: COLORS.primary, ...NEUROMORPHIC.combinedShadow },
+  codeCardLabel: { fontSize: 11, color: COLORS.textMuted, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 },
+  codeCardValue: { fontSize: 28, fontWeight: '900', color: COLORS.primary, letterSpacing: 6, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' },
+  codeCardHint:  { fontSize: 11, color: COLORS.textMuted, marginTop: 6, textAlign: 'center' },
 
-  detailValue:  { fontSize: 15, color: colors.textPrimary, lineHeight: 22 },
-  detailSub:    { fontSize: 13, color: colors.textSecondary },
+  detailValue:  { fontSize: 15, color: COLORS.textPrimary, lineHeight: 22 },
+  detailSub:    { fontSize: 13, color: COLORS.textSecondary },
 
   productRow:        { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, gap: 12 },
   productImageWrap:  { width: 60, height: 60, borderRadius: 14, overflow: 'hidden' },
   productInfo:       { flex: 1 },
-  productName:       { fontSize: 14, fontWeight: '600', color: colors.textPrimary, lineHeight: 20 },
-  productQty:        { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
-  productSubtotal:   { fontSize: 14, fontWeight: '700', color: colors.primary },
+  productName:       { fontSize: 14, fontWeight: '600', color: COLORS.textPrimary, lineHeight: 20 },
+  productQty:        { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
+  productSubtotal:   { fontSize: 14, fontWeight: '700', color: COLORS.primary },
 
-  totalCard:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.background, borderRadius: 16, padding: 18, marginTop: 4, ...neuro.combinedShadow },
-  totalLabel: { fontSize: 16, color: colors.textSecondary },
-  totalValue: { fontSize: 22, fontWeight: '800', color: colors.primary },
+  totalCard:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: COLORS.background, borderRadius: 16, padding: 18, marginTop: 4, ...NEUROMORPHIC.combinedShadow },
+  totalLabel: { fontSize: 16, color: COLORS.textSecondary },
+  totalValue: { fontSize: 22, fontWeight: '800', color: COLORS.primary },
 
-  employeeCommentCard:   { backgroundColor: colors.background, borderRadius: 16, marginTop: 4, overflow: 'hidden', borderLeftWidth: 3, borderLeftColor: colors.primary, ...neuro.combinedShadow },
+  employeeCommentCard:   { backgroundColor: COLORS.background, borderRadius: 16, marginTop: 4, overflow: 'hidden', borderLeftWidth: 3, borderLeftColor: COLORS.primary, ...NEUROMORPHIC.combinedShadow },
   employeeCommentHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingTop: 12, paddingBottom: 6 },
-  employeeCommentIcon:   { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.primaryLighter, justifyContent: 'center', alignItems: 'center' },
-  employeeCommentTitle:  { fontSize: 12, fontWeight: '700', color: colors.primary, textTransform: 'uppercase', letterSpacing: 0.5 },
-  employeeCommentText:   { fontSize: 14, color: colors.textPrimary, lineHeight: 20, paddingHorizontal: 14, paddingBottom: 14 },
+  employeeCommentIcon:   { width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(138,90,0,0.1)', justifyContent: 'center', alignItems: 'center' },
+  employeeCommentTitle:  { fontSize: 12, fontWeight: '700', color: COLORS.primary, textTransform: 'uppercase', letterSpacing: 0.5 },
+  employeeCommentText:   { fontSize: 14, color: COLORS.textPrimary, lineHeight: 20, paddingHorizontal: 14, paddingBottom: 14 },
 });
 
 export default OrdersScreen;
+

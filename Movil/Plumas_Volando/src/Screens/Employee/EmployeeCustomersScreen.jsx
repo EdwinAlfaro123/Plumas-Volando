@@ -8,7 +8,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, NEUROMORPHIC, TYPOGRAPHY } from '../../Constants/theme';
-import { useTheme } from '../../Context/ThemeContext';
 import { useToast } from '../../Context/ToastContext';
 import api from '../../Services/api';
 import { maskEmail } from '../../Utils/formatters';
@@ -20,28 +19,28 @@ const getInitials = (name = '', lastname = '') =>
 
 // ─── CARD DE CLIENTE ──────────────────────────────────────────────────────────
 
-const CustomerCard = ({ customer, colors, neuro }) => {
+const CustomerCard = ({ customer }) => {
   const initials = getInitials(customer.name, customer.lastname || customer.lastName || '');
   const isActive = customer.isActive !== false;
 
   return (
-    <View style={[card.wrap, { backgroundColor: colors.background }, neuro.combinedShadow]}>
+    <View style={[card.wrap, NEUROMORPHIC.combinedShadow, { backgroundColor: COLORS.background }]}>
       {/* franja lateral de estado */}
       <View style={[card.stripe, { backgroundColor: isActive ? '#22c55e' : '#ef4444' }]} />
 
       {/* avatar */}
-      <View style={[card.avatar, { backgroundColor: colors.background }, neuro.inset]}>
+      <View style={[card.avatar, NEUROMORPHIC.inset, { backgroundColor: COLORS.background }]}>
         {customer.profilePhoto ? (
           <Image source={{ uri: customer.profilePhoto }} style={card.avatarImg} />
         ) : (
-          <Text style={[card.avatarText, { color: colors.primary }]}>{initials}</Text>
+          <Text style={[card.avatarText, { color: COLORS.primary }]}>{initials}</Text>
         )}
       </View>
 
       {/* info */}
       <View style={card.info}>
         <View style={card.topRow}>
-          <Text style={[card.name, { color: colors.textPrimary }]} numberOfLines={1}>
+          <Text style={[card.name, { color: COLORS.textPrimary }]} numberOfLines={1}>
             {customer.name || 'Sin nombre'} {customer.lastname || customer.lastName || ''}
           </Text>
           <View style={[card.badge, { backgroundColor: isActive ? '#f0fdf4' : '#fef2f2' }]}>
@@ -53,23 +52,23 @@ const CustomerCard = ({ customer, colors, neuro }) => {
         </View>
 
         <View style={card.row}>
-          <Ionicons name="mail-outline" size={12} color={colors.textMuted} />
-          <Text style={[card.detail, { color: colors.textSecondary }]} numberOfLines={1}>
+          <Ionicons name="mail-outline" size={12} color={COLORS.textMuted} />
+          <Text style={[card.detail, { color: COLORS.textSecondary }]} numberOfLines={1}>
             {maskEmail(customer.email) || 'Sin correo'}
           </Text>
         </View>
 
         <View style={card.row}>
-          <Ionicons name="call-outline" size={12} color={colors.textMuted} />
-          <Text style={[card.detail, { color: colors.textSecondary }]}>
+          <Ionicons name="call-outline" size={12} color={COLORS.textMuted} />
+          <Text style={[card.detail, { color: COLORS.textSecondary }]}>
             {customer.phone || 'Sin teléfono'}
           </Text>
         </View>
 
         {!!customer.DUI && (
           <View style={card.row}>
-            <Ionicons name="card-outline" size={12} color={colors.textMuted} />
-            <Text style={[card.detail, { color: colors.textSecondary }]}>{customer.DUI}</Text>
+            <Ionicons name="card-outline" size={12} color={COLORS.textMuted} />
+            <Text style={[card.detail, { color: COLORS.textSecondary }]}>{customer.DUI}</Text>
           </View>
         )}
       </View>
@@ -96,8 +95,6 @@ const card = StyleSheet.create({
 // ─── PANTALLA PRINCIPAL ───────────────────────────────────────────────────────
 
 const EmployeeCustomersScreen = () => {
-  const { colors, isDark, darkNeuro } = useTheme();
-  const neuro = isDark ? darkNeuro : NEUROMORPHIC;
   const { showToast } = useToast();
 
   const [allCustomers, setAllCustomers] = useState([]);
@@ -135,11 +132,11 @@ const EmployeeCustomersScreen = () => {
 
   const handleFilterChange = (f) => { setFilter(f); setPage(1); };
 
-  const s = getStyles(colors, neuro);
+  const s = getStyles();
 
   return (
     <SafeAreaView style={s.screen} edges={['top']}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar style="dark" />
 
       {/* ENCABEZADO */}
       <View style={s.header}>
@@ -151,8 +148,8 @@ const EmployeeCustomersScreen = () => {
         </View>
         <TouchableOpacity style={s.refreshBtn} onPress={() => { loadCustomers(); setPage(1); }} disabled={loading}>
           {loading
-            ? <ActivityIndicator size="small" color={colors.primary} />
-            : <Ionicons name="refresh-outline" size={20} color={colors.primary} />
+            ? <ActivityIndicator size="small" color={COLORS.primary} />
+            : <Ionicons name="refresh-outline" size={20} color={COLORS.primary} />
           }
         </TouchableOpacity>
       </View>
@@ -162,7 +159,7 @@ const EmployeeCustomersScreen = () => {
         {FILTERS.map(f => {
           const active = filter === f;
           return (
-            <TouchableOpacity key={f} style={[s.filterChip, active && { backgroundColor: colors.primary }]} onPress={() => handleFilterChange(f)}>
+            <TouchableOpacity key={f} style={[s.filterChip, active && { backgroundColor: COLORS.primary }]} onPress={() => handleFilterChange(f)}>
               <Text style={[s.filterText, active && { color: '#fff' }]}>{f}</Text>
             </TouchableOpacity>
           );
@@ -172,13 +169,13 @@ const EmployeeCustomersScreen = () => {
       {/* LISTA */}
       {loading ? (
         <View style={s.center}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={s.loadingText}>Cargando clientes…</Text>
         </View>
       ) : pageData.length === 0 ? (
         <View style={s.center}>
           <View style={s.emptyIcon}>
-            <Ionicons name="people-outline" size={40} color={colors.primary} />
+            <Ionicons name="people-outline" size={40} color={COLORS.primary} />
           </View>
           <Text style={s.emptyTitle}>Sin clientes</Text>
           <Text style={s.emptyText}>
@@ -189,7 +186,7 @@ const EmployeeCustomersScreen = () => {
         <FlatList
           data={pageData}
           keyExtractor={c => c._id}
-          renderItem={({ item }) => <CustomerCard customer={item} colors={colors} neuro={neuro} />}
+          renderItem={({ item }) => <CustomerCard customer={item} />}
           contentContainerStyle={s.list}
           showsVerticalScrollIndicator={false}
           ListFooterComponent={
@@ -200,12 +197,12 @@ const EmployeeCustomersScreen = () => {
                   onPress={() => setPage(p => Math.max(1, p - 1))}
                   disabled={safePage === 1}
                 >
-                  <Ionicons name="chevron-back" size={16} color={safePage === 1 ? colors.textMuted : colors.primary} />
-                  <Text style={[s.pageBtnText, safePage === 1 && { color: colors.textMuted }]}>Anterior</Text>
+                  <Ionicons name="chevron-back" size={16} color={safePage === 1 ? COLORS.textMuted : COLORS.primary} />
+                  <Text style={[s.pageBtnText, safePage === 1 && { color: COLORS.textMuted }]}>Anterior</Text>
                 </TouchableOpacity>
 
-                <View style={[s.pageIndicator, neuro.inset]}>
-                  <Text style={[s.pageIndicatorText, { color: colors.textPrimary }]}>{safePage} / {totalPages}</Text>
+                <View style={[s.pageIndicator, NEUROMORPHIC.inset]}>
+                  <Text style={[s.pageIndicatorText, { color: COLORS.textPrimary }]}>{safePage} / {totalPages}</Text>
                 </View>
 
                 <TouchableOpacity
@@ -213,8 +210,8 @@ const EmployeeCustomersScreen = () => {
                   onPress={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={safePage === totalPages}
                 >
-                  <Text style={[s.pageBtnText, safePage === totalPages && { color: colors.textMuted }]}>Siguiente</Text>
-                  <Ionicons name="chevron-forward" size={16} color={safePage === totalPages ? colors.textMuted : colors.primary} />
+                  <Text style={[s.pageBtnText, safePage === totalPages && { color: COLORS.textMuted }]}>Siguiente</Text>
+                  <Ionicons name="chevron-forward" size={16} color={safePage === totalPages ? COLORS.textMuted : COLORS.primary} />
                 </TouchableOpacity>
               </View>
             ) : null
@@ -227,29 +224,29 @@ const EmployeeCustomersScreen = () => {
 
 // ─── ESTILOS DINÁMICOS ────────────────────────────────────────────────────────
 
-const getStyles = (colors, neuro) => StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+const getStyles = () => StyleSheet.create({
+  screen: { flex: 1, backgroundColor: COLORS.background },
 
   header:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 14, paddingBottom: 10 },
-  title:      { ...TYPOGRAPHY.heading, fontSize: 26, color: colors.textPrimary },
-  subtitle:   { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
-  refreshBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', ...neuro.combinedShadow },
+  title:      { ...TYPOGRAPHY.heading, fontSize: 26, color: COLORS.textPrimary },
+  subtitle:   { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
+  refreshBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center', ...NEUROMORPHIC.combinedShadow },
 
   filterRow:  { flexDirection: 'row', paddingHorizontal: 16, paddingBottom: 12, gap: 8 },
-  filterChip: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 20, paddingVertical: 10, backgroundColor: colors.background, ...neuro.combinedShadow },
-  filterText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
+  filterChip: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 20, paddingVertical: 10, backgroundColor: COLORS.background, ...NEUROMORPHIC.combinedShadow },
+  filterText: { fontSize: 12, fontWeight: '600', color: COLORS.textSecondary },
 
   list:        { paddingHorizontal: 16, paddingBottom: 24 },
   center:      { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12, padding: 20 },
-  loadingText: { fontSize: 14, color: colors.textSecondary },
-  emptyIcon:   { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', ...neuro.combinedShadow },
-  emptyTitle:  { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
-  emptyText:   { fontSize: 13, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
+  loadingText: { fontSize: 14, color: COLORS.textSecondary },
+  emptyIcon:   { width: 72, height: 72, borderRadius: 36, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center', ...NEUROMORPHIC.combinedShadow },
+  emptyTitle:  { fontSize: 17, fontWeight: '700', color: COLORS.textPrimary },
+  emptyText:   { fontSize: 13, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 20 },
 
   pagination:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4, paddingVertical: 8, gap: 8 },
-  pageBtn:           { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.background, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, ...neuro.combinedShadow },
+  pageBtn:           { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: COLORS.background, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, ...NEUROMORPHIC.combinedShadow },
   pageBtnDisabled:   { opacity: 0.4 },
-  pageBtnText:       { fontSize: 13, fontWeight: '600', color: colors.primary },
+  pageBtnText:       { fontSize: 13, fontWeight: '600', color: COLORS.primary },
   pageIndicator:     { flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 14, paddingVertical: 10 },
   pageIndicatorText: { fontSize: 13, fontWeight: '700' },
 });

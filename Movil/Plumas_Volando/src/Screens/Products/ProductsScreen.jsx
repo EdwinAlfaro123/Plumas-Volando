@@ -5,7 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, NEUROMORPHIC } from '../../Constants/theme';
-import { useTheme } from '../../Context/ThemeContext';
 import ProductCard from '../../Components/Data/ProductCard';
 import DataState from '../../Components/Data/DataSate';
 import FloatingCartButton from '../../Components/Navigation/FloatingCartButton';
@@ -15,8 +14,6 @@ import { productService } from '../../Services/productService';
 import { useCart } from '../../Context/CartContext';
 
 const ProductsScreen = ({ navigation }) => {
-    const { colors, isDark, darkNeuro } = useTheme();
-    const neuro = isDark ? darkNeuro : NEUROMORPHIC;
     const { addToCart } = useCart();
     
     // Estados de Datos
@@ -82,15 +79,15 @@ const ProductsScreen = ({ navigation }) => {
     const activeFiltersCount = Object.values(filters).filter(v => v !== '' && v !== null).length;
 
     return (
-        <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: colors.background }]}>
-            <StatusBar style={isDark ? 'light' : 'dark'} />
+        <SafeAreaView edges={['top']} style={styles.container}>
+            <StatusBar style="dark" />
             
             {/* HEADER */}
             <View style={styles.header}>
                 <View style={styles.headerTop}>
                     <View style={styles.headerCopy}>
-                        <Text numberOfLines={1} style={[styles.title, { color: colors.textPrimary }]}>Productos frescos</Text>
-                        <Text numberOfLines={1} style={[styles.subtitle, { color: colors.textSecondary }]}>Elige lo que necesitas para tu hogar.</Text>
+                        <Text numberOfLines={1} style={styles.title}>Productos frescos</Text>
+                        <Text numberOfLines={1} style={styles.subtitle}>Elige lo que necesitas para tu hogar.</Text>
                     </View>
                     <FloatingCartButton navigation={navigation} />
                 </View>
@@ -104,12 +101,12 @@ const ProductsScreen = ({ navigation }) => {
 
                 {/* FILTER BUTTON */}
                 <TouchableOpacity
-                    style={[styles.filterButton, { backgroundColor: colors.background }, neuro.flat]}
+                    style={styles.filterButton}
                     onPress={() => setShowFilterModal(true)}
                     activeOpacity={0.8}
                 >
-                    <Ionicons name="options-outline" size={18} color={colors.primary} />
-                    <Text style={[styles.filterButtonText, { color: colors.primary }]}>Filtros</Text>
+                    <Ionicons name="options-outline" size={18} color={COLORS.primary} />
+                    <Text style={styles.filterButtonText}>Filtros</Text>
                     {activeFiltersCount > 0 && (
                         <View style={styles.badge}>
                             <Text style={styles.badgeText}>{activeFiltersCount}</Text>
@@ -143,23 +140,23 @@ const ProductsScreen = ({ navigation }) => {
                         totalPages > 1 ? (
                             <View style={styles.pagination}>
                                 <TouchableOpacity
-                                    style={[styles.pageBtn, { backgroundColor: colors.background }, neuro.combinedShadow, page <= 1 && styles.pageBtnDisabled]}
+                                    style={[styles.pageBtn, page <= 1 && styles.pageBtnDisabled]}
                                     onPress={() => page > 1 && loadProducts(page - 1)}
                                     activeOpacity={0.8}
                                     disabled={page <= 1}
                                 >
-                                    <Ionicons name="chevron-back" size={18} color={page <= 1 ? colors.textMuted : colors.primary} />
+                                    <Ionicons name="chevron-back" size={18} color={page <= 1 ? COLORS.textMuted : COLORS.primary} />
                                 </TouchableOpacity>
-                                <View style={[styles.pageIndicator, { backgroundColor: colors.background }, neuro.inset]}>
-                                    <Text style={[styles.pageText, { color: colors.textPrimary }]}>{page} / {totalPages}</Text>
+                                <View style={styles.pageIndicator}>
+                                    <Text style={styles.pageText}>{page} / {totalPages}</Text>
                                 </View>
                                 <TouchableOpacity
-                                    style={[styles.pageBtn, { backgroundColor: colors.background }, neuro.combinedShadow, page >= totalPages && styles.pageBtnDisabled]}
+                                    style={[styles.pageBtn, page >= totalPages && styles.pageBtnDisabled]}
                                     onPress={() => page < totalPages && loadProducts(page + 1)}
                                     activeOpacity={0.8}
                                     disabled={page >= totalPages}
                                 >
-                                    <Ionicons name="chevron-forward" size={18} color={page >= totalPages ? colors.textMuted : colors.primary} />
+                                    <Ionicons name="chevron-forward" size={18} color={page >= totalPages ? COLORS.textMuted : COLORS.primary} />
                                 </TouchableOpacity>
                             </View>
                         ) : null
