@@ -123,9 +123,11 @@ const EmployeeOrdersScreen = () => {
   const [total, setTotal]             = useState(0);
   const [filter, setFilter]           = useState('Todos');
 
-  const [selected, setSelected] = useState(null);
-  const [updating, setUpdating] = useState(false);
-  const [comment, setComment]   = useState('');
+  const [selected, setSelected]   = useState(null);
+  const [updating, setUpdating]   = useState(false);
+  const [comment, setComment]     = useState('');
+  const [showVerify, setShowVerify] = useState(false);
+  const [verifyCode, setVerifyCode] = useState('');
 
   const loadPage = useCallback(async (pageNum = 1, reset = false) => {
     if (pageNum === 1) setLoading(true); else setLoadingMore(true);
@@ -160,10 +162,13 @@ const EmployeeOrdersScreen = () => {
     try {
       const payload = { state: newState };
       if (comment.trim()) payload.employeeComment = comment.trim();
+      if (newState === 'Entregado') payload.verificationCode = verifyCode.trim().toUpperCase();
       await api.patch(`/orders/${selected._id}/state`, payload);
       const updatedOrder = { ...selected, state: newState, employeeComment: payload.employeeComment ?? selected.employeeComment };
       setOrders(prev => prev.map(o => o._id === selected._id ? updatedOrder : o));
       setSelected(updatedOrder);
+      setShowVerify(false);
+      setVerifyCode('');
       showToast(`Estado actualizado a "${newState}".`, 'success');
     } catch (err) {
       showToast(err.response?.data?.message || 'Error al actualizar.', 'error');
@@ -172,8 +177,8 @@ const EmployeeOrdersScreen = () => {
     }
   };
 
-  const openModal  = (order) => { setSelected(order); setComment(order.employeeComment || ''); };
-  const closeModal = () => { setSelected(null); setComment(''); };
+  const openModal  = (order) => { setSelected(order); setComment(order.employeeComment || ''); setShowVerify(false); setVerifyCode(''); };
+  const closeModal = () => { setSelected(null); setComment(''); setShowVerify(false); setVerifyCode(''); };
 
   const FILTERS  = ['Todos', 'Pendiente', 'Entregado', 'Cancelado'];
   const filtered = filter === 'Todos' ? orders : orders.filter(o => (o.state || 'Pendiente') === filter);
@@ -362,11 +367,16 @@ const EmployeeOrdersScreen = () => {
                   {['Pendiente', 'Entregado', 'Cancelado'].map(st => {
                     const cfg     = STATE_CONFIG[st];
                     const current = (selected.state || 'Pendiente') === st;
+                    const isEntregado = st === 'Entregado';
                     return (
                       <TouchableOpacity
                         key={st}
                         style={[s.stateBtn, { borderColor: cfg.color }, current && { backgroundColor: cfg.color }]}
-                        onPress={() => !current && applyStateChange(st)}
+                        onPress={() => {
+                          if (current || updating) return;
+                          if (isEntregado) { setShowVerify(true); setVerifyCode(''); }
+                          else applyStateChange(st);
+                        }}
                         disabled={current || updating}
                         activeOpacity={0.8}
                       >
@@ -383,6 +393,51 @@ const EmployeeOrdersScreen = () => {
                     );
                   })}
                 </View>
+
+                {/* INPUT DE VERIFICACIÓN (aparece al pulsar Entregado) */}
+                {showVerify && (
+                  <View style={[s.verifySection, neuro.combinedShadow]}>
+                    <View style={s.verifyHeader}>
+                      <Ionicons name="shield-checkmark-outline" size={15} color={colors.primary} />
+                      <Text style={s.verifyTitle}>Código de verificación del cliente</Text>
+                    </View>
+                    <Text style={[s.verifyHint, { color: colors.textMuted }]}>Pide al cliente que te muestre su código de pedido.</Text>
+                    <View style={[s.verifyInputWrap, neuro.inset]}>
+                      <TextInput
+                        style={[s.verifyInput, { color: colors.textPrimary }]}
+                        value={verifyCode}
+                        onChangeText={v => setVerifyCode(v.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                        placeholder="Ej: A1B2C3D4"
+                        placeholderTextColor={colors.textMuted}
+                        autoCapitalize="characters"
+                        maxLength={8}
+                        autoFocus
+                      />
+                    </View>
+                    <View style={s.verifyActions}>
+                      <TouchableOpacity
+                        style={s.verifyCancelBtn}
+                        onPress={() => { setShowVerify(false); setVerifyCode(''); }}
+                      >
+                        <Text style={[s.verifyCancelText, { color: colors.textSecondary }]}>Cancelar</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[s.verifyConfirmBtn, (!verifyCode.trim() || updating) && { opacity: 0.5 }]}
+                        onPress={() => applyStateChange('Entregado')}
+                        disabled={!verifyCode.trim() || updating}
+                        activeOpacity={0.8}
+                      >
+                        {updating
+                          ? <ActivityIndicator size="small" color="#fff" />
+                          : <>
+                              <Ionicons name="checkmark-circle" size={16} color="#fff" />
+                              <Text style={s.verifyConfirmText}>Confirmar entrega</Text>
+                            </>
+                        }
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
 
                 <View style={s.stateNoteWrap}>
                   <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
@@ -468,6 +523,18 @@ const getStyles = (colors, neuro) => StyleSheet.create({
   stateBtnText:     { fontSize: 12, fontWeight: '700' },
   stateNoteWrap:    { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
   stateNote:        { flex: 1, fontSize: 11, color: colors.textMuted, lineHeight: 16 },
+
+  verifySection:    { backgroundColor: colors.background, borderRadius: 16, padding: 14, marginBottom: 14 },
+  verifyHeader:     { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 4 },
+  verifyTitle:      { fontSize: 13, fontWeight: '700', color: colors.textPrimary },
+  verifyHint:       { fontSize: 12, marginBottom: 10, lineHeight: 16 },
+  verifyInputWrap:  { borderRadius: 12, marginBottom: 12 },
+  verifyInput:      { fontSize: 18, fontWeight: '800', letterSpacing: 4, textAlign: 'center', paddingVertical: 14, paddingHorizontal: 16 },
+  verifyActions:    { flexDirection: 'row', gap: 10 },
+  verifyCancelBtn:  { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border },
+  verifyCancelText: { fontSize: 13, fontWeight: '600' },
+  verifyConfirmBtn: { flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: '#22c55e', borderRadius: 12, paddingVertical: 12 },
+  verifyConfirmText:{ fontSize: 13, fontWeight: '700', color: '#fff' },
 });
 
 export default EmployeeOrdersScreen;

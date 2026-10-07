@@ -416,14 +416,26 @@ orderController.updateOrder = async (req, res) => {
   }
 };
 
-// Cambiar solo el estado de una orden (empleado) + comentario opcional
+// Cambiar solo el estado de una orden (empleado) + comentario opcional + código de verificación
 orderController.patchOrderState = async (req, res) => {
   try {
-    const { state, employeeComment } = req.body;
+    const { state, employeeComment, verificationCode } = req.body;
     const valid = ['Pendiente', 'Entregado', 'Cancelado'];
     if (!valid.includes(state)) {
       return res.status(400).json({ message: 'Estado inválido. Usa: Pendiente, Entregado o Cancelado' });
     }
+
+    const order = await ordersModel.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Orden no encontrada' });
+
+    // Al marcar como Entregado se requiere el código de verificación del cliente
+    if (state === 'Entregado') {
+      const expectedCode = (order.verificationCode || order._id.toString().slice(-8)).toUpperCase();
+      if (!verificationCode || verificationCode.trim().toUpperCase() !== expectedCode) {
+        return res.status(400).json({ message: 'Código de verificación incorrecto' });
+      }
+    }
+
     const updateData = { state };
     if (employeeComment !== undefined) {
       updateData.employeeComment = typeof employeeComment === 'string'
@@ -435,7 +447,6 @@ orderController.patchOrderState = async (req, res) => {
       updateData,
       { new: true }
     );
-    if (!updated) return res.status(404).json({ message: 'Orden no encontrada' });
     await createBillIfDelivered(updated);
     return res.status(200).json({ message: 'Estado actualizado', order: updated });
   } catch (error) {
