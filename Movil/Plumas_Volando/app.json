@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/logo-plumas.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
@@ -15,7 +14,6 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#EEF0F5"
       },
-      "edgeToEdgeEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
