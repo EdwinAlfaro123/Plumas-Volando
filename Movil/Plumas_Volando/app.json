@@ -11,9 +11,9 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/logo-plumas.png",
         "backgroundColor": "#EEF0F5"
-      },
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
