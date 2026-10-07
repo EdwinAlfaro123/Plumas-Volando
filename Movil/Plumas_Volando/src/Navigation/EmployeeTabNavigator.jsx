@@ -5,13 +5,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '../Constants/theme';
 import EmployeeOrdersScreen from '../Screens/Employee/EmployeeOrdersScreen';
+import EmployeeCustomersScreen from '../Screens/Employee/EmployeeCustomersScreen';
 import EmployeeSettingsScreen from '../Screens/Employee/EmployeeSettingsScreen';
 
 const Tab = createBottomTabNavigator();
 
 const TAB_CONFIG = {
-  EmployeeOrders:   { filled: 'receipt',  outline: 'receipt-outline',  label: 'Pedidos' },
-  EmployeeSettings: { filled: 'person',   outline: 'person-outline',   label: 'Perfil'  },
+  EmployeeOrders:    { filled: 'receipt', outline: 'receipt-outline', label: 'Pedidos'  },
+  EmployeeCustomers: { filled: 'people',  outline: 'people-outline',  label: 'Clientes' },
+  EmployeeSettings:  { filled: 'person',  outline: 'person-outline',  label: 'Perfil'   },
 };
 
 const EmployeeTabBar = ({ state, navigation }) => {
@@ -59,8 +61,9 @@ const EmployeeTabNavigator = () => (
     sceneContainerStyle={{ paddingBottom: 88 }}
     screenOptions={{ headerShown: false }}
   >
-    <Tab.Screen component={EmployeeOrdersScreen} name="EmployeeOrders" />
-    <Tab.Screen component={EmployeeSettingsScreen} name="EmployeeSettings" />
+    <Tab.Screen component={EmployeeOrdersScreen}    name="EmployeeOrders"    />
+    <Tab.Screen component={EmployeeCustomersScreen} name="EmployeeCustomers" />
+    <Tab.Screen component={EmployeeSettingsScreen}  name="EmployeeSettings"  />
   </Tab.Navigator>
 );
 
